@@ -1,13 +1,14 @@
 #
 Env = "debug"
+KeyStore = "./config/keystore"
 
 #
 [Server]
-NodeUrl = ""
-Gid = ""
+NodeUrl = "http://127.0.0.1:5871"
+Gid = "e7fd1f3b48865f158dbccfcbc7d2af7ac7cab0783726ce43b0724b96cf83a8632cc637f6da880f06c4bb246b23fb96e0ef9a33b8dde72df7d1108294bf1aa33f"
 ThresHold   ="2/3"
-DetectCount =10
-DetectTime = 60
+DetectCount =60
+DetectTime = 10
 
 #
 [Db]
@@ -21,16 +22,18 @@ Pwd="851012"
 [[Tokens]]
 Symbol = "IOTA"
 NodeUrl = "chrysalis-nodes.iota.org"
-PublicKey = "715593d2c4dfa9bc5b2718e6a4c704b63cd3b62a81ca92b17ee3487daf3d593a"
+#PublicKey = "715593d2c4dfa9bc5b2718e6a4c704b63cd3b62a81ca92b17ee3487daf3d593a"
+PublicKey = "8c187002a32bf4143ae9260f3a08aca19ebea321d91f47fb7f8dfd2281f3d41a"
 Contact = ""
 
 [[Tokens]]
-Symbol = "SMIOTA"
+Symbol = "MATIC"
 NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
-PublicKey = "04ffc749db5bdb9ddc38844c02691c34f2180bc82c0e5a4b3dbd1c4373c3a91944a1d4d9fc562bb48feceb5e320f5ee182dd7800c731bbb21a4e869159661c7c8e"
-Contact = "0xC5ED170966756B86f8a35131D0dfB1F5148995aF"
+#NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
+PublicKey = "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab"
+Contact = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
 
 #
 [[Pairs]]
 SrcToken = "IOTA"
-DestToken = "SMIOTA"
+DestToken = "MATIC"

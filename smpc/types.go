@@ -1,7 +1,6 @@
 package smpc
 
 import (
-	"biota_swap/tools/crypto"
 	"biota_swap/tools/rlp"
 	"crypto/ecdsa"
 	"encoding/json"
@@ -12,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 var SmpcToAddr string = "0x00000000000000000000000000000000000000dc"

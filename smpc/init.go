@@ -17,10 +17,8 @@ const (
 	Product RunMode = 1
 )
 
-func InitSmpc(url string, keyJson []byte, pwd string) {
+func InitSmpc(url string, kt *keystore.Key) {
 	client = ethrpc.New(url)
-	var err error
-	if keyWrapper, err = keystore.DecryptKey(keyJson, pwd); err != nil {
-		panic(err)
-	}
+	keyWrapper = kt
+	runMode = Product
 }

@@ -42,7 +42,7 @@ func Sign(pubkey, gid, context, hash, threshold string, keyType string) (string,
 		Keytype:       keyType,
 		GroupID:       gid,
 		ThresHold:     threshold,
-		Mode:          "1",
+		Mode:          "0",
 		AcceptTimeOut: "600",
 		TimeStamp:     strconv.FormatInt(time.Now().UnixMilli(), 10),
 	}

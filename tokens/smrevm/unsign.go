@@ -1,4 +1,4 @@
-package evm
+package smrevm
 
 import (
 	"biota_swap/gl"
@@ -57,7 +57,7 @@ func NewEvmSiota(uri string, conAddr, publicKey string) (*EvmIota, error) {
 }
 
 func (ei *EvmIota) Symbol() string {
-	return "MATIC"
+	return "SMIOTA"
 }
 
 func (ei *EvmIota) PublicKey() []byte {

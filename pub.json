@@ -1,0 +1,116 @@
+{
+    "Data": {
+        "result": {
+            "Group": [
+                {
+                    "GroupID": "9b57a395e12b4a70a44c352bb297189b798eae68de0c9744f16c3f0ef73992745c847160728b2f8b289657ab431ca8f5f367976df821fba6725ca22221c66f58",
+                    "Accounts": [
+                        {
+                            "PubKey": "8c187002a32bf4143ae9260f3a08aca19ebea321d91f47fb7f8dfd2281f3d41a",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1673534790740"
+                        },
+                        {
+                            "PubKey": "04ba4eb91d615d00b85079b7ee70017df8192bc0c9dc78bce7d511a40db4ec28f5c67fd1d55da9ad21303c11b59ce37ac4ba77c888aac90168889329fb8a90e69b",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736600912"
+                        },
+                        {
+                            "PubKey": "114c56fc0829beabe4e76cc4507ecf453ada5997baa662aaf48ea8c2d211d210",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669787712026"
+                        },
+                        {
+                            "PubKey": "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736355064"
+                        },
+                        {
+                            "PubKey": "04ba4eb91d615d00b85079b7ee70017df8192bc0c9dc78bce7d511a40db4ec28f5c67fd1d55da9ad21303c11b59ce37ac4ba77c888aac90168889329fb8a90e69b",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736600912"
+                        },
+                        {
+                            "PubKey": "04ba4eb91d615d00b85079b7ee70017df8192bc0c9dc78bce7d511a40db4ec28f5c67fd1d55da9ad21303c11b59ce37ac4ba77c888aac90168889329fb8a90e69b",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736600912"
+                        },
+                        {
+                            "PubKey": "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736355064"
+                        },
+                        {
+                            "PubKey": "114c56fc0829beabe4e76cc4507ecf453ada5997baa662aaf48ea8c2d211d210",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669787712026"
+                        },
+                        {
+                            "PubKey": "04ba4eb91d615d00b85079b7ee70017df8192bc0c9dc78bce7d511a40db4ec28f5c67fd1d55da9ad21303c11b59ce37ac4ba77c888aac90168889329fb8a90e69b",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736600912"
+                        },
+                        {
+                            "PubKey": "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736355064"
+                        },
+                        {
+                            "PubKey": "04ba4eb91d615d00b85079b7ee70017df8192bc0c9dc78bce7d511a40db4ec28f5c67fd1d55da9ad21303c11b59ce37ac4ba77c888aac90168889329fb8a90e69b",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736600912"
+                        },
+                        {
+                            "PubKey": "04ba4eb91d615d00b85079b7ee70017df8192bc0c9dc78bce7d511a40db4ec28f5c67fd1d55da9ad21303c11b59ce37ac4ba77c888aac90168889329fb8a90e69b",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736600912"
+                        },
+                        {
+                            "PubKey": "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736355064"
+                        },
+                        {
+                            "PubKey": "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736355064"
+                        },
+                        {
+                            "PubKey": "8c187002a32bf4143ae9260f3a08aca19ebea321d91f47fb7f8dfd2281f3d41a",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1673534790740"
+                        },
+                        {
+                            "PubKey": "04ba4eb91d615d00b85079b7ee70017df8192bc0c9dc78bce7d511a40db4ec28f5c67fd1d55da9ad21303c11b59ce37ac4ba77c888aac90168889329fb8a90e69b",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736600912"
+                        },
+                        {
+                            "PubKey": "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736355064"
+                        },
+                        {
+                            "PubKey": "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736355064"
+                        },
+                        {
+                            "PubKey": "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736355064"
+                        },
+                        {
+                            "PubKey": "04ba4eb91d615d00b85079b7ee70017df8192bc0c9dc78bce7d511a40db4ec28f5c67fd1d55da9ad21303c11b59ce37ac4ba77c888aac90168889329fb8a90e69b",
+                            "ThresHold": "2/3",
+                            "TimeStamp": "1669736600912"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "Error": "",
+    "Status": "Success",
+    "Tip": ""
+}

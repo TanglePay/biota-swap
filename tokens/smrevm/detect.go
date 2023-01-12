@@ -1,4 +1,4 @@
-package evm
+package smrevm
 
 import (
 	"biota_swap/gl"
@@ -6,15 +6,23 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 func (ei *EvmIota) StartListen(ch chan *tokens.SwapOrder) {
-	nodeUrl := "wss://" + ei.url
+	blockHeight, err := ei.client.BlockNumber(context.Background())
+	if err != nil {
+		errOrder := &tokens.SwapOrder{
+			Type:  0,
+			Error: fmt.Errorf("Get the block number error. %v", err),
+		}
+		ch <- errOrder
+		return
+	}
 
 	//Set the query filter
 	query := ethereum.FilterQuery{
@@ -22,31 +30,28 @@ func (ei *EvmIota) StartListen(ch chan *tokens.SwapOrder) {
 		Topics:    [][]common.Hash{{EventUnWrap}},
 	}
 
-	errOrder := &tokens.SwapOrder{Type: 0}
-
-	//Create the ethclient
-	c, err := ethclient.Dial(nodeUrl)
-	if err != nil {
-		errOrder.Error = fmt.Errorf("The EthWssClient redial error. %v\nThe EthWssClient will be redialed later...\n", err)
-		ch <- errOrder
-		return
-	}
-	eventLogChan := make(chan types.Log)
-	sub, err := c.SubscribeFilterLogs(context.Background(), query, eventLogChan)
-	if err != nil || sub == nil {
-		errOrder.Error = fmt.Errorf("Get event logs from eth wss client error. %v\n", err)
-		ch <- errOrder
-		return
-	}
 	for {
-		select {
-		case err := <-sub.Err():
-			errOrder.Error = fmt.Errorf("Event wss sub error. %v\nThe EthWssClient will be redialed later...\n", err)
+		query.FromBlock = new(big.Int).SetUint64(blockHeight)
+		logs, err := ei.client.FilterLogs(context.Background(), query)
+		if err != nil {
+			errOrder := &tokens.SwapOrder{
+				Type:  1,
+				Error: fmt.Errorf("client FilterLogs error. %v", err),
+			}
 			ch <- errOrder
-			return
-		case vLog := <-eventLogChan:
-			ei.dealTransferEvent(ch, &vLog)
+			time.Sleep(5 * time.Second)
+			continue
 		}
+		for i := range logs {
+			ei.dealTransferEvent(ch, &logs[i])
+			blockHeight = logs[i].BlockNumber + 1
+		}
+		if lastBlockNumber, err := ei.client.BlockNumber(context.Background()); err != nil {
+			fmt.Println(err)
+		} else {
+			blockHeight = lastBlockNumber
+		}
+		time.Sleep(10 * time.Second)
 	}
 }
 

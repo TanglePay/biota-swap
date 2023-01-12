@@ -35,7 +35,7 @@ func NewIotaToken(_url, chain, coin, publicKey, netPrefix string) *IotaToken {
 		hrp:        iotago.NetworkPrefix(netPrefix),
 		walletAddr: iotago.AddressFromEd25519PubKey(pubKey),
 		chainName:  chain,
-		coin:       coin,
+		coin:       chain,
 	}
 }
 

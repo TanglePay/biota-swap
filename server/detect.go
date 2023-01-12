@@ -8,6 +8,7 @@ import (
 	"biota_swap/tokens"
 	"biota_swap/tokens/evm"
 	"biota_swap/tokens/iota"
+	"biota_swap/tokens/smrevm"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -115,6 +116,7 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 	msContext, _ := json.Marshal(MsgContext{SrcToken: wo.SrcToken, DestToken: wo.DestToken, Method: "wrap", TxData: txData})
 
 	keyID, err := smpc.Sign(common.Bytes2Hex(t2.PublicKey()), config.Sr.Gid, string(msContext), hexutil.Encode(hash), config.Sr.ThresHold, t2.KeyType())
+	fmt.Println(keyID)
 	if err != nil {
 		gl.OutLogger.Error("smpc.Sign error(%v). %v", err, order)
 		return
@@ -156,6 +158,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 	msContext, _ := json.Marshal(MsgContext{SrcToken: wo.SrcToken, DestToken: wo.DestToken, Method: "wrap", TxData: txData})
 
 	keyID, err := smpc.Sign(common.Bytes2Hex(t1.PublicKey()), config.Sr.Gid, string(msContext), hexutil.Encode(hash), config.Sr.ThresHold, t1.KeyType())
+	fmt.Println(keyID)
 	if err != nil {
 		gl.OutLogger.Error("smpc.Sign error(%v). %v", err, order)
 		return
@@ -169,7 +172,6 @@ func detectSignStatus(keyID string, txData []byte, t tokens.Token) {
 		rsvs, err := smpc.GetSignStatus(keyID)
 		if err != nil {
 			gl.OutLogger.Error("GetSignStatus error. %s : %v", keyID, err)
-			break
 		}
 		if len(rsvs) > 0 {
 			if txID, err := t.SendSignedTxData(rsvs[0], txData); err != nil {
@@ -194,10 +196,12 @@ func NewSourceChain(conf config.Token) tokens.SourceToken {
 }
 
 func NewDestinationChain(conf config.Token) tokens.DestinationToken {
-	chain, _ := evm.NewEvmSiota(conf.NodeUrl, conf.Contact, conf.PublicKey)
+	var chain tokens.DestinationToken
 	switch conf.Symbol {
 	case "SMIOTA":
-		return chain
+		chain, _ = smrevm.NewEvmSiota(conf.NodeUrl, conf.Contact, conf.PublicKey)
+	case "MATIC":
+		chain, _ = evm.NewEvmSiota(conf.NodeUrl, conf.Contact, conf.PublicKey)
 	}
-	return nil
+	return chain
 }

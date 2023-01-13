@@ -13,7 +13,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	iotago "github.com/iotaledger/iota.go/v2"
 )
 
 var MethodWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,address,uint64)"))
@@ -96,30 +95,35 @@ func (ei *EvmIota) CreateWrapTxData(to string, amount *big.Int, txID string) ([]
 	return h[:], txData, nil
 }
 
-func (ei *EvmIota) GetUnWrapTxByHash(txHash string) (tokens.BaseTransaction, error) {
-	baseTx := tokens.BaseTransaction{}
-	hash := common.HexToHash(txHash)
+func (ei *EvmIota) CheckTxData(txid []byte, to string, amount *big.Int) error {
+	hash := common.BytesToHash(txid)
 	tx, isPending, err := ei.client.TransactionByHash(context.Background(), hash)
 	if err != nil {
-		return baseTx, fmt.Errorf("client.TransactionByHash error. %s, %v", txHash, err)
+		return fmt.Errorf("client.TransactionByHash error. %s, %v", hash.Hex(), err)
 	}
 	if isPending {
-		return baseTx, fmt.Errorf("tx is pending status. %s", txHash)
+		return fmt.Errorf("tx is pending status. %s", hash.Hex())
 	}
 
 	data := tx.Data()
 	if bytes.Compare(data[:4], MethodUnWrap[:4]) != 0 {
-		return baseTx, fmt.Errorf("tx is not UnWrap.")
+		return fmt.Errorf("tx is not UnWrap.")
 	}
 	data = data[4:]
-	to := iotago.AddressFromEd25519PubKey(data[:32])
-	baseTx.To = to.Bech32(iotago.NetworkPrefix(ei.unwrapNetPrefix))
-	baseTx.Chain = ei.unwrapChain
-	baseTx.Amount = new(big.Int).SetBytes(data[32:])
-	return baseTx, nil
+
+	if bytes.Compare(common.Hex2Bytes(to), data[:32]) != 0 {
+		return fmt.Errorf("to address is not equal. %s : %s", to, common.Bytes2Hex(data[:32]))
+	}
+
+	a := new(big.Int).SetBytes(data[32:])
+	if a.Cmp(amount) != 0 {
+		return fmt.Errorf("amount is not equal. %d : %d", amount.Uint64(), a.Uint64())
+	}
+
+	return nil
 }
 
-func (ei *EvmIota) ValiditeWrapTxData(hash, txData []byte) (tokens.BaseTransaction, string, error) {
+func (ei *EvmIota) ValiditeWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {
 	baseTx := tokens.BaseTransaction{}
 
 	rawTx := &types.Transaction{}
@@ -127,21 +131,20 @@ func (ei *EvmIota) ValiditeWrapTxData(hash, txData []byte) (tokens.BaseTransacti
 
 	data := rawTx.Data()
 	if bytes.Compare(data[:4], MethodWrap[:4]) != 0 {
-		return baseTx, "", fmt.Errorf("tx method is not right.")
+		return baseTx, fmt.Errorf("tx method is not right.")
 	}
 	data = data[4:]
 
-	txid := common.Bytes2Hex(data[:32])
+	baseTx.Txid = data[:32]
 	data = data[32:]
 
-	baseTx.Chain = ei.unwrapChain
 	baseTx.To = common.BytesToAddress(data[12:32]).Hex()
 
 	h := types.NewEIP155Signer(ei.chainId).Hash(rawTx)
 	if bytes.Compare(hash, h.Bytes()) != 0 {
-		return baseTx, "", fmt.Errorf("hash is not right. %s : %s", h.Hex(), hex.EncodeToString(hash))
+		return baseTx, fmt.Errorf("hash is not right. %s : %s", h.Hex(), hex.EncodeToString(hash))
 	}
-	return baseTx, txid, nil
+	return baseTx, nil
 }
 
 func (ei *EvmIota) SendSignedTxData(signedHash string, txData []byte) ([]byte, error) {

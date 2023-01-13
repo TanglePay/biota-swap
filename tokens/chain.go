@@ -11,31 +11,30 @@ type Token interface {
 	Address() string
 	StartListen(chan *SwapOrder)
 	SendSignedTxData(hash string, txData []byte) ([]byte, error)
+	CheckTxData(txid []byte, to string, amount *big.Int) error
 }
 
 type SourceToken interface {
 	Token
 	CreateUnWrapTxData(addr string, amount *big.Int, extra []byte) ([]byte, []byte, error)
-	GetWrapTxByHash(txHash string) (BaseTransaction, error)
-	ValiditeUnWrapTxData(hash, txData []byte) (BaseTransaction, string, error)
+	ValiditeUnWrapTxData(hash, txData []byte) (BaseTransaction, error)
 }
 
 type DestinationToken interface {
 	Token
 	CreateWrapTxData(to string, amount *big.Int, txID string) ([]byte, []byte, error)
-	GetUnWrapTxByHash(txHash string) (BaseTransaction, error)
-	ValiditeWrapTxData(hash, txData []byte) (BaseTransaction, string, error)
+	ValiditeWrapTxData(hash, txData []byte) (BaseTransaction, error)
 }
 
 type BaseTransaction struct {
-	Chain  string
+	Txid   []byte
 	To     string
 	Amount *big.Int
 }
 
 type WrapExtra struct {
-	Chain string `json:"chain"`
-	TxID  string `json:"txid"`
+	Symbol string `json:"symbol"`
+	TxID   string `json:"txid"`
 }
 
 type MsgContext struct {

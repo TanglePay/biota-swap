@@ -6,9 +6,6 @@ import (
 	"biota_swap/model"
 	"biota_swap/smpc"
 	"biota_swap/tokens"
-	"biota_swap/tokens/evm"
-	"biota_swap/tokens/iota"
-	"biota_swap/tokens/smrevm"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -183,25 +180,4 @@ func detectSignStatus(keyID string, txData []byte, t tokens.Token) {
 		}
 		time.Sleep(config.Sr.DetectTime * time.Second)
 	}
-}
-
-func NewSourceChain(conf config.Token) tokens.SourceToken {
-	switch conf.Symbol {
-	case "IOTA":
-		return iota.NewIotaToken(conf.NodeUrl, conf.Symbol, "iota", conf.PublicKey, "iota")
-	case "ATOI":
-		return iota.NewIotaToken(conf.NodeUrl, conf.Symbol, "iota", conf.PublicKey, "atoi")
-	}
-	return nil
-}
-
-func NewDestinationChain(conf config.Token) tokens.DestinationToken {
-	var chain tokens.DestinationToken
-	switch conf.Symbol {
-	case "SMIOTA":
-		chain, _ = smrevm.NewEvmSiota(conf.NodeUrl, conf.Contact, conf.PublicKey)
-	case "MATIC":
-		chain, _ = evm.NewEvmSiota(conf.NodeUrl, conf.Contact, conf.PublicKey)
-	}
-	return chain
 }

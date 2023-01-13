@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/iotaledger/hive.go/serializer"
 	iotago "github.com/iotaledger/iota.go/v2"
 )
@@ -20,27 +21,23 @@ type IotaToken struct {
 	publicKey  []byte
 	hrp        iotago.NetworkPrefix
 	walletAddr iotago.Ed25519Address
-	chainName  string
-	coin       string
 }
 
 // NewIotaToken
 // url don't contain the prefix of "https://"
-func NewIotaToken(_url, chain, coin, publicKey, netPrefix string) *IotaToken {
+func NewIotaToken(_url, publicKey, _hrp string) *IotaToken {
 	pubKey, _ := hex.DecodeString(publicKey)
 	return &IotaToken{
 		url:        _url,
 		nodeAPI:    iotago.NewNodeHTTPAPIClient("https://" + _url),
 		publicKey:  pubKey,
-		hrp:        iotago.NetworkPrefix(netPrefix),
+		hrp:        iotago.NetworkPrefix(_hrp),
 		walletAddr: iotago.AddressFromEd25519PubKey(pubKey),
-		chainName:  chain,
-		coin:       chain,
 	}
 }
 
 func (it *IotaToken) Symbol() string {
-	return it.coin
+	return "IOTA"
 }
 
 func (it *IotaToken) PublicKey() []byte {
@@ -175,31 +172,96 @@ func (it *IotaToken) GetWrapTxByHash(txHash string) (tokens.BaseTransaction, err
 	if err = json.Unmarshal([]byte(payload.Essence.EssPayload.Data), &payloadData); err != nil {
 		return baseTx, fmt.Errorf("payload Unmarshal error. %s : %d", payload.Essence.EssPayload.Data, err)
 	}
-	baseTx.Chain = payloadData.Chain
 	baseTx.To = payloadData.To
 	return baseTx, nil
 }
 
-func (it *IotaToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseTransaction, string, error) {
+func (it *IotaToken) CheckTxData(txid []byte, to string, amount *big.Int) error {
+	var msgID iotago.MessageID
+	if len(txid) != iotago.MessageIDLength {
+		return fmt.Errorf("txid error. %s", hex.EncodeToString(txid))
+	}
+	copy(msgID[:], txid)
+
+	meta, err := it.nodeAPI.MessageMetadataByMessageID(context.Background(), msgID)
+	if err != nil {
+		return fmt.Errorf("MessageMetadataByMessageID error. %s, %v", hex.EncodeToString(txid), err)
+	}
+	if meta.ConflictReason != 0 {
+		return fmt.Errorf("ConflictReason is not confirm. %s : %d", hex.EncodeToString(txid), meta.ConflictReason)
+	}
+
+	message, err := it.nodeAPI.MessageByMessageID(context.Background(), msgID)
+	if err != nil {
+		return fmt.Errorf("MessageByMessageID error. %s, %v", hex.EncodeToString(txid), err)
+	}
+
+	//Unmarshal the payload of message
+	data, err := message.Payload.MarshalJSON()
+	if err != nil {
+		return fmt.Errorf("MarshalJSON for(data) error. %v, %s", err, hex.EncodeToString(txid))
+	}
+	payload := Payload{}
+	err = json.Unmarshal(data, &payload)
+	if err != nil {
+		return fmt.Errorf("Unmarshal payload error. %v, %s", err, hex.EncodeToString(txid))
+	}
+	if payload.Type != 0 { //payload's type must be 0
+		return fmt.Errorf("payload type is not 0. %d : %s", payload.Type, hex.EncodeToString(txid))
+	}
+
+	//caculate the total amount of message from outputs
+	totalAmount := uint64(0)
+	for _, output := range payload.Essence.Outputs {
+		if output.Type != 0 {
+			continue
+		}
+		addr := output.Addr.Addr
+		if output.Addr.Type == iotago.AddressEd25519 {
+			addr = iotago.MustParseEd25519AddressFromHexString(output.Addr.Addr).Bech32(it.hrp)
+		}
+		if addr != it.Address() {
+			continue
+		}
+		totalAmount += output.Amount
+	}
+	if totalAmount == 0 || len(payload.UnlockBlocks) == 0 {
+		return fmt.Errorf("message outputs amount is 0 or unlockBlocks is empty. %s : %d", hex.EncodeToString(txid), len(payload.UnlockBlocks))
+	}
+
+	if amount.Uint64() != totalAmount {
+		return fmt.Errorf("amount is not equal. %d : %d", amount.Uint64(), totalAmount)
+	}
+
+	payloadData := EssencePayloadData{}
+	if err = json.Unmarshal([]byte(payload.Essence.EssPayload.Data), &payloadData); err != nil {
+		return fmt.Errorf("payload Unmarshal error. %s : %v", payload.Essence.EssPayload.Data, err)
+	}
+	if to != payloadData.To {
+		return fmt.Errorf("to address is not equal. %s : %s", to, payloadData.To)
+	}
+	return nil
+}
+
+func (it *IotaToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {
 	baseTx := tokens.BaseTransaction{}
 
 	seri := &iotago.TransactionEssence{}
 	if err := seri.UnmarshalJSON(txData); err != nil {
-		return baseTx, "", fmt.Errorf("msgContext can't be UnmarshalJSON to TransactionEssence. %v", err)
+		return baseTx, fmt.Errorf("msgContext can't be UnmarshalJSON to TransactionEssence. %v", err)
 	}
 
 	if sign, err := seri.SigningMessage(); err != nil {
-		return baseTx, "", fmt.Errorf("seri.SigningMessage error. %v", err)
+		return baseTx, fmt.Errorf("seri.SigningMessage error. %v", err)
 	} else if bytes.Compare(hash, sign) != 0 {
-		return baseTx, "", fmt.Errorf("hash is not right. %s : %s", hex.EncodeToString(hash), hex.EncodeToString(sign))
+		return baseTx, fmt.Errorf("hash is not right. %s : %s", hex.EncodeToString(hash), hex.EncodeToString(sign))
 	}
 
 	payload := seri.Payload.(*iotago.Indexation)
 	extra := &tokens.WrapExtra{}
 	if err := json.Unmarshal(payload.Data, extra); err != nil {
-		return baseTx, "", fmt.Errorf("payload json.Unmarshal error. %v", err)
+		return baseTx, fmt.Errorf("payload json.Unmarshal error. %v", err)
 	}
-	baseTx.Chain = extra.Chain
 
 	for i := range seri.Outputs {
 		output := seri.Outputs[i].(*iotago.SigLockedSingleOutput)
@@ -208,10 +270,10 @@ func (it *IotaToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseTrans
 			continue
 		}
 		baseTx.Amount = new(big.Int).SetUint64(output.Amount)
-		baseTx.To = outAddr
+		baseTx.To = output.Address.(*iotago.Ed25519Address).String()
 	}
-
-	return baseTx, extra.TxID, nil
+	baseTx.Txid = common.FromHex(extra.TxID)
+	return baseTx, nil
 }
 
 func (it *IotaToken) SendSignedTxData(hash string, txData []byte) ([]byte, error) {

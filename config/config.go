@@ -11,7 +11,8 @@ import (
 
 var (
 	Env        string
-	Sr         ServeConfig
+	Server     ServerConfig
+	Smpc       SmpcConfig
 	Db         Database
 	Tokens     map[string]Token
 	WrapPairs  map[string]string
@@ -22,7 +23,8 @@ var (
 func init() {
 	type AllConfig struct {
 		Env      string
-		Server   ServeConfig
+		Server   ServerConfig
+		Smpc     SmpcConfig
 		Db       Database
 		Tokens   []Token
 		Pairs    []WrapPair
@@ -34,7 +36,8 @@ func init() {
 	}
 
 	Env = all.Env
-	Sr = all.Server
+	Server = all.Server
+	Smpc = all.Smpc
 	Db = all.Db
 	Tokens = make(map[string]Token)
 	for _, t := range all.Tokens {
@@ -77,10 +80,16 @@ type Database struct {
 	Pwd    string
 }
 
-type ServeConfig struct {
-	NodeUrl     string
-	Gid         string
-	ThresHold   string
+type SmpcConfig struct {
+	NodeUrl   string
+	Gid       string
+	ThresHold string
+}
+
+type ServerConfig struct {
+	Detect      bool
 	DetectCount int
 	DetectTime  time.Duration
+	Accept      bool
+	AcceptTime  time.Duration
 }

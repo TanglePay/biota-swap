@@ -1,6 +1,7 @@
 package server
 
 import (
+	"biota_swap/config"
 	"biota_swap/gl"
 	"biota_swap/smpc"
 	"encoding/json"
@@ -11,7 +12,7 @@ import (
 
 func Accept() {
 	go func() {
-		ticker := time.NewTicker(10 * time.Second)
+		ticker := time.NewTicker(config.Server.AcceptTime * time.Second)
 		for range ticker.C {
 			//Get the sign data from smpc node
 			infoDatas, err := smpc.GetCurNodeSignInfo()

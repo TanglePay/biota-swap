@@ -3,12 +3,17 @@ Env = "debug"
 KeyStore = "./config/keystore"
 
 #
-[Server]
+[Smpc]
 NodeUrl = "http://127.0.0.1:5871"
 Gid = "e7fd1f3b48865f158dbccfcbc7d2af7ac7cab0783726ce43b0724b96cf83a8632cc637f6da880f06c4bb246b23fb96e0ef9a33b8dde72df7d1108294bf1aa33f"
 ThresHold   ="2/3"
+
+[Server]
+Detect = true
 DetectCount =60
 DetectTime = 10
+Accept = true
+AcceptTime = 30
 
 #
 [Db]

@@ -26,12 +26,15 @@ func main() {
 
 	model.ConnectToMysql()
 
-	smpc.InitSmpc(config.Sr.NodeUrl, config.KeyWrapper)
-	//fmt.Println(smpc.GetSignStatus("0x1a1bffdd176f1c2fcd5229df5b6f259a0632938bff24ab33ae280ed8e899d606"))
-	//return
-	//server.Accept()
+	smpc.InitSmpc(config.Smpc.NodeUrl, config.KeyWrapper)
 
-	server.ListenTokens()
+	if config.Server.Detect {
+		server.Accept()
+	}
+
+	if config.Server.Accept {
+		server.ListenTokens()
+	}
 
 	daemon.WaitForKill()
 }

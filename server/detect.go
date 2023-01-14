@@ -18,7 +18,7 @@ import (
 )
 
 func init() {
-	client = ethrpc.New(config.Sr.NodeUrl)
+	client = ethrpc.New(config.Smpc.NodeUrl)
 }
 
 func ListenTokens() {
@@ -112,7 +112,7 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 
 	msContext, _ := json.Marshal(MsgContext{SrcToken: wo.SrcToken, DestToken: wo.DestToken, Method: "wrap", TxData: txData})
 
-	keyID, err := smpc.Sign(common.Bytes2Hex(t2.PublicKey()), config.Sr.Gid, string(msContext), hexutil.Encode(hash), config.Sr.ThresHold, t2.KeyType())
+	keyID, err := smpc.Sign(common.Bytes2Hex(t2.PublicKey()), config.Smpc.Gid, string(msContext), hexutil.Encode(hash), config.Smpc.ThresHold, t2.KeyType())
 	fmt.Println(keyID)
 	if err != nil {
 		gl.OutLogger.Error("smpc.Sign error(%v). %v", err, order)
@@ -154,7 +154,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 
 	msContext, _ := json.Marshal(MsgContext{SrcToken: wo.SrcToken, DestToken: wo.DestToken, Method: "wrap", TxData: txData})
 
-	keyID, err := smpc.Sign(common.Bytes2Hex(t1.PublicKey()), config.Sr.Gid, string(msContext), hexutil.Encode(hash), config.Sr.ThresHold, t1.KeyType())
+	keyID, err := smpc.Sign(common.Bytes2Hex(t1.PublicKey()), config.Smpc.Gid, string(msContext), hexutil.Encode(hash), config.Smpc.ThresHold, t1.KeyType())
 	fmt.Println(keyID)
 	if err != nil {
 		gl.OutLogger.Error("smpc.Sign error(%v). %v", err, order)
@@ -165,7 +165,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 }
 
 func detectSignStatus(keyID string, txData []byte, t tokens.Token) {
-	for i := 0; i < config.Sr.DetectCount; i++ {
+	for i := 0; i < config.Server.DetectCount; i++ {
 		rsvs, err := smpc.GetSignStatus(keyID)
 		if err != nil {
 			gl.OutLogger.Error("GetSignStatus error. %s : %v", keyID, err)
@@ -178,6 +178,6 @@ func detectSignStatus(keyID string, txData []byte, t tokens.Token) {
 			}
 			break
 		}
-		time.Sleep(config.Sr.DetectTime * time.Second)
+		time.Sleep(config.Server.DetectTime * time.Second)
 	}
 }

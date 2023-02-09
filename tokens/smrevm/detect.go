@@ -14,7 +14,7 @@ import (
 )
 
 func (ei *EvmIota) StartListen(ch chan *tokens.SwapOrder) {
-	blockHeight, err := ei.client.BlockNumber(context.Background())
+	fromHeight, err := ei.client.BlockNumber(context.Background())
 	if err != nil {
 		errOrder := &tokens.SwapOrder{
 			Type:  0,
@@ -31,7 +31,21 @@ func (ei *EvmIota) StartListen(ch chan *tokens.SwapOrder) {
 	}
 
 	for {
-		query.FromBlock = new(big.Int).SetUint64(blockHeight)
+		time.Sleep(10 * time.Second)
+		var toHeight uint64
+		if toHeight, err = ei.client.BlockNumber(context.Background()); err != nil {
+			errOrder := &tokens.SwapOrder{
+				Type:  1,
+				Error: fmt.Errorf(" error. %v", err),
+			}
+			ch <- errOrder
+			continue
+		} else if toHeight <= fromHeight {
+			continue
+		}
+
+		query.FromBlock = new(big.Int).SetUint64(fromHeight)
+		query.ToBlock = new(big.Int).SetUint64(toHeight)
 		logs, err := ei.client.FilterLogs(context.Background(), query)
 		if err != nil {
 			errOrder := &tokens.SwapOrder{
@@ -39,19 +53,12 @@ func (ei *EvmIota) StartListen(ch chan *tokens.SwapOrder) {
 				Error: fmt.Errorf("client FilterLogs error. %v", err),
 			}
 			ch <- errOrder
-			time.Sleep(5 * time.Second)
 			continue
 		}
 		for i := range logs {
 			ei.dealTransferEvent(ch, &logs[i])
-			blockHeight = logs[i].BlockNumber + 1
 		}
-		if lastBlockNumber, err := ei.client.BlockNumber(context.Background()); err != nil {
-			fmt.Println(err)
-		} else {
-			blockHeight = lastBlockNumber
-		}
-		time.Sleep(10 * time.Second)
+		fromHeight = toHeight + 1
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/iotaledger/hive.go/serializer"
@@ -26,7 +27,10 @@ type IotaToken struct {
 // NewIotaToken
 // url don't contain the prefix of "https://"
 func NewIotaToken(_url, publicKey, _hrp string) *IotaToken {
-	pubKey, _ := hex.DecodeString(publicKey)
+	pubKey, err := hex.DecodeString(publicKey)
+	if err != nil {
+		panic(err)
+	}
 	return &IotaToken{
 		url:        _url,
 		nodeAPI:    iotago.NewNodeHTTPAPIClient("https://" + _url),
@@ -37,7 +41,7 @@ func NewIotaToken(_url, publicKey, _hrp string) *IotaToken {
 }
 
 func (it *IotaToken) Symbol() string {
-	return "IOTA"
+	return strings.ToUpper(string(it.hrp))
 }
 
 func (it *IotaToken) PublicKey() []byte {

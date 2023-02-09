@@ -3,6 +3,7 @@ package server
 import (
 	"biota_swap/config"
 	"biota_swap/gl"
+	"biota_swap/log"
 	"biota_swap/model"
 	"biota_swap/smpc"
 	"biota_swap/tokens"
@@ -31,6 +32,7 @@ func ListenTokens() {
 		if _, exist := destTokens[dest]; !exist {
 			destTokens[dest] = NewDestinationChain(config.Tokens[dest])
 		}
+		log.Infof("src: %s, dest: %s", srcTokens[src].Address(), destTokens[dest].Address())
 		go ListenWrap(srcTokens[src], destTokens[dest])
 		go ListenUnWrap(srcTokens[src], destTokens[dest])
 	}

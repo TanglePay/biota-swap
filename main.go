@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -28,11 +27,11 @@ func main() {
 
 	smpc.InitSmpc(config.Smpc.NodeUrl, config.KeyWrapper)
 
-	if config.Server.Detect {
+	if config.Server.Accept {
 		server.Accept()
 	}
 
-	if config.Server.Accept {
+	if config.Server.Detect {
 		server.ListenTokens()
 	}
 
@@ -46,31 +45,38 @@ func TestQuery() {
 	}
 
 	//Set the query filter
-	query := ethereum.FilterQuery{
-		Addresses: []common.Address{common.HexToAddress("0xC5ED170966756B86f8a35131D0dfB1F5148995aF")},
+	query := ethereum.FilterQuery{}
+
+	fromHeight, err := c.BlockNumber(context.Background())
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
-	blockHeight, err := c.BlockNumber(context.Background())
-	if err != nil {
-		panic(err)
-	}
 	for {
-		query.FromBlock = new(big.Int).SetUint64(blockHeight)
+		time.Sleep(5 * time.Second)
+		var toHeight uint64
+		if toHeight, err = c.BlockNumber(context.Background()); err != nil {
+			fmt.Println(err)
+			continue
+		} else if toHeight <= fromHeight {
+			continue
+		}
+
+		query.FromBlock = new(big.Int).SetUint64(fromHeight)
+		query.ToBlock = new(big.Int).SetUint64(toHeight)
 		logs, err := c.FilterLogs(context.Background(), query)
 		if err != nil {
 			fmt.Println(err)
-			time.Sleep(5 * time.Second)
 			continue
 		}
+		preHeight := uint64(0)
 		for i := range logs {
-			blockHeight = logs[i].BlockNumber + 1
-			fmt.Println(blockHeight)
+			if preHeight != logs[i].BlockNumber {
+				fmt.Println(logs[i].BlockNumber)
+				preHeight = logs[i].BlockNumber
+			}
 		}
-		if lastBlockNumber, err := c.BlockNumber(context.Background()); err != nil {
-			fmt.Println(err)
-		} else {
-			blockHeight = lastBlockNumber
-		}
-		time.Sleep(10 * time.Second)
+		fromHeight = toHeight + 1
 	}
 }

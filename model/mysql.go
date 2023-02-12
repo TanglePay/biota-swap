@@ -1,7 +1,7 @@
 package model
 
 import (
-	"biota_swap/config"
+	"bwrap/config"
 	"database/sql"
 	"fmt"
 	"log"

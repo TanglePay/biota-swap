@@ -1,7 +1,7 @@
 package smpc
 
 import (
-	"biota_swap/tools/crypto"
+	"bwrap/tools/crypto"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"

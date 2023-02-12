@@ -1,12 +1,12 @@
 package iota
 
 import (
-	"biota_swap/tokens"
+	"bwrap/tokens"
 	"context"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"strconv"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	iotago "github.com/iotaledger/iota.go/v2"
@@ -51,8 +51,8 @@ type EssencePayload struct {
 }
 
 type EssencePayloadData struct {
-	To    string `json:"to"`
-	Chain string `json:"chain"`
+	To     string `json:"to"`
+	Symbol string `json:"symbol"`
 }
 
 func (it *IotaToken) StartListen(ch chan *tokens.SwapOrder) {
@@ -135,10 +135,12 @@ func (it *IotaToken) dealTransferMessage(ch chan *tokens.SwapOrder, msg *iotago.
 	}
 
 	order := &tokens.SwapOrder{
-		TxID:   msg.MessageID,
-		From:   bech32Addr,
-		To:     extraData.To,
-		Amount: strconv.FormatUint(totalAmount, 10),
+		TxID:      msg.MessageID,
+		SrcToken:  it.Symbol(),
+		DestToken: extraData.Symbol,
+		From:      bech32Addr,
+		To:        extraData.To,
+		Amount:    new(big.Int).SetUint64(totalAmount),
 	}
 	ch <- order
 	return nil

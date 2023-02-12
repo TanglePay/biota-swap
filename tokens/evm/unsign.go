@@ -1,11 +1,12 @@
 package evm
 
 import (
-	"biota_swap/gl"
-	"biota_swap/tokens"
-	"biota_swap/tools/crypto"
+	"bwrap/gl"
+	"bwrap/tokens"
+	"bwrap/tools/crypto"
 	"bytes"
 	"context"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 	"math/big"
@@ -15,11 +16,11 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-var MethodWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,address,uint64)"))
-var MethodUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,uint64)"))
-var EventUnWrap = crypto.Keccak256Hash([]byte("UnWrap(address,bytes32,uint64)"))
+var MethodWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,uint256,address)"))
+var MethodUnWrap = crypto.Keccak256Hash([]byte("send(bytes32,uint256,address)"))
+var EventUnWrap = crypto.Keccak256Hash([]byte("UnWrap(address,bytes32,bytes32,uint256)"))
 
-type EvmIota struct {
+type EvmToken struct {
 	client          *ethclient.Client
 	url             string
 	chainId         *big.Int
@@ -28,9 +29,11 @@ type EvmIota struct {
 	address         common.Address
 	unwrapNetPrefix string
 	unwrapChain     string
+	privateKey      *ecdsa.PrivateKey
+	ListenType      int //0: listen event, 1: scan block
 }
 
-func NewEvmSiota(uri string, conAddr, publicKey string) (*EvmIota, error) {
+func NewEvmToken(uri string, conAddr, publicKey string, prv *ecdsa.PrivateKey, _listenType int) (*EvmToken, error) {
 	c, err := ethclient.Dial("https://" + uri)
 	if err != nil {
 		return nil, err
@@ -45,33 +48,39 @@ func NewEvmSiota(uri string, conAddr, publicKey string) (*EvmIota, error) {
 		return nil, err
 	}
 
-	return &EvmIota{
-		url:       uri,
-		client:    c,
-		chainId:   chainId,
-		contract:  common.HexToAddress(conAddr),
-		publicKey: pk,
-		address:   crypto.PubkeyToAddress(*newPk),
+	return &EvmToken{
+		url:        uri,
+		client:     c,
+		chainId:    chainId,
+		contract:   common.HexToAddress(conAddr),
+		publicKey:  pk,
+		address:    crypto.PubkeyToAddress(*newPk),
+		privateKey: prv,
+		ListenType: _listenType,
 	}, err
 }
 
-func (ei *EvmIota) Symbol() string {
-	return "MATIC"
+func (ei *EvmToken) MultiSignType() int {
+	return tokens.Contract
 }
 
-func (ei *EvmIota) PublicKey() []byte {
+func (ei *EvmToken) Symbol() string {
+	return "SMIOTA"
+}
+
+func (ei *EvmToken) PublicKey() []byte {
 	return ei.publicKey
 }
 
-func (ei *EvmIota) KeyType() string {
+func (ei *EvmToken) KeyType() string {
 	return "EC256K1"
 }
 
-func (ei *EvmIota) Address() string {
+func (ei *EvmToken) Address() string {
 	return ei.address.Hex()
 }
 
-func (ei *EvmIota) CreateWrapTxData(to string, amount *big.Int, txID string) ([]byte, []byte, error) {
+func (ei *EvmToken) CreateWrapTxData(to string, amount *big.Int, txID string) ([]byte, []byte, error) {
 	var data []byte
 	data = append(data, MethodWrap[:4]...)
 	data = append(data, common.Hex2Bytes(txID)...)
@@ -95,7 +104,7 @@ func (ei *EvmIota) CreateWrapTxData(to string, amount *big.Int, txID string) ([]
 	return h[:], txData, nil
 }
 
-func (ei *EvmIota) CheckTxData(txid []byte, to string, amount *big.Int) error {
+func (ei *EvmToken) CheckTxData(txid []byte, to string, amount *big.Int) error {
 	hash := common.BytesToHash(txid)
 	tx, isPending, err := ei.client.TransactionByHash(context.Background(), hash)
 	if err != nil {
@@ -123,7 +132,7 @@ func (ei *EvmIota) CheckTxData(txid []byte, to string, amount *big.Int) error {
 	return nil
 }
 
-func (ei *EvmIota) ValiditeWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {
+func (ei *EvmToken) ValiditeWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {
 	baseTx := tokens.BaseTransaction{}
 
 	rawTx := &types.Transaction{}
@@ -147,7 +156,7 @@ func (ei *EvmIota) ValiditeWrapTxData(hash, txData []byte) (tokens.BaseTransacti
 	return baseTx, nil
 }
 
-func (ei *EvmIota) SendSignedTxData(signedHash string, txData []byte) ([]byte, error) {
+func (ei *EvmToken) SendSignedTxData(signedHash string, txData []byte) ([]byte, error) {
 	rawTx := &types.Transaction{}
 	rawTx.UnmarshalJSON(txData)
 	signedTx, _ := rawTx.WithSignature(types.NewEIP155Signer(ei.chainId), common.Hex2Bytes(signedHash))
@@ -155,4 +164,75 @@ func (ei *EvmIota) SendSignedTxData(signedHash string, txData []byte) ([]byte, e
 		return nil, err
 	}
 	return signedTx.Hash().Bytes(), nil
+}
+
+func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string) ([]byte, error) {
+	var data []byte
+	data = append(data, MethodWrap[:4]...)
+	data = append(data, common.Hex2Bytes(txid)...)
+	data = append(data, common.LeftPadBytes(amount.Bytes(), 32)...)
+	data = append(data, common.LeftPadBytes(common.FromHex(to), 32)...)
+	value := big.NewInt(0)
+
+	gasPrice, err := ei.client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
+	}
+
+	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.address)
+	if err != nil {
+		return nil, err
+	}
+	tx := types.NewTransaction(nonce, ei.contract, value, gl.GasLimit, gasPrice, data)
+
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(ei.chainId), ei.privateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ei.client.SendTransaction(context.Background(), signedTx)
+	if err != nil {
+		return nil, err
+	}
+
+	return signedTx.Hash().Bytes(), nil
+}
+
+func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string) ([]byte, error) {
+	var data []byte
+	data = append(data, MethodUnWrap[:4]...)
+	data = append(data, common.Hex2Bytes(txid)...)
+	data = append(data, common.LeftPadBytes(amount.Bytes(), 32)...)
+	data = append(data, common.LeftPadBytes(common.FromHex(to), 32)...)
+	value := big.NewInt(0)
+
+	gasPrice, err := ei.client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
+	}
+
+	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.address)
+	if err != nil {
+		return nil, err
+	}
+	tx := types.NewTransaction(nonce, ei.contract, value, gl.GasLimit, gasPrice, data)
+
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(ei.chainId), ei.privateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ei.client.SendTransaction(context.Background(), signedTx)
+	if err != nil {
+		return nil, err
+	}
+
+	return signedTx.Hash().Bytes(), nil
+}
+
+func (ei *EvmToken) CreateUnWrapTxData(addr string, amount *big.Int, extra []byte) ([]byte, []byte, error) {
+	return nil, nil, fmt.Errorf("Don't support this method")
+}
+func (ei *EvmToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {
+	return tokens.BaseTransaction{}, fmt.Errorf("Don't support this method")
 }

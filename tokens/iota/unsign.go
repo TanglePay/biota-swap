@@ -1,8 +1,8 @@
 package iota
 
 import (
-	"biota_swap/gl"
-	"biota_swap/tokens"
+	"bwrap/gl"
+	"bwrap/tokens"
 	"bytes"
 	"context"
 	"encoding/hex"
@@ -38,6 +38,11 @@ func NewIotaToken(_url, publicKey, _hrp string) *IotaToken {
 		hrp:        iotago.NetworkPrefix(_hrp),
 		walletAddr: iotago.AddressFromEd25519PubKey(pubKey),
 	}
+}
+
+//
+func (ei *IotaToken) MultiSignType() int {
+	return tokens.Smpc
 }
 
 func (it *IotaToken) Symbol() string {
@@ -323,6 +328,10 @@ func (it *IotaToken) SendSignedTxData(hash string, txData []byte) ([]byte, error
 	}
 
 	return id[:], nil
+}
+
+func (it *IotaToken) SendUnWrap(txid string, amount *big.Int, to string) ([]byte, error) {
+	return nil, fmt.Errorf("Don't support this method")
 }
 
 // NewTransactionBuilder creates a new TransactionBuilder.

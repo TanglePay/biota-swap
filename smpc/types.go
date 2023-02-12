@@ -1,7 +1,7 @@
 package smpc
 
 import (
-	"biota_swap/tools/rlp"
+	"bwrap/tools/rlp"
 	"crypto/ecdsa"
 	"encoding/json"
 	"errors"

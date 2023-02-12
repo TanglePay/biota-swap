@@ -35,7 +35,7 @@ Before run this service, you must fill the config/conf.toml file with the right 
 ## Run the Bridge service
 ```shell
 go build
-./biota_swap
+./bwrap
 ```
 Stop the service
 ```shell

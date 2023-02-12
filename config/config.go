@@ -1,7 +1,7 @@
 package config
 
 import (
-	"biota_swap/log"
+	"bwrap/log"
 	"io/ioutil"
 	"time"
 
@@ -20,7 +20,7 @@ var (
 )
 
 //Load load config file
-func init() {
+func Load(pwd string) {
 	type AllConfig struct {
 		Env      string
 		Server   ServerConfig
@@ -40,31 +40,45 @@ func init() {
 	Smpc = all.Smpc
 	Db = all.Db
 	Tokens = make(map[string]Token)
+	var err error
 	for _, t := range all.Tokens {
+		if len(t.KeyStore) > 0 {
+			var keyjson []byte
+			keyjson, err := ioutil.ReadFile(t.KeyStore)
+			if err != nil {
+				log.Panicf("Read keystore file fail. %s : %v\n", t.KeyStore, err)
+			}
+			if t.KeyWrapper, err = keystore.DecryptKey(keyjson, pwd); err != nil {
+				log.Panicf("keystore decrypt error : %v\n", err)
+			}
+		}
 		Tokens[t.Symbol] = t
 	}
 	WrapPairs = make(map[string]string)
 	for _, p := range all.Pairs {
 		WrapPairs[p.SrcToken] = p.DestToken
 	}
+
 	var keyjson []byte
-	keyjson, err := ioutil.ReadFile(all.KeyStore)
+	keyjson, err = ioutil.ReadFile(all.Smpc.KeyStore)
 	if err != nil {
-		log.Panicf("Read keystore file fail. %s : %v\n", all.KeyStore, err)
+		log.Panicf("Read keystore file fail. %s : %v\n", all.Smpc.KeyStore, err)
 	}
 	keyWrapper, err := keystore.DecryptKey(keyjson, "secret")
 	if err != nil {
 		log.Panicf("keystore decrypt error : %v\n", err)
 	}
-
-	KeyWrapper = keyWrapper
+	Smpc.KeyWrapper = keyWrapper
 }
 
 type Token struct {
-	Symbol    string
-	NodeUrl   string
-	PublicKey string
-	Contact   string
+	Symbol        string
+	NodeUrl       string
+	MultiSignType int
+	PublicKey     string
+	Contact       string
+	KeyStore      string
+	KeyWrapper    *keystore.Key
 }
 
 type WrapPair struct {
@@ -81,9 +95,11 @@ type Database struct {
 }
 
 type SmpcConfig struct {
-	NodeUrl   string
-	Gid       string
-	ThresHold string
+	NodeUrl    string
+	Gid        string
+	ThresHold  string
+	KeyStore   string
+	KeyWrapper *keystore.Key
 }
 
 type ServerConfig struct {

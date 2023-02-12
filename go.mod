@@ -1,4 +1,4 @@
-module biota_swap
+module bwrap
 
 go 1.18
 

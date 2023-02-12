@@ -1,15 +1,12 @@
-# Env is "debug" or "product". It will run backgroud if Env is not "debug".
-# KeyStore is the key of the node of smpc
-Env = "debug"
-KeyStore = "./config/keystore"
-
 # NodeUrl is the node url of smpc
 # Gid is the group id of "3"
 # ThresHold is the group rule. It can be "2/3", "3/5", "4/6" ...
+# KeyStore is the key of the node of smpc
 [Smpc]
 NodeUrl = "http://127.0.0.1:5871"
 Gid = "e7fd1f3b48865f158dbccfcbc7d2af7ac7cab0783726ce43b0724b96cf83a8632cc637f6da880f06c4bb246b23fb96e0ef9a33b8dde72df7d1108294bf1aa33f"
 ThresHold   ="2/3"
+KeyStore = "./config/keystore"
 
 # The Server config
 # Detect and Accpet are two services that user can choose one or two to start.
@@ -17,7 +14,7 @@ ThresHold   ="2/3"
 # AcceptTime is the check time as seconds with one loop.
 [Server]
 Detect = true
-DetectCount =60
+DetectCount = 60
 DetectTime = 10
 Accept = false
 AcceptTime = 30
@@ -32,23 +29,47 @@ Usr="root"
 Pwd="851012"
 
 # Tokens contain "ATOI", "IOTA", SMIOTA", "MATIC"
+# Symbol is the unique
+# MultiSignType, 0 is contract multiSign, 2 is smpc multiSign
 [[Tokens]]
 Symbol = "ATOI"
 #NodeUrl = "chrysalis-nodes.iota.org"
 NodeUrl = "api.lb-0.h.chrysalis-devnet.iota.cafe"
+MultiSignType = 2
 #PublicKey = "715593d2c4dfa9bc5b2718e6a4c704b63cd3b62a81ca92b17ee3487daf3d593a"
-PublicKey = "dfe207ee19bc0a36522cd1a53e7263ae83af4da69cbe107be3441a4fd69017ef"
+PublicKey = "e769532b1364dbd56ae6277128d5e7b5c61490beecf3f3b39321030cdcbaf576"
 Contact = ""
+KeyStore = ""
+
+[[Tokens]]
+Symbol = "MATIC"
+NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+PublicKey = "e769532b1364dbd56ae6277128d5e7b5c61490beecf3f3b39321030cdcbaf576"
+Contact = ""
+KeyStore = "./config/keystore"
 
 [[Tokens]]
 Symbol = "SMIOTA"
 #NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
-PublicKey = "047781b557b4cb160429cf9f36eda0a90d49ac2711bdff62a5113c15faaea57ee5659cfeef1b276e234b47097d413a65380f50bc1e67ea94f0665d74949c4a23ab"
+PublicKey = ""
 Contact = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
+KeyStore = "./config/keystore"
+
+[[Tokens]]
+Symbol = "SMATIC"
+#NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
+PublicKey = ""
+Contact = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
+KeyStore = "./config/keystore"
 
 # Pairs is the bridge pair. 
 # SrcToken to DestToken. They must beed in the "Tokens".
 [[Pairs]]
 SrcToken = "ATOI"
 DestToken = "SMIOTA"
+
+[[Pairs]]
+SrcToken = "MATIC"
+DestToken = "SMATIC"

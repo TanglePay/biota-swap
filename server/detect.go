@@ -1,16 +1,15 @@
 package server
 
 import (
-	"biota_swap/config"
-	"biota_swap/gl"
-	"biota_swap/log"
-	"biota_swap/model"
-	"biota_swap/smpc"
-	"biota_swap/tokens"
+	"bwrap/config"
+	"bwrap/gl"
+	"bwrap/log"
+	"bwrap/model"
+	"bwrap/smpc"
+	"bwrap/tokens"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"math/big"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -23,16 +22,12 @@ func init() {
 }
 
 func ListenTokens() {
-	srcTokens = make(map[string]tokens.SourceToken)
-	destTokens = make(map[string]tokens.DestinationToken)
 	for src, dest := range config.WrapPairs {
-		if _, exist := srcTokens[src]; !exist {
-			srcTokens[src] = NewSourceChain(config.Tokens[src])
-		}
-		if _, exist := destTokens[dest]; !exist {
-			destTokens[dest] = NewDestinationChain(config.Tokens[dest])
-		}
+		srcTokens[src] = NewSourceChain(config.Tokens[src])
+		destTokens[dest] = NewDestinationChain(config.Tokens[dest])
+
 		log.Infof("src: %s, dest: %s", srcTokens[src].Address(), destTokens[dest].Address())
+
 		go ListenWrap(srcTokens[src], destTokens[dest])
 		go ListenUnWrap(srcTokens[src], destTokens[dest])
 	}
@@ -89,6 +84,10 @@ func ListenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 }
 
 func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tokens.SwapOrder) {
+	if order.DestToken != t2.Symbol() {
+		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.DestToken, t2.Symbol())
+		return
+	}
 	wo := model.SwapOrder{
 		TxID:      order.TxID,
 		SrcToken:  t1.Symbol(),
@@ -96,17 +95,29 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 		Wrap:      1,
 		From:      order.From,
 		To:        order.To,
-		Amount:    order.Amount,
+		Amount:    order.Amount.String(),
 		Ts:        time.Now().UnixMilli(),
 	}
-	//check the chain tx
+
+	// check the chain tx
 	if err := model.StoreSwapOrder(&wo); err != nil {
 		gl.OutLogger.Error("store the wrap order to db error(%v). %v", err, wo)
 		return
 	}
 
-	amount, _ := new(big.Int).SetString(wo.Amount, 10)
-	hash, txData, err := t2.CreateWrapTxData(wo.To, amount, wo.TxID)
+	// when the MultiSignType is Contract, this process don't need the smpc to sign.
+	if t2.MultiSignType() == tokens.Contract {
+		id, err := t2.SendWrap(order.TxID, order.Amount, order.To)
+		if err != nil {
+			gl.OutLogger.Error("SendWrap error. %s, %v", order.TxID, err)
+		} else {
+			gl.OutLogger.Info("SendWrap. %s => %s OK. %s", wo.SrcToken, wo.DestToken, hex.EncodeToString(id))
+		}
+		return
+	}
+
+	// when the MultiSignType si smpc, it need smpc to sign
+	hash, txData, err := t2.CreateWrapTxData(wo.To, order.Amount, wo.TxID)
 	if err != nil {
 		gl.OutLogger.Error("CreateUnsignTxData error(%v). %v", err, order)
 		return
@@ -125,30 +136,45 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 }
 
 func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tokens.SwapOrder) {
+	if order.DestToken != t1.Symbol() {
+		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.DestToken, t2.Symbol())
+		return
+	}
 	wo := model.SwapOrder{
 		TxID:      order.TxID,
-		SrcToken:  t1.Symbol(),
-		DestToken: t2.Symbol(),
+		SrcToken:  order.SrcToken,
+		DestToken: order.DestToken,
 		Wrap:      -1,
 		From:      order.From,
 		To:        order.To,
-		Amount:    order.Amount,
+		Amount:    order.Amount.String(),
 		Ts:        time.Now().UnixMilli(),
 	}
+
 	//check the chain tx
 	if err := model.StoreSwapOrder(&wo); err != nil {
 		gl.OutLogger.Error("store the wrap order to db error(%v). %v", err, wo)
 		return
 	}
 
-	amount, _ := new(big.Int).SetString(wo.Amount, 10)
+	// when the MultiSignType is Contract, this process don't need the smpc to sign.
+	if t1.MultiSignType() == tokens.Contract {
+		id, err := t1.SendUnWrap(order.TxID, order.Amount, order.To)
+		if err != nil {
+			gl.OutLogger.Error("SendUnWrap error. %s, %v", order.TxID, err)
+		} else {
+			gl.OutLogger.Info("SendWrap. %s => %s OK. %s", order.SrcToken, order.DestToken, hex.EncodeToString(id))
+		}
+		return
+	}
+
 	data, _ := json.Marshal(map[string]interface{}{
 		"txid":   wo.TxID,
 		"from":   wo.From,
 		"to":     wo.To,
 		"amount": wo.Amount,
 	})
-	hash, txData, err := t1.CreateUnWrapTxData(wo.To, amount, data)
+	hash, txData, err := t1.CreateUnWrapTxData(order.To, order.Amount, data)
 	if err != nil {
 		gl.OutLogger.Error("CreateUnsignTxData error. %v : %v", err, order)
 		return

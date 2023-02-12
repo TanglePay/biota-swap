@@ -13,7 +13,7 @@ import (
 )
 
 func TestWrap(t *testing.T) {
-	chainClient, err := NewEvmSiota("https://rpc-mumbai.maticvigil.com/", "0x9b5EE326F61cc57A94820C6CA36E7795D3A21281", "")
+	chainClient, err := NewEvmToken("https://rpc-mumbai.maticvigil.com/", "0x9b5EE326F61cc57A94820C6CA36E7795D3A21281", "", nil, 0)
 	if err != nil {
 		t.Fatal(err)
 	}

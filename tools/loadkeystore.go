@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"biota_swap/tools/keystore"
+	"bwrap/tools/keystore"
 )
 
 var errUnsafeFilePermissions = errors.New("unsafe file permissions, want 0400")

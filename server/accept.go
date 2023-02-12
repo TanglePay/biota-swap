@@ -1,9 +1,9 @@
 package server
 
 import (
-	"biota_swap/config"
-	"biota_swap/gl"
-	"biota_swap/smpc"
+	"bwrap/config"
+	"bwrap/gl"
+	"bwrap/smpc"
 	"encoding/json"
 	"time"
 

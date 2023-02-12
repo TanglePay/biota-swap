@@ -6,7 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"biota_swap/log"
+	"bwrap/log"
 )
 
 // RPCGet rpc get

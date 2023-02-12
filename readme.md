@@ -54,7 +54,8 @@ One of the keystore file:
 * One of the validaters request a group id and a sub group id and send them to other validaters.
 * One of the validaters request some public keys by running "gsmpc-client" and send them to other valildaters.
 * Other validaters should accept the request in time when one of them request gourp id or public key.
-* The public keys of all the MutliSignWallets must send to TanglePay to create contract on evm.
+* The addresses of all the MutliSignWallets must send to TanglePay to create contract on evm.
+* TanglePay send the evm contract address to all the validaters.
 Detail infomation for this, can see [smpc-node keygen and sign workflow](https://github.com/TanglePay/smpc-node).
 
 ### 4. Config the bridge service
@@ -63,7 +64,7 @@ Before run this service, you must fill the config/conf.toml file with the right 
 ## Run the Bridge service
 ```shell
 go build
-./bwrap
+./bwrap -d
 ```
 Stop the service
 ```shell

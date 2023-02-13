@@ -42,7 +42,7 @@ func NewIotaToken(_url, publicKey, _hrp string) *IotaToken {
 
 //
 func (ei *IotaToken) MultiSignType() int {
-	return tokens.Smpc
+	return tokens.SmpcSign
 }
 
 func (it *IotaToken) Symbol() string {

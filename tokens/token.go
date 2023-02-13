@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	Contract int = 0
-	Smpc     int = 2
+	EvmMultiSign int = 0
+	SmpcSign     int = 2
 )
 
 const (

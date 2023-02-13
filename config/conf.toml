@@ -9,15 +9,12 @@ ThresHold   ="2/3"
 KeyStore = "./config/keystore"
 
 # The Server config
-# Detect and Accpet are two services that user can choose one or two to start.
 # DetectCount is the detect count when it request a sign to accept. The DetectTime is the time as seconds between two detect loops.
 # AcceptTime is the check time as seconds with one loop.
 # AcceptOverTime is the time as seconds. If smpc sign over this time, it should be not accepted.
 [Server]
-Detect = true
 DetectCount = 60
 DetectTime = 10
-Accept = false
 AcceptTime = 30
 AcceptOverTime = 7200
 

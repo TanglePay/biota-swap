@@ -60,7 +60,7 @@ func NewEvmToken(uri string, conAddr, publicKey string, prv *ecdsa.PrivateKey, _
 }
 
 func (ei *EvmToken) MultiSignType() int {
-	return tokens.Contract
+	return tokens.EvmMultiSign
 }
 
 func (ei *EvmToken) Symbol() string {

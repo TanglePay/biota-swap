@@ -102,7 +102,6 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 	// check the chain tx
 	if err := model.StoreSwapOrder(&wo); err != nil {
 		gl.OutLogger.Error("store the wrap order to db error(%v). %v", err, wo)
-		return
 	}
 
 	// mint the wrapped token in chain t2
@@ -135,11 +134,13 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 	// Check the chain tx
 	if err := model.StoreSwapOrder(&wo); err != nil {
 		gl.OutLogger.Error("store the unwrap order to db error(%v). %v", err, wo)
-		return
+		if t1.MultiSignType() == tokens.SmpcSign {
+			return
+		}
 	}
 
 	// When the MultiSignType is Contract, this process don't need the smpc to sign.
-	if t1.MultiSignType() == tokens.Contract {
+	if t1.MultiSignType() == tokens.EvmMultiSign {
 		id, err := t1.SendUnWrap(order.TxID, order.Amount, order.To)
 		if err != nil {
 			gl.OutLogger.Error("SendUnWrap error. %s, %v", order.TxID, err)

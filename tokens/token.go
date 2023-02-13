@@ -9,6 +9,11 @@ const (
 	Smpc     int = 2
 )
 
+const (
+	ListenEvent = 0
+	ScanBlock   = 1
+)
+
 type Token interface {
 	MultiSignType() int
 	Symbol() string
@@ -16,12 +21,11 @@ type Token interface {
 	KeyType() string
 	Address() string
 	StartListen(chan *SwapOrder)
-	SendSignedTxData(hash string, txData []byte) ([]byte, error)
-	CheckTxData(txid []byte, to string, amount *big.Int) error
 }
 
 type SourceToken interface {
 	Token
+	SendSignedTxData(hash string, txData []byte) ([]byte, error)
 	CreateUnWrapTxData(addr string, amount *big.Int, extra []byte) ([]byte, []byte, error)
 	ValiditeUnWrapTxData(hash, txData []byte) (BaseTransaction, error)
 	SendUnWrap(txid string, amount *big.Int, to string) ([]byte, error)
@@ -29,8 +33,7 @@ type SourceToken interface {
 
 type DestinationToken interface {
 	Token
-	CreateWrapTxData(to string, amount *big.Int, txID string) ([]byte, []byte, error)
-	ValiditeWrapTxData(hash, txData []byte) (BaseTransaction, error)
+	CheckUnWrapTx(txid []byte, to, symbol string, amount *big.Int) error
 	SendWrap(txid string, amount *big.Int, to string) ([]byte, error)
 }
 

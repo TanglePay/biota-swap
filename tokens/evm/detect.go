@@ -3,6 +3,7 @@ package evm
 import (
 	"bwrap/gl"
 	"bwrap/tokens"
+	"bwrap/tools/crypto"
 	"context"
 	"fmt"
 	"math/big"
@@ -14,10 +15,12 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+var EventUnWrap = crypto.Keccak256Hash([]byte("UnWrap(address,bytes32,bytes32,uint256)"))
+
 func (ei *EvmToken) StartListen(ch chan *tokens.SwapOrder) {
-	if ei.ListenType == 0 {
+	if ei.ListenType == tokens.ListenEvent {
 		ei.listenEvent(ch)
-	} else if ei.ListenType == 1 {
+	} else if ei.ListenType == tokens.ScanBlock {
 		ei.scanBlock(ch)
 	}
 }

@@ -15,6 +15,10 @@ var (
 	destTokens map[string]tokens.DestinationToken
 )
 
+const (
+	UnwrapMethod = "unwrap"
+)
+
 func init() {
 	srcTokens = make(map[string]tokens.SourceToken)
 	destTokens = make(map[string]tokens.DestinationToken)
@@ -25,7 +29,7 @@ type MsgContext struct {
 	DestToken string `json:"dest_token"` // the wrapped token in the target chain
 	Method    string `json:"method"`     // "wrap" or "unwrap"
 	TxData    []byte `json:"txdata"`     // txid of the source chain
-	TimeStamp int64  `json:"timestamp"`  // in seconds
+	Timestamp int64  `json:"timestamp"`  // in seconds
 }
 
 func NewSourceChain(conf config.Token) tokens.SourceToken {
@@ -35,7 +39,7 @@ func NewSourceChain(conf config.Token) tokens.SourceToken {
 	case "ATOI":
 		return iota.NewIotaToken(conf.NodeUrl, conf.PublicKey, "atoi")
 	case "MATIC":
-		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contact, conf.PublicKey, conf.KeyWrapper.PrivateKey, 1)
+		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contact, conf.PublicKey, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
 		if err != nil {
 			panic(err)
 		}
@@ -49,9 +53,9 @@ func NewDestinationChain(conf config.Token) tokens.DestinationToken {
 	var err error
 	switch conf.Symbol {
 	case "SMIOTA":
-		chain, err = evm.NewEvmToken(conf.NodeUrl, conf.Contact, conf.PublicKey, conf.KeyWrapper.PrivateKey, 1)
+		chain, err = evm.NewEvmToken(conf.NodeUrl, conf.Contact, conf.PublicKey, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
 	case "SMATIC":
-		chain, err = evm.NewEvmToken(conf.NodeUrl, conf.Contact, conf.PublicKey, conf.KeyWrapper.PrivateKey, 1)
+		chain, err = evm.NewEvmToken(conf.NodeUrl, conf.Contact, conf.PublicKey, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
 	}
 	if err != nil {
 		panic(err)

@@ -105,6 +105,7 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 		return
 	}
 
+	// mint the wrapped token in chain t2
 	id, err := t2.SendWrap(order.TxID, order.Amount, order.To)
 	if err != nil {
 		gl.OutLogger.Error("SendWrap error. %s, %v", order.TxID, err)
@@ -116,9 +117,10 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 
 func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tokens.SwapOrder) {
 	if order.ToToken != t1.Symbol() {
-		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.ToToken, t1.Symbol())
+		gl.OutLogger.Error("The tx unwrap order's target token is error. %s, %s", order.ToToken, t1.Symbol())
 		return
 	}
+
 	wo := model.SwapOrder{
 		TxID:      order.TxID,
 		SrcToken:  order.ToToken,
@@ -130,13 +132,13 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 		Ts:        time.Now().UnixMilli(),
 	}
 
-	//check the chain tx
+	// Check the chain tx
 	if err := model.StoreSwapOrder(&wo); err != nil {
-		gl.OutLogger.Error("store the wrap order to db error(%v). %v", err, wo)
+		gl.OutLogger.Error("store the unwrap order to db error(%v). %v", err, wo)
 		return
 	}
 
-	// when the MultiSignType is Contract, this process don't need the smpc to sign.
+	// When the MultiSignType is Contract, this process don't need the smpc to sign.
 	if t1.MultiSignType() == tokens.Contract {
 		id, err := t1.SendUnWrap(order.TxID, order.Amount, order.To)
 		if err != nil {
@@ -147,7 +149,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 		return
 	}
 
-	data, _ := json.Marshal(map[string]interface{}{
+	data, _ := json.Marshal(map[string]string{
 		"txid":   wo.TxID,
 		"from":   wo.From,
 		"to":     wo.To,
@@ -161,9 +163,9 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 	msContext, _ := json.Marshal(MsgContext{
 		SrcToken:  wo.SrcToken,
 		DestToken: wo.DestToken,
-		Method:    "unwrap",
+		Method:    UnwrapMethod,
 		TxData:    txData,
-		TimeStamp: time.Now().Unix(),
+		Timestamp: time.Now().Unix(),
 	})
 	keyID, err := smpc.Sign(common.Bytes2Hex(t1.PublicKey()), config.Smpc.Gid, string(msContext), hexutil.Encode(hash), config.Smpc.ThresHold, t1.KeyType())
 	if err != nil {
@@ -176,7 +178,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 	go detectSignStatus(keyID, txData, t1)
 }
 
-func detectSignStatus(keyID string, txData []byte, t tokens.Token) {
+func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) {
 	for i := 0; i < config.Server.DetectCount; i++ {
 		rsvs, err := smpc.GetSignStatus(keyID)
 		if err != nil {

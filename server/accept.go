@@ -26,56 +26,45 @@ func Accept() {
 			}
 			for i := range infoDatas {
 				d := infoDatas[i]
-				var agree bool = true
-				//validite the msgContext
-				for j, msg := range d.MsgContext {
-					msgContext := MsgContext{}
-					if err := json.Unmarshal([]byte(msg), &msgContext); err != nil {
-						gl.OutLogger.Error("json.Unmarshal to MsgContext error. %v", err)
-						agree = false
-						break
-					}
-					if time.Now().Unix()-msgContext.TimeStamp > config.Server.AcceptOverTime {
-						gl.OutLogger.Error("Accept MsgContext over time. %v", msgContext)
-						agree = false
-						break
-					}
-					t1 := srcTokens[msgContext.SrcToken]
-					t2 := destTokens[msgContext.DestToken]
-					if t1 == nil || t2 == nil {
-						gl.OutLogger.Error("token client have no. %s, %s", msgContext.SrcToken, msgContext.DestToken)
-						agree = false
-						break
-					}
-					if msgContext.Method == "wrap" {
-						if baseTx, err := t2.ValiditeWrapTxData(common.Hex2Bytes(d.MsgHash[j]), msgContext.TxData); err != nil {
-							gl.OutLogger.Error("ValiditeWrapTxData error. %s, %s, %v", d.MsgHash[j], string(msgContext.TxData), err)
-							agree = false
-						} else if err = t1.CheckTxData(baseTx.Txid, baseTx.To, baseTx.Amount); err != nil {
-							gl.OutLogger.Error("CheckTxData error. %v : %v", baseTx, err)
-							agree = false
-						}
-					} else if msgContext.Method == "unwrap" {
-						if baseTx, err := t1.ValiditeUnWrapTxData(common.Hex2Bytes(d.MsgHash[j]), msgContext.TxData); err != nil {
-							gl.OutLogger.Error("ValiditeWrapTxData error. %s, %s, %v", d.MsgHash[j], string(msgContext.TxData), err)
-							agree = false
-						} else if err = t2.CheckTxData(baseTx.Txid, baseTx.To, baseTx.Amount); err != nil {
-							gl.OutLogger.Error("CheckTxData error. %v : %v", baseTx, err)
-							agree = false
-						} else {
-							txid := hex.EncodeToString(baseTx.Txid)
-							if acceptedTxes[txid] {
-								gl.OutLogger.Error("txid has been unwrapped. txid: %s, to: %s, amount: %s", txid, baseTx.To, baseTx.Amount.String())
-								agree = false
-							}
-							acceptedTxes[txid] = true
-						}
-					}
-					if !agree {
-						break
-					}
+				if len(d.MsgContext) != 1 || len(d.MsgHash) != 1 {
+					gl.OutLogger.Error("MsgContext don't support multiple. %v", d.MsgContext)
+					continue
 				}
-				if err = smpc.AcceptSign(d, agree); err != nil {
+				msgContext := MsgContext{}
+				if err := json.Unmarshal([]byte(d.MsgContext[0]), &msgContext); err != nil {
+					gl.OutLogger.Error("json.Unmarshal to MsgContext error. %v", err)
+					continue
+				}
+				if (time.Now().Unix() - msgContext.Timestamp) > config.Server.AcceptOverTime {
+					gl.OutLogger.Error("Accept MsgContext over time. %v", msgContext)
+					continue
+				}
+				t1 := srcTokens[msgContext.SrcToken]
+				t2 := destTokens[msgContext.DestToken]
+				if t1 == nil || t2 == nil {
+					gl.OutLogger.Error("token don't support. %s, %s", msgContext.SrcToken, msgContext.DestToken)
+					continue
+				}
+				if msgContext.Method != UnwrapMethod {
+					gl.OutLogger.Error("msgContext.Method don't support. %s", msgContext.Method)
+					continue
+				}
+				if baseTx, err := t1.ValiditeUnWrapTxData(common.Hex2Bytes(d.MsgHash[0]), msgContext.TxData); err != nil {
+					gl.OutLogger.Error("ValiditeWrapTxData error. %s, %s, %v", d.MsgHash[0], string(msgContext.TxData), err)
+					continue
+				} else if err = t2.CheckUnWrapTx(baseTx.Txid, baseTx.To, t1.Symbol(), baseTx.Amount); err != nil {
+					gl.OutLogger.Error("CheckTxData error. %v : %v", baseTx, err)
+					continue
+				} else {
+					txid := hex.EncodeToString(baseTx.Txid)
+					if acceptedTxes[txid] {
+						gl.OutLogger.Error("txid has been unwrapped. txid: %s, to: %s, amount: %s", txid, baseTx.To, baseTx.Amount.String())
+						continue
+					}
+					acceptedTxes[txid] = true
+				}
+
+				if err = smpc.AcceptSign(d, true); err != nil {
 					gl.OutLogger.Error("smpc.AcceptSign error. %v : %v", d, err)
 				} else {
 					gl.OutLogger.Info("Accept the info. ")

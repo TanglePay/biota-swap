@@ -143,7 +143,6 @@ func AcceptSign(keyInfo signCurNodeInfo, agree bool) error {
 	return err
 }
 
-// --------------------------Debug--------------------------------
 var hashDB map[string][]string = make(map[string][]string)
 
 func sign(keyID, hash string, kt string) {

@@ -19,7 +19,7 @@ DetectCount = 60
 DetectTime = 10
 Accept = false
 AcceptTime = 30
-AcceptOverTime = 86400
+AcceptOverTime = 7200
 
 # database driver is mysql
 # the dabasebase name is "smpc" and the table to see the "readme"

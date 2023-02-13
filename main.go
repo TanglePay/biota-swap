@@ -38,7 +38,7 @@ func main() {
 
 	model.ConnectToMysql()
 
-	smpc.InitSmpc(config.Smpc.NodeUrl, config.KeyWrapper)
+	smpc.InitSmpc(config.Smpc.NodeUrl, config.Smpc.KeyWrapper)
 
 	if config.Server.Accept {
 		server.Accept()

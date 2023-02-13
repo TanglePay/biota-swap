@@ -10,13 +10,12 @@ import (
 )
 
 var (
-	Env        string
-	Server     ServerConfig
-	Smpc       SmpcConfig
-	Db         Database
-	Tokens     map[string]Token
-	WrapPairs  map[string]string
-	KeyWrapper *keystore.Key
+	Env       string
+	Server    ServerConfig
+	Smpc      SmpcConfig
+	Db        Database
+	Tokens    map[string]Token
+	WrapPairs map[string]string
 )
 
 //Load load config file

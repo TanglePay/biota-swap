@@ -39,7 +39,7 @@ func NewSourceChain(conf config.Token) tokens.SourceToken {
 	case "ATOI":
 		return iota.NewIotaToken(conf.NodeUrl, conf.PublicKey, "atoi")
 	case "MATIC":
-		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contact, conf.PublicKey, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
+		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.PublicKey, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
 		if err != nil {
 			panic(err)
 		}
@@ -53,9 +53,9 @@ func NewDestinationChain(conf config.Token) tokens.DestinationToken {
 	var err error
 	switch conf.Symbol {
 	case "SMIOTA":
-		chain, err = evm.NewEvmToken(conf.NodeUrl, conf.Contact, conf.PublicKey, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
+		chain, err = evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.PublicKey, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
 	case "SMATIC":
-		chain, err = evm.NewEvmToken(conf.NodeUrl, conf.Contact, conf.PublicKey, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
+		chain, err = evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.PublicKey, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
 	}
 	if err != nil {
 		panic(err)

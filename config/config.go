@@ -75,7 +75,7 @@ type Token struct {
 	NodeUrl       string
 	MultiSignType int
 	PublicKey     string
-	Contact       string
+	Contract      string
 	KeyStore      string
 	KeyWrapper    *keystore.Key
 }

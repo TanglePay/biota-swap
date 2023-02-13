@@ -39,14 +39,14 @@ NodeUrl = "api.lb-0.h.chrysalis-devnet.iota.cafe"
 MultiSignType = 2
 #PublicKey = "715593d2c4dfa9bc5b2718e6a4c704b63cd3b62a81ca92b17ee3487daf3d593a"
 PublicKey = "e769532b1364dbd56ae6277128d5e7b5c61490beecf3f3b39321030cdcbaf576"
-Contact = "null"
+Contract = "null"
 KeyStore = "null"
 
 [[Tokens]]
 Symbol = "MATIC"
 NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 PublicKey = "null"
-Contact = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
+Contract = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
 KeyStore = "./config/keystore"
 
 [[Tokens]]
@@ -54,7 +54,7 @@ Symbol = "SMIOTA"
 #NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
 PublicKey = "null"
-Contact = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
+Contract = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
 KeyStore = "./config/keystore"
 
 [[Tokens]]
@@ -62,7 +62,7 @@ Symbol = "SMATIC"
 #NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
 PublicKey = "null"
-Contact = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
+Contract = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
 KeyStore = "./config/keystore"
 
 # Pairs is the bridge pair. 

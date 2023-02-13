@@ -21,10 +21,10 @@ func init() {
 }
 
 type MsgContext struct {
-	SrcToken  string `json:"src_token"`
-	DestToken string `json:"dest_token"`
-	Method    string `json:"method"`
-	TxData    []byte `json:"txdata"`
+	SrcToken  string `json:"src_token"`  // the real token in the source chain
+	DestToken string `json:"dest_token"` // the wrapped token in the target chain
+	Method    string `json:"method"`     // "wrap" or "unwrap"
+	TxData    []byte `json:"txdata"`     // txid of the source chain
 }
 
 func NewSourceChain(conf config.Token) tokens.SourceToken {

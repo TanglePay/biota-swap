@@ -122,8 +122,8 @@ func (ei *EvmToken) dealTransferEvent(ch chan *tokens.SwapOrder, vLog *types.Log
 
 	order := &tokens.SwapOrder{
 		TxID:      tx,
-		SrcToken:  ei.Symbol(),
-		DestToken: symbol,
+		FromToken: ei.Symbol(),
+		ToToken:   symbol,
 		From:      common.BytesToAddress(vLog.Topics[1][:]).Hex(),
 		To:        common.Bytes2Hex(vLog.Topics[2][:]),
 		Amount:    amount,

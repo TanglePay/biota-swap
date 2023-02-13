@@ -84,14 +84,14 @@ func ListenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 }
 
 func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tokens.SwapOrder) {
-	if order.DestToken != t2.Symbol() {
-		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.DestToken, t2.Symbol())
+	if order.ToToken != t2.Symbol() {
+		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.ToToken, t2.Symbol())
 		return
 	}
 	wo := model.SwapOrder{
 		TxID:      order.TxID,
-		SrcToken:  t1.Symbol(),
-		DestToken: t2.Symbol(),
+		SrcToken:  order.FromToken,
+		DestToken: order.ToToken,
 		Wrap:      1,
 		From:      order.From,
 		To:        order.To,
@@ -122,28 +122,27 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 		gl.OutLogger.Error("CreateUnsignTxData error(%v). %v", err, order)
 		return
 	}
-
 	msContext, _ := json.Marshal(MsgContext{SrcToken: wo.SrcToken, DestToken: wo.DestToken, Method: "wrap", TxData: txData})
-
 	keyID, err := smpc.Sign(common.Bytes2Hex(t2.PublicKey()), config.Smpc.Gid, string(msContext), hexutil.Encode(hash), config.Smpc.ThresHold, t2.KeyType())
-	fmt.Println(keyID)
 	if err != nil {
 		gl.OutLogger.Error("smpc.Sign error(%v). %v", err, order)
 		return
+	} else {
+		gl.OutLogger.Info("Require Sign to smpc for wrap. %s", keyID)
 	}
 
 	go detectSignStatus(keyID, txData, t2)
 }
 
 func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tokens.SwapOrder) {
-	if order.DestToken != t1.Symbol() {
-		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.DestToken, t2.Symbol())
+	if order.ToToken != t1.Symbol() {
+		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.ToToken, t1.Symbol())
 		return
 	}
 	wo := model.SwapOrder{
 		TxID:      order.TxID,
-		SrcToken:  order.SrcToken,
-		DestToken: order.DestToken,
+		SrcToken:  order.ToToken,
+		DestToken: order.FromToken,
 		Wrap:      -1,
 		From:      order.From,
 		To:        order.To,
@@ -163,7 +162,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 		if err != nil {
 			gl.OutLogger.Error("SendUnWrap error. %s, %v", order.TxID, err)
 		} else {
-			gl.OutLogger.Info("SendWrap. %s => %s OK. %s", order.SrcToken, order.DestToken, hex.EncodeToString(id))
+			gl.OutLogger.Info("SendUnWrap. %s => %s OK. %s", order.FromToken, order.ToToken, hex.EncodeToString(id))
 		}
 		return
 	}
@@ -179,14 +178,13 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 		gl.OutLogger.Error("CreateUnsignTxData error. %v : %v", err, order)
 		return
 	}
-
-	msContext, _ := json.Marshal(MsgContext{SrcToken: wo.SrcToken, DestToken: wo.DestToken, Method: "wrap", TxData: txData})
-
+	msContext, _ := json.Marshal(MsgContext{SrcToken: wo.SrcToken, DestToken: wo.DestToken, Method: "unwrap", TxData: txData})
 	keyID, err := smpc.Sign(common.Bytes2Hex(t1.PublicKey()), config.Smpc.Gid, string(msContext), hexutil.Encode(hash), config.Smpc.ThresHold, t1.KeyType())
-	fmt.Println(keyID)
 	if err != nil {
 		gl.OutLogger.Error("smpc.Sign error(%v). %v", err, order)
 		return
+	} else {
+		gl.OutLogger.Info("Require Sign to smpc for unwrap. %s", keyID)
 	}
 
 	go detectSignStatus(keyID, txData, t1)

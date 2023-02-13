@@ -136,8 +136,8 @@ func (it *IotaToken) dealTransferMessage(ch chan *tokens.SwapOrder, msg *iotago.
 
 	order := &tokens.SwapOrder{
 		TxID:      msg.MessageID,
-		SrcToken:  it.Symbol(),
-		DestToken: extraData.Symbol,
+		FromToken: it.Symbol(),
+		ToToken:   extraData.Symbol,
 		From:      bech32Addr,
 		To:        extraData.To,
 		Amount:    new(big.Int).SetUint64(totalAmount),

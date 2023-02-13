@@ -65,8 +65,8 @@ type ChainError struct {
 
 type SwapOrder struct {
 	TxID      string
-	SrcToken  string
-	DestToken string
+	FromToken string
+	ToToken   string
 	From      string
 	To        string
 	Amount    *big.Int

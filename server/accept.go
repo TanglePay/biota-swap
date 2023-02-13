@@ -4,13 +4,17 @@ import (
 	"bwrap/config"
 	"bwrap/gl"
 	"bwrap/smpc"
+	"encoding/hex"
 	"encoding/json"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 )
 
+var acceptedTxes map[string]bool
+
 func Accept() {
+	acceptedTxes = make(map[string]bool)
 	go func() {
 		ticker := time.NewTicker(config.Server.AcceptTime * time.Second)
 		for range ticker.C {
@@ -50,6 +54,13 @@ func Accept() {
 						} else if err = t2.CheckTxData(baseTx.Txid, baseTx.To, baseTx.Amount); err != nil {
 							agree = false
 							gl.OutLogger.Error("CheckTxData error. %v : %v", baseTx, err)
+						} else {
+							txid := hex.EncodeToString(baseTx.Txid)
+							if acceptedTxes[txid] {
+								agree = false
+								gl.OutLogger.Error("txid has been unwrapped. txid: %s, to: %s, amount: %s", txid, baseTx.To, baseTx.Amount.String())
+							}
+							acceptedTxes[txid] = true
 						}
 					}
 				}

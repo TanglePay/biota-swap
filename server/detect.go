@@ -105,39 +105,13 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 		return
 	}
 
-	// when the MultiSignType is Contract, this process don't need the smpc to sign.
-	if t2.MultiSignType() == tokens.Contract {
-		id, err := t2.SendWrap(order.TxID, order.Amount, order.To)
-		if err != nil {
-			gl.OutLogger.Error("SendWrap error. %s, %v", order.TxID, err)
-		} else {
-			gl.OutLogger.Info("SendWrap. %s => %s OK. %s", wo.SrcToken, wo.DestToken, hex.EncodeToString(id))
-		}
-		return
-	}
-
-	// when the MultiSignType si smpc, it need smpc to sign
-	hash, txData, err := t2.CreateWrapTxData(wo.To, order.Amount, wo.TxID)
+	id, err := t2.SendWrap(order.TxID, order.Amount, order.To)
 	if err != nil {
-		gl.OutLogger.Error("CreateUnsignTxData error(%v). %v", err, order)
-		return
-	}
-	msContext, _ := json.Marshal(MsgContext{
-		SrcToken:  wo.SrcToken,
-		DestToken: wo.DestToken,
-		Method:    "wrap",
-		TxData:    txData,
-		TimeStamp: time.Now().Unix(),
-	})
-	keyID, err := smpc.Sign(common.Bytes2Hex(t2.PublicKey()), config.Smpc.Gid, string(msContext), hexutil.Encode(hash), config.Smpc.ThresHold, t2.KeyType())
-	if err != nil {
-		gl.OutLogger.Error("smpc.Sign error(%v). %v", err, order)
-		return
+		gl.OutLogger.Error("SendWrap error. %s, %v", order.TxID, err)
 	} else {
-		gl.OutLogger.Info("Require Sign to smpc for wrap. %s", keyID)
+		gl.OutLogger.Info("SendWrap. %s => %s OK. %s", wo.SrcToken, wo.DestToken, hex.EncodeToString(id))
 	}
-
-	go detectSignStatus(keyID, txData, t2)
+	return
 }
 
 func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tokens.SwapOrder) {

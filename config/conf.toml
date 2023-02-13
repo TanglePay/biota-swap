@@ -33,6 +33,8 @@ Pwd="851012"
 # Tokens contain "ATOI", "IOTA", SMIOTA", "MATIC"
 # Symbol is the unique
 # MultiSignType, 0 is contract multiSign, 2 is smpc multiSign
+# MultiSignType = 0: PublicKey is null
+# MultiSignType = 2: Contract and KeyStore is null
 [[Tokens]]
 Symbol = "ATOI"
 #NodeUrl = "chrysalis-nodes.iota.org"
@@ -40,21 +42,21 @@ NodeUrl = "api.lb-0.h.chrysalis-devnet.iota.cafe"
 MultiSignType = 2
 #PublicKey = "715593d2c4dfa9bc5b2718e6a4c704b63cd3b62a81ca92b17ee3487daf3d593a"
 PublicKey = "e769532b1364dbd56ae6277128d5e7b5c61490beecf3f3b39321030cdcbaf576"
-Contact = ""
-KeyStore = ""
+Contact = "null"
+KeyStore = "null"
 
 [[Tokens]]
 Symbol = "MATIC"
 NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
-PublicKey = "e769532b1364dbd56ae6277128d5e7b5c61490beecf3f3b39321030cdcbaf576"
-Contact = ""
+PublicKey = "null"
+Contact = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
 KeyStore = "./config/keystore"
 
 [[Tokens]]
 Symbol = "SMIOTA"
 #NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
-PublicKey = ""
+PublicKey = "null"
 Contact = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
 KeyStore = "./config/keystore"
 
@@ -62,7 +64,7 @@ KeyStore = "./config/keystore"
 Symbol = "SMATIC"
 #NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
-PublicKey = ""
+PublicKey = "null"
 Contact = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
 KeyStore = "./config/keystore"
 

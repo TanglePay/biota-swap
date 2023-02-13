@@ -25,6 +25,7 @@ type MsgContext struct {
 	DestToken string `json:"dest_token"` // the wrapped token in the target chain
 	Method    string `json:"method"`     // "wrap" or "unwrap"
 	TxData    []byte `json:"txdata"`     // txid of the source chain
+	TimeStamp int64  `json:"timestamp"`  // in seconds
 }
 
 func NewSourceChain(conf config.Token) tokens.SourceToken {

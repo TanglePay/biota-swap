@@ -182,7 +182,8 @@ func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) {
 	for i := 0; i < config.Server.DetectCount; i++ {
 		rsvs, err := smpc.GetSignStatus(keyID)
 		if err != nil {
-			if err != smpc.ErrNoAccept {
+			// get sign accept data fail from db
+			if len(err.Error()) != 33 {
 				gl.OutLogger.Error("GetSignStatus error. %s : %v", keyID, err)
 			}
 		}

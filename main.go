@@ -7,6 +7,7 @@ import (
 	"bwrap/model"
 	"bwrap/server"
 	"bwrap/smpc"
+	"bwrap/tools/crypto"
 	"context"
 	"fmt"
 	"log"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -68,20 +70,27 @@ func input() {
 	}
 }
 
+var EventUnWrap = crypto.Keccak256Hash([]byte("UnWrap(address,bytes32,bytes32,uint256)"))
+
 func TestQuery() {
-	c, err := ethclient.Dial("https://rpc-mumbai.maticvigil.com")
+	c, err := ethclient.Dial("https://api.sc.testnet.shimmer.network/evm/jsonrpc")
 	if err != nil {
 		panic(err)
 	}
 
 	//Set the query filter
-	query := ethereum.FilterQuery{}
+	query := ethereum.FilterQuery{
+		Addresses: []common.Address{common.HexToAddress("2E5591820Dcd82Bf75B369665Ca81eA2Fe54BfB5")},
+		Topics:    [][]common.Hash{{EventUnWrap}},
+	}
 
 	fromHeight, err := c.BlockNumber(context.Background())
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	fromHeight = 6340
 
 	for {
 		time.Sleep(5 * time.Second)

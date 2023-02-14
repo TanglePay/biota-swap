@@ -87,8 +87,7 @@ func getJSONResult(successResponse json.RawMessage) (string, error) {
 		return "", err
 	}
 	if err := json.Unmarshal(repData, &data); err != nil {
-		fmt.Println("getJSONResult Unmarshal json fail:", err)
-		return "", err
+		return "", fmt.Errorf("getJSONResult Unmarshal json fail: %v", err)
 	}
 	return data.Result, nil
 }
@@ -96,16 +95,14 @@ func getJSONResult(successResponse json.RawMessage) (string, error) {
 func getJSONData(successResponse json.RawMessage) ([]byte, error) {
 	var rep response
 	if err := json.Unmarshal(successResponse, &rep); err != nil {
-		fmt.Println("getJSONData Unmarshal json fail:", err)
-		return nil, err
+		return nil, fmt.Errorf("getJSONData Unmarshal json fail: %v", err)
 	}
 	if rep.Status != "Success" {
 		return nil, errors.New(rep.Error)
 	}
 	repData, err := json.Marshal(rep.Data)
 	if err != nil {
-		fmt.Println("getJSONData Marshal json fail:", err)
-		return nil, err
+		return nil, fmt.Errorf("getJSONData Marshal json fail: %v", err)
 	}
 	return repData, nil
 }

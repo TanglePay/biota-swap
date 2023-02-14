@@ -4,6 +4,7 @@ import (
 	"bwrap/gl"
 	"bwrap/tokens"
 	"bwrap/tools/crypto"
+	"bytes"
 	"context"
 	"fmt"
 	"math/big"
@@ -52,7 +53,7 @@ func (ei *EvmToken) scanBlock(ch chan *tokens.SwapOrder) {
 			}
 			ch <- errOrder
 			continue
-		} else if toHeight <= fromHeight {
+		} else if toHeight < fromHeight {
 			continue
 		}
 
@@ -118,7 +119,7 @@ func (ei *EvmToken) dealTransferEvent(ch chan *tokens.SwapOrder, vLog *types.Log
 		ch <- errOrder
 		return
 	}
-	symbol := string(vLog.Data[:32])
+	symbol, _, _ := bytes.Cut(vLog.Data[:32], []byte{0})
 	amount := new(big.Int).SetBytes(vLog.Data[32:])
 	account := common.HexToAddress(vLog.Topics[1].Hex()).Hex()
 	gl.OutLogger.Info("UnWrap token. %s : %s : %s", tx, account, amount.String())
@@ -126,7 +127,7 @@ func (ei *EvmToken) dealTransferEvent(ch chan *tokens.SwapOrder, vLog *types.Log
 	order := &tokens.SwapOrder{
 		TxID:      tx,
 		FromToken: ei.Symbol(),
-		ToToken:   symbol,
+		ToToken:   string(symbol),
 		From:      common.BytesToAddress(vLog.Topics[1][:]).Hex(),
 		To:        common.Bytes2Hex(vLog.Topics[2][:]),
 		Amount:    amount,

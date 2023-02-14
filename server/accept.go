@@ -6,9 +6,8 @@ import (
 	"bwrap/smpc"
 	"encoding/hex"
 	"encoding/json"
+	"strings"
 	"time"
-
-	"github.com/ethereum/go-ethereum/common"
 )
 
 var acceptedTxes map[string]bool
@@ -49,7 +48,8 @@ func Accept() {
 					gl.OutLogger.Error("msgContext.Method don't support. %s", msgContext.Method)
 					continue
 				}
-				if baseTx, err := t1.ValiditeUnWrapTxData(common.Hex2Bytes(d.MsgHash[0]), msgContext.TxData); err != nil {
+				hash, _ := hex.DecodeString(strings.TrimPrefix(d.MsgHash[0], "0x"))
+				if baseTx, err := t1.ValiditeUnWrapTxData(hash, msgContext.TxData); err != nil {
 					gl.OutLogger.Error("ValiditeWrapTxData error. %s, %s, %v", d.MsgHash[0], string(msgContext.TxData), err)
 					continue
 				} else if err = t2.CheckUnWrapTx(baseTx.Txid, baseTx.To, t1.Symbol(), baseTx.Amount); err != nil {
@@ -58,7 +58,7 @@ func Accept() {
 				} else {
 					txid := hex.EncodeToString(baseTx.Txid)
 					if acceptedTxes[txid] {
-						gl.OutLogger.Error("txid has been unwrapped. txid: %s, to: %s, amount: %s", txid, baseTx.To, baseTx.Amount.String())
+						//gl.OutLogger.Error("txid has been unwrapped. txid: %s, to: %s, amount: %s", txid, baseTx.To, baseTx.Amount.String())
 						continue
 					}
 					acceptedTxes[txid] = true
@@ -67,7 +67,7 @@ func Accept() {
 				if err = smpc.AcceptSign(d, true); err != nil {
 					gl.OutLogger.Error("smpc.AcceptSign error. %v : %v", d, err)
 				} else {
-					gl.OutLogger.Info("Accept the info. ")
+					gl.OutLogger.Info("Accept the info. %s", d.Key)
 				}
 			}
 		}

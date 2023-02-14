@@ -93,15 +93,15 @@ func (ei *EvmToken) CheckUnWrapTx(txid []byte, to, symbol string, amount *big.In
 	}
 	data = data[32:]
 
-	data, _, _ = bytes.Cut(data[:32], []byte{0})
-	if string(data) != symbol {
+	sy, _, _ := bytes.Cut(data[:32], []byte{0})
+	if string(sy) != symbol {
 		return fmt.Errorf("symbol is not equal. %s :%s", string(data), symbol)
 	}
 	data = data[32:]
 
 	a := new(big.Int).SetBytes(data)
-	if a.Cmp(amount) != 0 {
-		return fmt.Errorf("amount is not equal. %d : %d", amount.Uint64(), a.Uint64())
+	if a.Cmp(amount) < 0 {
+		return fmt.Errorf("amount is bigger. %d : %d", amount.Uint64(), a.Uint64())
 	}
 
 	return nil

@@ -9,7 +9,6 @@ import (
 	"bwrap/tokens"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -26,7 +25,7 @@ func ListenTokens() {
 		srcTokens[src] = NewSourceChain(config.Tokens[src])
 		destTokens[dest] = NewDestinationChain(config.Tokens[dest])
 
-		log.Infof("src: %s, dest: %s", srcTokens[src].Address(), destTokens[dest].Address())
+		log.Infof("src: %s", srcTokens[src].Address())
 
 		go ListenWrap(srcTokens[src], destTokens[dest])
 		go ListenUnWrap(srcTokens[src], destTokens[dest])
@@ -42,7 +41,7 @@ func ListenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 		for {
 			select {
 			case order := <-orderC:
-				fmt.Println(order)
+				gl.OutLogger.Info("Wrap Order : %v", order)
 				if order.Error != nil {
 					gl.OutLogger.Error(order.Error.Error())
 					if order.Type == 0 {
@@ -67,7 +66,7 @@ func ListenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 		for {
 			select {
 			case order := <-orderC:
-				fmt.Println(order)
+				gl.OutLogger.Info("UnWrap Order : %v", order)
 				if order.Error != nil {
 					gl.OutLogger.Error(order.Error.Error())
 					if order.Type == 0 {
@@ -183,7 +182,9 @@ func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) {
 	for i := 0; i < config.Server.DetectCount; i++ {
 		rsvs, err := smpc.GetSignStatus(keyID)
 		if err != nil {
-			gl.OutLogger.Error("GetSignStatus error. %s : %v", keyID, err)
+			if err != smpc.ErrNoAccept {
+				gl.OutLogger.Error("GetSignStatus error. %s : %v", keyID, err)
+			}
 		}
 		if len(rsvs) > 0 {
 			if txID, err := t.SendSignedTxData(rsvs[0], txData); err != nil {

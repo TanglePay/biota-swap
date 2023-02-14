@@ -4,6 +4,7 @@ import (
 	"bwrap/tools/crypto"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -68,6 +69,8 @@ func Sign(pubkey, gid, context, hash, threshold string, keyType string) (string,
 	return keyID, nil
 }
 
+var ErrNoAccept = errors.New("get sign accept data fail from db")
+
 func GetSignStatus(keyID string) ([]string, error) {
 	if runMode == Debug {
 		return hashDB[keyID], nil
@@ -79,14 +82,14 @@ func GetSignStatus(keyID string) ([]string, error) {
 	}
 	statusJSONStr, err := getJSONResult(reqStatus)
 	if err != nil {
-		return nil, fmt.Errorf("smpc_getSignStatus=NotStart, keyID=%s. %v", keyID, err)
+		return nil, err
 	}
 	if err := json.Unmarshal([]byte(statusJSONStr), &statusJSON); err != nil {
 		return nil, fmt.Errorf("Unmarshal statusJSONStr fail. %s, %v", statusJSONStr, err)
 	}
 	switch statusJSON.Status {
 	case "Timeout", "Failure":
-		return nil, fmt.Errorf("smpc_getSignStatus=%s, keyID=%s", statusJSON.Status, keyID)
+		return nil, fmt.Errorf("smpc_getSignStatus=%s", statusJSON.Status)
 	case "Success":
 		return statusJSON.Rsv, nil
 	default:
@@ -118,7 +121,7 @@ func AcceptSign(keyInfo signCurNodeInfo, agree bool) error {
 		accept = "DISAGREE"
 	}
 	data := acceptSignData{
-		TxType:     "",
+		TxType:     "ACCEPTSIGN",
 		Key:        keyInfo.Key,
 		Accept:     accept,
 		MsgHash:    keyInfo.MsgHash,

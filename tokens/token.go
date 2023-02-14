@@ -17,7 +17,6 @@ const (
 type Token interface {
 	MultiSignType() int
 	Symbol() string
-	PublicKey() []byte
 	KeyType() string
 	Address() string
 	StartListen(chan *SwapOrder)
@@ -25,6 +24,7 @@ type Token interface {
 
 type SourceToken interface {
 	Token
+	PublicKey() []byte
 	SendSignedTxData(hash string, txData []byte) ([]byte, error)
 	CreateUnWrapTxData(addr string, amount *big.Int, extra []byte) ([]byte, []byte, error)
 	ValiditeUnWrapTxData(hash, txData []byte) (BaseTransaction, error)

@@ -102,10 +102,8 @@ type SmpcConfig struct {
 }
 
 type ServerConfig struct {
-	Detect         bool
 	DetectCount    int
 	DetectTime     time.Duration
-	Accept         bool
 	AcceptTime     time.Duration
 	AcceptOverTime int64
 }

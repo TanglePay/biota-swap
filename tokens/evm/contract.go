@@ -20,19 +20,17 @@ var MethodSend = crypto.Keccak256Hash([]byte("send(bytes32,uint256,address)"))
 var MethodUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,bytes32,uint256)"))
 
 type EvmToken struct {
-	client          *ethclient.Client
-	url             string
-	chainId         *big.Int
-	contract        common.Address
-	publicKey       []byte
-	address         common.Address
-	unwrapNetPrefix string
-	unwrapChain     string
-	privateKey      *ecdsa.PrivateKey
-	ListenType      int //0: listen event, 1: scan block
+	client     *ethclient.Client
+	url        string
+	chainId    *big.Int
+	symbol     string
+	contract   common.Address
+	address    common.Address
+	privateKey *ecdsa.PrivateKey
+	ListenType int //0: listen event, 1: scan block
 }
 
-func NewEvmToken(uri string, conAddr, publicKey string, prv *ecdsa.PrivateKey, _listenType int) (*EvmToken, error) {
+func NewEvmToken(uri, conAddr, symbol string, prv *ecdsa.PrivateKey, _listenType int) (*EvmToken, error) {
 	c, err := ethclient.Dial("https://" + uri)
 	if err != nil {
 		return nil, err
@@ -41,19 +39,14 @@ func NewEvmToken(uri string, conAddr, publicKey string, prv *ecdsa.PrivateKey, _
 	if err != nil {
 		return nil, err
 	}
-	pk := common.Hex2Bytes(publicKey)
-	newPk, err := crypto.UnmarshalPubkey(pk)
-	if err != nil {
-		return nil, err
-	}
 
 	return &EvmToken{
 		url:        uri,
 		client:     c,
 		chainId:    chainId,
+		symbol:     symbol,
 		contract:   common.HexToAddress(conAddr),
-		publicKey:  pk,
-		address:    crypto.PubkeyToAddress(*newPk),
+		address:    crypto.PubkeyToAddress(prv.PublicKey),
 		privateKey: prv,
 		ListenType: _listenType,
 	}, err
@@ -64,11 +57,11 @@ func (ei *EvmToken) MultiSignType() int {
 }
 
 func (ei *EvmToken) Symbol() string {
-	return "SMIOTA"
+	return ei.symbol
 }
 
 func (ei *EvmToken) PublicKey() []byte {
-	return ei.publicKey
+	return nil
 }
 
 func (ei *EvmToken) KeyType() string {

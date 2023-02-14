@@ -40,13 +40,9 @@ func main() {
 
 	smpc.InitSmpc(config.Smpc.NodeUrl, config.Smpc.KeyWrapper)
 
-	if config.Server.Accept {
-		server.Accept()
-	}
+	server.Accept()
 
-	if config.Server.Detect {
-		server.ListenTokens()
-	}
+	server.ListenTokens()
 
 	daemon.WaitForKill()
 }

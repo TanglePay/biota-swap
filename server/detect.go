@@ -9,6 +9,7 @@ import (
 	"bwrap/tokens"
 	"encoding/hex"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -98,9 +99,15 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 		Ts:        time.Now().UnixMilli(),
 	}
 
+	if !dealedOrders.Check(order.TxID) {
+		return
+	}
+
 	// check the chain tx
 	if err := model.StoreSwapOrder(&wo); err != nil {
-		gl.OutLogger.Error("store the wrap order to db error(%v). %v", err, wo)
+		if !strings.HasPrefix(err.Error(), "Error 1062") {
+			gl.OutLogger.Error("store the wrap order to db error(%v). %v", err, wo)
+		}
 	}
 
 	// mint the wrapped token in chain t2
@@ -128,6 +135,10 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 		To:        order.To,
 		Amount:    order.Amount.String(),
 		Ts:        time.Now().UnixMilli(),
+	}
+
+	if !dealedOrders.Check(order.TxID) {
+		return
 	}
 
 	// Check the chain tx

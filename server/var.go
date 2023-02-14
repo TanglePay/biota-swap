@@ -5,14 +5,49 @@ import (
 	"bwrap/tokens"
 	"bwrap/tokens/evm"
 	"bwrap/tokens/iota"
+	"sync"
+	"time"
 
 	"github.com/onrik/ethrpc"
 )
 
+type DealedOrdersCheck struct {
+	dealed map[string]bool
+	mu     sync.Mutex
+}
+
+func NewDealedOrdersCheck() *DealedOrdersCheck {
+	d := &DealedOrdersCheck{
+		dealed: make(map[string]bool),
+	}
+	go d.expired()
+	return d
+}
+
+func (doc *DealedOrdersCheck) Check(txid string) bool {
+	doc.mu.Lock()
+	defer doc.mu.Unlock()
+	if _, exist := doc.dealed[txid]; exist {
+		return false
+	}
+	doc.dealed[txid] = true
+	return true
+}
+
+func (doc *DealedOrdersCheck) expired() {
+	ticker := time.NewTicker(time.Hour * 24)
+	for range ticker.C {
+		doc.mu.Lock()
+		doc.dealed = make(map[string]bool)
+		doc.mu.Unlock()
+	}
+}
+
 var (
-	client     *ethrpc.EthRPC
-	srcTokens  map[string]tokens.SourceToken
-	destTokens map[string]tokens.DestinationToken
+	client       *ethrpc.EthRPC
+	srcTokens    map[string]tokens.SourceToken
+	destTokens   map[string]tokens.DestinationToken
+	dealedOrders *DealedOrdersCheck
 )
 
 const (
@@ -22,6 +57,7 @@ const (
 func init() {
 	srcTokens = make(map[string]tokens.SourceToken)
 	destTokens = make(map[string]tokens.DestinationToken)
+	dealedOrders = NewDealedOrdersCheck()
 }
 
 type MsgContext struct {

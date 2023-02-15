@@ -42,13 +42,13 @@ func ListenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 		for {
 			select {
 			case order := <-orderC:
-				gl.OutLogger.Info("Wrap Order : %v", order)
 				if order.Error != nil {
 					gl.OutLogger.Error(order.Error.Error())
 					if order.Type == 0 {
 						break FOR
 					}
 				} else {
+					gl.OutLogger.Info("Wrap Order : %v", *order)
 					dealWrapOrder(t1, t2, order)
 				}
 			}
@@ -67,13 +67,13 @@ func ListenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 		for {
 			select {
 			case order := <-orderC:
-				gl.OutLogger.Info("UnWrap Order : %v", order)
 				if order.Error != nil {
 					gl.OutLogger.Error(order.Error.Error())
 					if order.Type == 0 {
 						break FOR
 					}
 				} else {
+					gl.OutLogger.Info("UnWrap Order : %v", *order)
 					dealUnWrapOrder(t1, t2, order)
 				}
 			}
@@ -143,7 +143,9 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 
 	// Check the chain tx
 	if err := model.StoreSwapOrder(&wo); err != nil {
-		gl.OutLogger.Error("store the unwrap order to db error(%v). %v", err, wo)
+		if !strings.HasPrefix(err.Error(), "Error 1062") {
+			gl.OutLogger.Error("store the unwrap order to db error(%v). %v", err, wo)
+		}
 		if t1.MultiSignType() == tokens.SmpcSign {
 			return
 		}
@@ -190,6 +192,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 }
 
 func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) {
+	gl.OutLogger.Info("Waiting %s to accept... ", keyID)
 	for i := 0; i < config.Server.DetectCount; i++ {
 		rsvs, err := smpc.GetSignStatus(keyID)
 		if err != nil {
@@ -204,8 +207,9 @@ func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) {
 			} else {
 				gl.OutLogger.Info("SendSignedTxData OK. %s", hex.EncodeToString(txID))
 			}
-			break
+			return
 		}
 		time.Sleep(config.Server.DetectTime * time.Second)
 	}
+	gl.OutLogger.Warn("Waiting %s to accept over time.", keyID)
 }

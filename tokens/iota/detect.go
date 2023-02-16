@@ -55,7 +55,7 @@ type EssencePayloadData struct {
 	Symbol string `json:"symbol"`
 }
 
-func (it *IotaToken) StartListen(ch chan *tokens.SwapOrder) {
+func (it *IotaToken) StartWrapListen(ch chan *tokens.SwapOrder) {
 	//Get the contract addresses for listening the iota output event
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()

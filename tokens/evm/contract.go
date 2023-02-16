@@ -69,7 +69,7 @@ func (ei *EvmToken) KeyType() string {
 }
 
 func (ei *EvmToken) Address() string {
-	return ei.address.Hex()
+	return ei.contract.Hex()
 }
 
 func (ei *EvmToken) CheckUnWrapTx(txid []byte, to, symbol string, amount *big.Int) error {
@@ -118,9 +118,13 @@ func (ei *EvmToken) SendSignedTxData(signedHash string, txData []byte) ([]byte, 
 }
 
 func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string) ([]byte, error) {
+	txHash := common.FromHex(txid)
+	if len(txHash) > 32 {
+		txHash = txHash[:32]
+	}
 	var data []byte
 	data = append(data, MethodWrap[:4]...)
-	data = append(data, common.Hex2Bytes(txid)...)
+	data = append(data, common.LeftPadBytes(txHash, 32)...)
 	data = append(data, common.LeftPadBytes(amount.Bytes(), 32)...)
 	data = append(data, common.LeftPadBytes(common.FromHex(to), 32)...)
 	value := big.NewInt(0)
@@ -150,9 +154,13 @@ func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string) ([]byte, e
 }
 
 func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string) ([]byte, error) {
+	txHash := common.FromHex(txid)
+	if len(txHash) > 32 {
+		txHash = txHash[:32]
+	}
 	var data []byte
 	data = append(data, MethodSend[:4]...)
-	data = append(data, common.Hex2Bytes(txid)...)
+	data = append(data, common.LeftPadBytes(txHash, 32)...)
 	data = append(data, common.LeftPadBytes(amount.Bytes(), 32)...)
 	data = append(data, common.LeftPadBytes(common.FromHex(to), 32)...)
 	value := big.NewInt(0)

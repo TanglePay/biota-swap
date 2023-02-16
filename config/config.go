@@ -3,6 +3,7 @@ package config
 import (
 	"bwrap/log"
 	"io/ioutil"
+	"math/big"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -52,6 +53,9 @@ func Load(pwd string) {
 			}
 		}
 		Tokens[t.Symbol] = t
+		if t.MinAmount == nil {
+			log.Panicf("%s's MinAmount must to be set.", t.Symbol)
+		}
 	}
 	WrapPairs = make(map[string]string)
 	for _, p := range all.Pairs {
@@ -73,9 +77,11 @@ func Load(pwd string) {
 type Token struct {
 	Symbol        string
 	NodeUrl       string
+	ScanEventType int
 	MultiSignType int
 	PublicKey     string
 	Contract      string
+	MinAmount     *big.Int
 	KeyStore      string
 	KeyWrapper    *keystore.Key
 }

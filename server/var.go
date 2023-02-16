@@ -74,14 +74,13 @@ func NewSourceChain(conf config.Token) tokens.SourceToken {
 		return iota.NewIotaToken(conf.NodeUrl, conf.PublicKey, "iota")
 	case "ATOI":
 		return iota.NewIotaToken(conf.NodeUrl, conf.PublicKey, "atoi")
-	case "MATIC":
+	default:
 		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
 		if err != nil {
 			panic(err)
 		}
 		return token
 	}
-	return nil
 }
 
 func NewDestinationChain(conf config.Token) tokens.DestinationToken {

@@ -36,7 +36,7 @@ func ListenTokens() {
 func ListenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	for {
 		orderC := make(chan *tokens.SwapOrder, 10)
-		go t1.StartListen(orderC)
+		go t1.StartWrapListen(orderC)
 		gl.OutLogger.Info("Begin to listen source token %s.", t1.Symbol())
 	FOR:
 		for {
@@ -49,6 +49,10 @@ func ListenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 					}
 				} else {
 					gl.OutLogger.Info("Wrap Order : %v", *order)
+					if order.Amount.Cmp(config.Tokens[t1.Symbol()].MinAmount) < 0 {
+						gl.OutLogger.Error("The amount of %s is smaller than %s", t1.Symbol(), config.Tokens[t1.Symbol()].MinAmount.String())
+						continue
+					}
 					dealWrapOrder(t1, t2, order)
 				}
 			}
@@ -61,7 +65,7 @@ func ListenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 func ListenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	for {
 		orderC := make(chan *tokens.SwapOrder, 10)
-		go t2.StartListen(orderC)
+		go t2.StartUnWrapListen(orderC)
 		gl.OutLogger.Info("Begin to listen dest token %s.", t2.Symbol())
 	FOR:
 		for {
@@ -74,6 +78,10 @@ func ListenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 					}
 				} else {
 					gl.OutLogger.Info("UnWrap Order : %v", *order)
+					if order.Amount.Cmp(config.Tokens[t2.Symbol()].MinAmount) < 0 {
+						gl.OutLogger.Error("The amount of %s is smaller than %s", t1.Symbol(), config.Tokens[t2.Symbol()].MinAmount.String())
+						continue
+					}
 					dealUnWrapOrder(t1, t2, order)
 				}
 			}

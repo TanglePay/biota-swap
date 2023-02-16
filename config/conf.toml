@@ -29,6 +29,7 @@ Pwd="851012"
 
 # Tokens contain "ATOI", "IOTA", SMIOTA", "MATIC"
 # Symbol is the unique
+# ScanEventType, 0: listen event as websockt or mqtt; 1: scan block to get event logs.
 # MultiSignType, 0 is contract multiSign, 2 is smpc multiSign
 # MultiSignType = 0: PublicKey is null
 # MultiSignType = 2: Contract and KeyStore is null
@@ -36,40 +37,66 @@ Pwd="851012"
 Symbol = "ATOI"
 #NodeUrl = "chrysalis-nodes.iota.org"
 NodeUrl = "api.lb-0.h.chrysalis-devnet.iota.cafe"
+ScanEventType = 0
 MultiSignType = 2
-#PublicKey = "715593d2c4dfa9bc5b2718e6a4c704b63cd3b62a81ca92b17ee3487daf3d593a"
 PublicKey = "8c187002a32bf4143ae9260f3a08aca19ebea321d91f47fb7f8dfd2281f3d41a"
-Contract = "null"
-KeyStore = ""
+MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "MATIC"
 NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+ScanEventType = 1
 MultiSignType = 0
-PublicKey = "null"
-Contract = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
-KeyStore = "./config/k1"
+Contract = "0x3e83D58F34AdbC830546F88AACa9590186f4d92f"
+KeyStore = "./config/k"
+MinAmount = 100000000000
+
+[[Tokens]]
+Symbol = "TT1"
+NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+ScanEventType = 1
+MultiSignType = 0
+Contract = "0xB4B74f0FE409Ab69B0C8885E62964c5e9CABBbd3"
+KeyStore = "./config/k"
+MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "SMIOTA"
-#NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
+ScanEventType = 1
 MultiSignType = 0
-PublicKey = "null"
-Contract = "0x2E5591820Dcd82Bf75B369665Ca81eA2Fe54BfB5"
-KeyStore = "./config/k1"
+Contract = "0xCB03Ebd74417AA792fC68a750F35c7b8F585027B"
+KeyStore = "./config/k"
+MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "SMATIC"
-#NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
+ScanEventType = 1
 MultiSignType = 0
-PublicKey = "null"
-Contract = "0x361293435A9Bb241EcA9fb4517Fe3a2b242125cc"
-KeyStore = "./config/k1"
+Contract = "0xB1359205E429fbdF52199692b5Adb09D1d70fa93"
+KeyStore = "./config/k"
+MinAmount = 1000000000
+
+[[Tokens]]
+Symbol = "STT1"
+NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
+ScanEventType = 1
+MultiSignType = 0
+Contract = "0x358BDE78b3a94Ba8cA996f481113B63A8847A155"
+KeyStore = "./config/k"
+MinAmount = 1000000
 
 # Pairs is the bridge pair. 
 # SrcToken to DestToken. They must beed in the "Tokens".
 [[Pairs]]
 SrcToken = "ATOI"
 DestToken = "SMIOTA"
+
+[[Pairs]]
+SrcToken = "MATIC"
+DestToken = "SMATIC"
+
+[[Pairs]]
+SrcToken = "TT1"
+DestToken = "STT1"

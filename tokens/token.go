@@ -19,11 +19,11 @@ type Token interface {
 	Symbol() string
 	KeyType() string
 	Address() string
-	StartListen(chan *SwapOrder)
 }
 
 type SourceToken interface {
 	Token
+	StartWrapListen(chan *SwapOrder)
 	PublicKey() []byte
 	SendSignedTxData(hash string, txData []byte) ([]byte, error)
 	CreateUnWrapTxData(addr string, amount *big.Int, extra []byte) ([]byte, []byte, error)
@@ -33,6 +33,7 @@ type SourceToken interface {
 
 type DestinationToken interface {
 	Token
+	StartUnWrapListen(chan *SwapOrder)
 	CheckUnWrapTx(txid []byte, to, symbol string, amount *big.Int) error
 	SendWrap(txid string, amount *big.Int, to string) ([]byte, error)
 }

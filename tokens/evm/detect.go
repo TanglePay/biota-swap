@@ -1,7 +1,6 @@
 package evm
 
 import (
-	"bwrap/gl"
 	"bwrap/tokens"
 	"bwrap/tools/crypto"
 	"bytes"
@@ -17,16 +16,25 @@ import (
 )
 
 var EventUnWrap = crypto.Keccak256Hash([]byte("UnWrap(address,bytes32,bytes32,uint256)"))
+var EventWrap = crypto.Keccak256Hash([]byte("Wrap(address,address,bytes32,uint256)"))
 
-func (ei *EvmToken) StartListen(ch chan *tokens.SwapOrder) {
+func (ei *EvmToken) StartWrapListen(ch chan *tokens.SwapOrder) {
 	if ei.ListenType == tokens.ListenEvent {
-		ei.listenEvent(ch)
+		ei.listenEvent(EventWrap, ch)
 	} else if ei.ListenType == tokens.ScanBlock {
-		ei.scanBlock(ch)
+		ei.scanBlock(EventWrap, ch)
 	}
 }
 
-func (ei *EvmToken) scanBlock(ch chan *tokens.SwapOrder) {
+func (ei *EvmToken) StartUnWrapListen(ch chan *tokens.SwapOrder) {
+	if ei.ListenType == tokens.ListenEvent {
+		ei.listenEvent(EventUnWrap, ch)
+	} else if ei.ListenType == tokens.ScanBlock {
+		ei.scanBlock(EventUnWrap, ch)
+	}
+}
+
+func (ei *EvmToken) scanBlock(event common.Hash, ch chan *tokens.SwapOrder) {
 	fromHeight, err := ei.client.BlockNumber(context.Background())
 	if err != nil {
 		errOrder := &tokens.SwapOrder{
@@ -40,7 +48,7 @@ func (ei *EvmToken) scanBlock(ch chan *tokens.SwapOrder) {
 	//Set the query filter
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{ei.contract},
-		Topics:    [][]common.Hash{{EventUnWrap}},
+		Topics:    [][]common.Hash{{event}},
 	}
 
 	for {
@@ -69,18 +77,22 @@ func (ei *EvmToken) scanBlock(ch chan *tokens.SwapOrder) {
 			continue
 		}
 		for i := range logs {
-			ei.dealTransferEvent(ch, &logs[i])
+			if logs[i].Topics[0].Hex() == EventWrap.Hex() {
+				ei.dealWrapEvent(ch, &logs[i])
+			} else {
+				ei.dealUnWrapEvent(ch, &logs[i])
+			}
 		}
 		fromHeight = toHeight + 1
 	}
 }
 
-func (ei *EvmToken) listenEvent(ch chan *tokens.SwapOrder) {
+func (ei *EvmToken) listenEvent(event common.Hash, ch chan *tokens.SwapOrder) {
 	nodeUrl := "wss://" + ei.url
 	//Set the query filter
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{ei.contract},
-		Topics:    [][]common.Hash{{EventUnWrap}},
+		Topics:    [][]common.Hash{{event}},
 	}
 
 	errOrder := &tokens.SwapOrder{Type: 0}
@@ -106,12 +118,41 @@ func (ei *EvmToken) listenEvent(ch chan *tokens.SwapOrder) {
 			ch <- errOrder
 			return
 		case vLog := <-eventLogChan:
-			ei.dealTransferEvent(ch, &vLog)
+			if vLog.Topics[0].Hex() == EventWrap.Hex() {
+				ei.dealWrapEvent(ch, &vLog)
+			} else {
+				ei.dealUnWrapEvent(ch, &vLog)
+			}
 		}
 	}
 }
 
-func (ei *EvmToken) dealTransferEvent(ch chan *tokens.SwapOrder, vLog *types.Log) {
+func (ei *EvmToken) dealWrapEvent(ch chan *tokens.SwapOrder, vLog *types.Log) {
+	errOrder := &tokens.SwapOrder{Type: 1}
+	tx := vLog.TxHash.Hex()
+	if len(vLog.Data) != 64 {
+		errOrder.Error = fmt.Errorf("Wrap event data is nil. %s, %s, %s\n", tx, vLog.Address.Hex(), vLog.Topics[1].Hex())
+		ch <- errOrder
+		return
+	}
+	fromAddr := common.BytesToAddress(vLog.Topics[1][:]).Hex()
+	toAddr := common.BytesToAddress(vLog.Topics[2][:]).Hex()
+	symbol, _, _ := bytes.Cut(vLog.Data[:32], []byte{0})
+	amount := new(big.Int).SetBytes(vLog.Data[32:])
+
+	order := &tokens.SwapOrder{
+		TxID:      tx,
+		FromToken: ei.Symbol(),
+		ToToken:   string(symbol),
+		From:      fromAddr,
+		To:        toAddr,
+		Amount:    amount,
+		Error:     nil,
+	}
+	ch <- order
+}
+
+func (ei *EvmToken) dealUnWrapEvent(ch chan *tokens.SwapOrder, vLog *types.Log) {
 	errOrder := &tokens.SwapOrder{Type: 1}
 	tx := vLog.TxHash.Hex()
 	if len(vLog.Data) == 0 {
@@ -121,8 +162,6 @@ func (ei *EvmToken) dealTransferEvent(ch chan *tokens.SwapOrder, vLog *types.Log
 	}
 	symbol, _, _ := bytes.Cut(vLog.Data[:32], []byte{0})
 	amount := new(big.Int).SetBytes(vLog.Data[32:])
-	account := common.HexToAddress(vLog.Topics[1].Hex()).Hex()
-	gl.OutLogger.Info("UnWrap token. %s : %s : %s", tx, account, amount.String())
 
 	order := &tokens.SwapOrder{
 		TxID:      tx,

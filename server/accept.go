@@ -16,6 +16,7 @@ func Accept() {
 	acceptedTxes = make(map[string]bool)
 	go func() {
 		ticker := time.NewTicker(config.Server.AcceptTime * time.Second)
+		defer ticker.Stop()
 		for range ticker.C {
 			//Get the sign data from smpc node
 			infoDatas, err := smpc.GetCurNodeSignInfo()

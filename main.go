@@ -26,7 +26,7 @@ func main() {
 
 	pwd := readRand()
 
-	config.Load(pwd)
+	config.LoadWithPwd(pwd)
 
 	gl.CreateLogFiles()
 

@@ -20,7 +20,7 @@ var (
 )
 
 //Load load config file
-func Load(pwd string) {
+func LoadWithPwd(pwd string) {
 	type AllConfig struct {
 		Env      string
 		Server   ServerConfig
@@ -72,6 +72,54 @@ func Load(pwd string) {
 		log.Panicf("keystore decrypt error : %v\n", err)
 	}
 	Smpc.KeyWrapper = keyWrapper
+}
+
+func Load() {
+	type AllConfig struct {
+		Env      string
+		Server   ServerConfig
+		Smpc     SmpcConfig
+		Db       Database
+		Tokens   []Token
+		Pairs    []WrapPair
+		KeyStore string
+	}
+	all := &AllConfig{}
+	if _, err := toml.DecodeFile("./config/conf.toml", all); err != nil {
+		panic(err)
+	}
+
+	Env = all.Env
+	Server = all.Server
+	Smpc = all.Smpc
+	Db = all.Db
+	Tokens = make(map[string]Token)
+	var err error
+	for _, t := range all.Tokens {
+		if len(t.KeyStore) > 0 {
+			var keyjson []byte
+			keyjson, err := ioutil.ReadFile(t.KeyStore)
+			if err != nil {
+				log.Panicf("Read keystore file fail. %s : %v\n", t.KeyStore, err)
+			}
+			t.KeyStore = string(keyjson)
+		}
+		Tokens[t.Symbol] = t
+		if t.MinAmount == nil {
+			log.Panicf("%s's MinAmount must to be set.", t.Symbol)
+		}
+	}
+	WrapPairs = make(map[string]string)
+	for _, p := range all.Pairs {
+		WrapPairs[p.SrcToken] = p.DestToken
+	}
+
+	var keyjson []byte
+	keyjson, err = ioutil.ReadFile(all.Smpc.KeyStore)
+	if err != nil {
+		log.Panicf("Read keystore file fail. %s : %v\n", all.Smpc.KeyStore, err)
+	}
+	Smpc.KeyStore = string(keyjson)
 }
 
 type Token struct {

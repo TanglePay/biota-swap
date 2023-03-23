@@ -25,7 +25,6 @@ var PerBlockSize uint64 = 1000
 
 // OutLogger global logger
 var OutLogger *logger.Logger
-var Errlogger *logger.Logger
 
 func CreateLogFiles() {
 	var err error
@@ -34,12 +33,5 @@ func CreateLogFiles() {
 	}
 	if OutLogger, err = logger.New("logs/out.log", 1, 3, 0); err != nil {
 		log.Panic("Create Outlogger file error. " + err.Error())
-	}
-
-	if err := os.MkdirAll("./logs/error", os.ModePerm); err != nil {
-		log.Panicf("Create dir './logs/error' error. %v", err)
-	}
-	if Errlogger, err = logger.New("logs/error/err.log", 1, 3, 0); err != nil {
-		log.Panic("Create Errlogger file error. " + err.Error())
 	}
 }

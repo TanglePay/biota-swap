@@ -48,6 +48,8 @@ var (
 	srcTokens    map[string]tokens.SourceToken
 	destTokens   map[string]tokens.DestinationToken
 	dealedOrders *DealedOrdersCheck
+
+	seeds [4]uint64
 )
 
 const (
@@ -58,6 +60,10 @@ func init() {
 	srcTokens = make(map[string]tokens.SourceToken)
 	destTokens = make(map[string]tokens.DestinationToken)
 	dealedOrders = NewDealedOrdersCheck()
+}
+
+func SetSeeds(_seeds [4]uint64) {
+	seeds = _seeds
 }
 
 type MsgContext struct {

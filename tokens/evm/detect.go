@@ -39,7 +39,7 @@ func (ei *EvmToken) scanBlock(event common.Hash, ch chan *tokens.SwapOrder) {
 	if err != nil {
 		errOrder := &tokens.SwapOrder{
 			Type:  0,
-			Error: fmt.Errorf("Get the block number error. %v", err),
+			Error: fmt.Errorf("Get the block number error. %s : %v", ei.symbol, err),
 		}
 		ch <- errOrder
 		return
@@ -57,7 +57,7 @@ func (ei *EvmToken) scanBlock(event common.Hash, ch chan *tokens.SwapOrder) {
 		if toHeight, err = ei.client.BlockNumber(context.Background()); err != nil {
 			errOrder := &tokens.SwapOrder{
 				Type:  1,
-				Error: fmt.Errorf(" error. %v", err),
+				Error: fmt.Errorf("BlockNumber error. %s : %v", ei.symbol, err),
 			}
 			ch <- errOrder
 			continue
@@ -71,7 +71,7 @@ func (ei *EvmToken) scanBlock(event common.Hash, ch chan *tokens.SwapOrder) {
 		if err != nil {
 			errOrder := &tokens.SwapOrder{
 				Type:  1,
-				Error: fmt.Errorf("client FilterLogs error. %v", err),
+				Error: fmt.Errorf("client FilterLogs error. %s : %v", ei.symbol, err),
 			}
 			ch <- errOrder
 			continue

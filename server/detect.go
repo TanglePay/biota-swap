@@ -64,7 +64,7 @@ func ListenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 
 func ListenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	for {
-		orderC := make(chan *tokens.SwapOrder, 10)
+		orderC := make(chan *tokens.SwapOrder, 10000)
 		go t2.StartUnWrapListen(orderC)
 		gl.OutLogger.Info("Begin to listen dest token %s.", t2.Symbol())
 	FOR:
@@ -125,7 +125,6 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 	} else {
 		gl.OutLogger.Info("SendWrap. %s => %s OK. %s", wo.SrcToken, wo.DestToken, hex.EncodeToString(id))
 	}
-	return
 }
 
 func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tokens.SwapOrder) {
@@ -196,7 +195,8 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 		gl.OutLogger.Info("Require Sign to smpc for unwrap. %s", keyID)
 	}
 
-	go detectSignStatus(keyID, txData, t1)
+	detectSignStatus(keyID, txData, t1)
+	time.Sleep(60 * time.Second)
 }
 
 func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) {

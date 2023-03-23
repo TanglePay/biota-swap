@@ -67,7 +67,7 @@ func Load(pwd string) {
 	if err != nil {
 		log.Panicf("Read keystore file fail. %s : %v\n", all.Smpc.KeyStore, err)
 	}
-	keyWrapper, err := keystore.DecryptKey(keyjson, "secret")
+	keyWrapper, err := keystore.DecryptKey(keyjson, pwd)
 	if err != nil {
 		log.Panicf("keystore decrypt error : %v\n", err)
 	}

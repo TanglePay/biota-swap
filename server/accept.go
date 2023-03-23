@@ -51,7 +51,7 @@ func Accept() {
 				}
 				hash, _ := hex.DecodeString(strings.TrimPrefix(d.MsgHash[0], "0x"))
 				if baseTx, err := t1.ValiditeUnWrapTxData(hash, msgContext.TxData); err != nil {
-					gl.OutLogger.Error("ValiditeWrapTxData error. %s, %s, %v", d.MsgHash[0], string(msgContext.TxData), err)
+					gl.OutLogger.Error("ValiditeUnWrapTxData error. %s, %s, %v", d.MsgHash[0], string(msgContext.TxData), err)
 					continue
 				} else if err = t2.CheckUnWrapTx(baseTx.Txid, baseTx.To, t1.Symbol(), baseTx.Amount); err != nil {
 					gl.OutLogger.Error("CheckTxData error. %v : %v", baseTx, err)

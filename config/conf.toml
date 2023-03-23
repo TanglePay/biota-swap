@@ -40,6 +40,7 @@ NodeUrl = "api.lb-0.h.chrysalis-devnet.iota.cafe"
 ScanEventType = 0
 MultiSignType = 2
 PublicKey = "8c187002a32bf4143ae9260f3a08aca19ebea321d91f47fb7f8dfd2281f3d41a"
+# Dave's pubkey fe944ff27add4acc90adb09438f9661b8e28dba2612ddb82559d604dfc428d1e
 MinAmount = 1000000
 
 [[Tokens]]
@@ -100,3 +101,6 @@ DestToken = "SMATIC"
 [[Pairs]]
 SrcToken = "TT1"
 DestToken = "STT1"
+
+# the keystores' encrypted password 
+Password = ""

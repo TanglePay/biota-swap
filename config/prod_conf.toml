@@ -1,0 +1,103 @@
+# NodeUrl is the node url of smpc
+# Gid is the subgroup id
+# ThresHold is the group rule. It can be "2/3", "3/5", "4/6" ...
+# KeyStore is the key of the node of smpc
+[Smpc]
+NodeUrl = "http://127.0.0.1:5871"
+Gid = "e7fd1f3b48865f158dbccfcbc7d2af7ac7cab0783726ce43b0724b96cf83a8632cc637f6da880f06c4bb246b23fb96e0ef9a33b8dde72df7d1108294bf1aa33f"
+ThresHold   ="2/3"
+KeyStore = "./config/keystore"
+
+# The Server config
+# DetectCount is the detect count when it request a sign to accept. The DetectTime is the time as seconds between two detect loops.
+# AcceptTime is the check time as seconds with one loop.
+# AcceptOverTime is the time as seconds. If smpc sign over this time, it should be not accepted.
+[Server]
+DetectCount = 60
+DetectTime = 10
+AcceptTime = 30
+AcceptOverTime = 7200
+
+# database driver is mysql
+# the dabasebase name is "smpc" and the table to see the "readme"
+[Db]
+Host = "127.0.0.1"
+Port = "3306"
+DbName = "smpc"
+Usr="root"
+Pwd="851012"
+
+# Tokens contain "ATOI", "IOTA", SMIOTA", "MATIC"
+# Symbol is the unique
+# ScanEventType, 0: listen event as websockt or mqtt; 1: scan block to get event logs.
+# MultiSignType, 0 is contract multiSign, 2 is smpc multiSign
+# MultiSignType = 0: PublicKey is null
+# MultiSignType = 2: Contract and KeyStore is null
+[[Tokens]]
+Symbol = "ATOI"
+#NodeUrl = "chrysalis-nodes.iota.org"
+NodeUrl = "api.lb-0.h.chrysalis-devnet.iota.cafe"
+ScanEventType = 0
+MultiSignType = 2
+PublicKey = "8c187002a32bf4143ae9260f3a08aca19ebea321d91f47fb7f8dfd2281f3d41a"
+# Dave's pubkey is fe944ff27add4acc90adb09438f9661b8e28dba2612ddb82559d604dfc428d1e
+MinAmount = 1000000
+
+[[Tokens]]
+Symbol = "MATIC"
+NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+ScanEventType = 1
+MultiSignType = 0
+Contract = "0x3e83D58F34AdbC830546F88AACa9590186f4d92f"
+KeyStore = "./config/k"
+MinAmount = 100000000000
+
+[[Tokens]]
+Symbol = "TT1"
+NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+ScanEventType = 1
+MultiSignType = 0
+Contract = "0xB4B74f0FE409Ab69B0C8885E62964c5e9CABBbd3"
+KeyStore = "./config/k"
+MinAmount = 1000000
+
+[[Tokens]]
+Symbol = "SMIOTA"
+NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
+ScanEventType = 1
+MultiSignType = 0
+Contract = "0xCB03Ebd74417AA792fC68a750F35c7b8F585027B"
+KeyStore = "./config/k"
+MinAmount = 1000000
+
+[[Tokens]]
+Symbol = "SMATIC"
+NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
+ScanEventType = 1
+MultiSignType = 0
+Contract = "0xB1359205E429fbdF52199692b5Adb09D1d70fa93"
+KeyStore = "./config/k"
+MinAmount = 1000000000
+
+[[Tokens]]
+Symbol = "STT1"
+NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
+ScanEventType = 1
+MultiSignType = 0
+Contract = "0x358BDE78b3a94Ba8cA996f481113B63A8847A155"
+KeyStore = "./config/k"
+MinAmount = 1000000
+
+# Pairs is the bridge pair. 
+# SrcToken to DestToken. They must beed in the "Tokens".
+[[Pairs]]
+SrcToken = "ATOI"
+DestToken = "SMIOTA"
+
+[[Pairs]]
+SrcToken = "MATIC"
+DestToken = "SMATIC"
+
+[[Pairs]]
+SrcToken = "TT1"
+DestToken = "STT1"

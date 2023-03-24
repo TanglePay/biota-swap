@@ -118,8 +118,14 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 		}
 	}
 
+	// Get Private Key
+	_, prv, err := config.GetPrivateKey(t2.Symbol())
+	if err != nil {
+		gl.OutLogger.Error("GetPrivateKey error. %s, %v", t2.Symbol(), err)
+		return
+	}
 	// mint the wrapped token in chain t2
-	id, err := t2.SendWrap(order.TxID, order.Amount, order.To)
+	id, err := t2.SendWrap(order.TxID, order.Amount, order.To, prv)
 	if err != nil {
 		gl.OutLogger.Error("SendWrap error. %s, %v", order.TxID, err)
 	} else {
@@ -160,7 +166,14 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 
 	// When the MultiSignType is Contract, this process don't need the smpc to sign.
 	if t1.MultiSignType() == tokens.EvmMultiSign {
-		id, err := t1.SendUnWrap(order.TxID, order.Amount, order.To)
+		// Get Private Key
+		_, prv, err := config.GetPrivateKey(t1.Symbol())
+		if err != nil {
+			gl.OutLogger.Error("GetPrivateKey error. %s, %v", t1.Symbol(), err)
+			return
+		}
+
+		id, err := t1.SendUnWrap(order.TxID, order.Amount, order.To, prv)
 		if err != nil {
 			gl.OutLogger.Error("SendUnWrap error. %s, %v", order.TxID, err)
 		} else {
@@ -187,7 +200,13 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 		TxData:    txData,
 		Timestamp: time.Now().Unix(),
 	})
-	keyID, err := smpc.Sign(common.Bytes2Hex(t1.PublicKey()), config.Smpc.Gid, string(msContext), hexutil.Encode(hash), config.Smpc.ThresHold, t1.KeyType())
+	// Get Private Key
+	_, prv, err := config.GetPrivateKey("smpc")
+	if err != nil {
+		gl.OutLogger.Error("GetPrivateKey error. smpc, %v", err)
+		return
+	}
+	keyID, err := smpc.Sign(common.Bytes2Hex(t1.PublicKey()), config.Smpc.Gid, string(msContext), hexutil.Encode(hash), config.Smpc.ThresHold, t1.KeyType(), prv)
 	if err != nil {
 		gl.OutLogger.Error("smpc.Sign error(%v). %v", err, order)
 		return

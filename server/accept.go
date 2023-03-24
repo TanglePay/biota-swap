@@ -64,8 +64,13 @@ func Accept() {
 					}
 					acceptedTxes[txid] = true
 				}
-
-				if err = smpc.AcceptSign(d, true); err != nil {
+				// Get Private Key
+				_, prv, err := config.GetPrivateKey("smpc")
+				if err != nil {
+					gl.OutLogger.Error("GetPrivateKey error. smpc, %v", err)
+					return
+				}
+				if err = smpc.AcceptSign(d, true, prv); err != nil {
 					gl.OutLogger.Error("smpc.AcceptSign error. %v : %v", d, err)
 				} else {
 					gl.OutLogger.Info("Accept the info. %s", d.Key)

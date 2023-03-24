@@ -62,10 +62,6 @@ func init() {
 	dealedOrders = NewDealedOrdersCheck()
 }
 
-func SetSeeds(_seeds [4]uint64) {
-	seeds = _seeds
-}
-
 type MsgContext struct {
 	SrcToken  string `json:"src_token"`  // the real token in the source chain
 	DestToken string `json:"dest_token"` // the wrapped token in the target chain
@@ -74,14 +70,14 @@ type MsgContext struct {
 	Timestamp int64  `json:"timestamp"`  // in seconds
 }
 
-func NewSourceChain(conf config.Token) tokens.SourceToken {
+func NewSourceChain(conf *config.Token) tokens.SourceToken {
 	switch conf.Symbol {
 	case "IOTA":
 		return iota.NewIotaToken(conf.NodeUrl, conf.PublicKey, "iota")
 	case "ATOI":
 		return iota.NewIotaToken(conf.NodeUrl, conf.PublicKey, "atoi")
 	default:
-		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.KeyWrapper.PrivateKey, tokens.ScanBlock)
+		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock)
 		if err != nil {
 			panic(err)
 		}
@@ -89,8 +85,8 @@ func NewSourceChain(conf config.Token) tokens.SourceToken {
 	}
 }
 
-func NewDestinationChain(conf config.Token) tokens.DestinationToken {
-	if chain, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.KeyWrapper.PrivateKey, tokens.ScanBlock); err != nil {
+func NewDestinationChain(conf *config.Token) tokens.DestinationToken {
+	if chain, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock); err != nil {
 		panic(err)
 	} else {
 		return chain

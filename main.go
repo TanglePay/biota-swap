@@ -7,6 +7,7 @@ import (
 	"bwrap/model"
 	"bwrap/server"
 	"bwrap/smpc"
+	"bwrap/tools"
 	"fmt"
 	"log"
 	"os"
@@ -24,15 +25,13 @@ func main() {
 		daemon.Background("./out.log", true)
 	}
 
-	pwd := readRand()
-
-	config.LoadWithPwd(pwd)
+	config.Load(readRand())
 
 	gl.CreateLogFiles()
 
 	model.ConnectToMysql()
 
-	smpc.InitSmpc(config.Smpc.NodeUrl, config.Smpc.KeyWrapper)
+	smpc.InitSmpc(config.Smpc.NodeUrl, config.Smpc.Account)
 
 	server.Accept()
 
@@ -41,7 +40,7 @@ func main() {
 	daemon.WaitForKill()
 }
 
-func readRand() string {
+func readRand() (string, [4]uint64) {
 	data, err := os.ReadFile("rand.data")
 	if err != nil {
 		log.Panicf("read rand.data error. %v", err)
@@ -50,7 +49,16 @@ func readRand() string {
 		log.Panicf("write rand.data error. %v", err)
 	}
 	os.Remove("rand.data")
-	return string(data)
+
+	//generate seeds
+	var seeds [4]uint64
+	seeds[0] = tools.GenerateRandomSeed()
+	seeds[1] = tools.GenerateRandomSeed()
+	seeds[2] = tools.GenerateRandomSeed()
+	seeds[3] = tools.GenerateRandomSeed()
+
+	pwd := tools.GetEncryptString(string(data), seeds)
+	return string(pwd), seeds
 }
 
 func input() {

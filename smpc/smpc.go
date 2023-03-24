@@ -2,11 +2,11 @@ package smpc
 
 import (
 	"bwrap/tools/crypto"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"strconv"
 	"time"
 
@@ -14,16 +14,9 @@ import (
 	"github.com/iotaledger/iota.go/v2/ed25519"
 )
 
-func Sign(pubkey, gid, context, hash, threshold string, keyType string) (string, error) {
-	if runMode == Debug {
-		data := make([]byte, 32)
-		rand.Read(data)
-		keyID := common.Bytes2Hex(data)
-		sign(keyID, hash, keyType)
-		return keyID, nil
-	}
+func Sign(pubkey, gid, context, hash, threshold, keyType string, pk *ecdsa.PrivateKey) (string, error) {
 	// get sign nonce
-	signNonce, err := client.Call("smpc_getSignNonce", keyWrapper.Address.String())
+	signNonce, err := client.Call("smpc_getSignNonce", account)
 	if err != nil {
 		return "", fmt.Errorf("smpc_getSignNonce error. %v", err)
 	}
@@ -49,7 +42,7 @@ func Sign(pubkey, gid, context, hash, threshold string, keyType string) (string,
 	}
 	playload, _ := json.Marshal(txdata)
 	// sign tx
-	rawTX, err := signTX(signer, keyWrapper.PrivateKey, nonce, playload)
+	rawTX, err := signTX(signer, pk, nonce, playload)
 	if err != nil {
 		return "", fmt.Errorf("signTx error. %v", err)
 	}
@@ -72,9 +65,6 @@ func Sign(pubkey, gid, context, hash, threshold string, keyType string) (string,
 var ErrNoAccept = errors.New("get sign accept data fail from db")
 
 func GetSignStatus(keyID string) ([]string, error) {
-	if runMode == Debug {
-		return hashDB[keyID], nil
-	}
 	var statusJSON signStatus
 	reqStatus, err := client.Call("smpc_getSignStatus", keyID)
 	if err != nil {
@@ -99,7 +89,7 @@ func GetSignStatus(keyID string) ([]string, error) {
 
 func GetCurNodeSignInfo() ([]signCurNodeInfo, error) {
 	// get approve list of condominium account
-	reqListRep, err := client.Call("smpc_getCurNodeSignInfo", keyWrapper.Address.String())
+	reqListRep, err := client.Call("smpc_getCurNodeSignInfo", account)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +105,7 @@ func GetCurNodeSignInfo() ([]signCurNodeInfo, error) {
 	return keyList, nil
 }
 
-func AcceptSign(keyInfo signCurNodeInfo, agree bool) error {
+func AcceptSign(keyInfo signCurNodeInfo, agree bool, pk *ecdsa.PrivateKey) error {
 	accept := "AGREE"
 	if !agree {
 		accept = "DISAGREE"
@@ -131,7 +121,7 @@ func AcceptSign(keyInfo signCurNodeInfo, agree bool) error {
 	playload, _ := json.Marshal(data)
 
 	// sign tx
-	rawTX, err := signTX(signer, keyWrapper.PrivateKey, 0, playload)
+	rawTX, err := signTX(signer, pk, 0, playload)
 	if err != nil {
 		return err
 	}

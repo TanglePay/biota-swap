@@ -1,6 +1,7 @@
 package tokens
 
 import (
+	"crypto/ecdsa"
 	"math/big"
 )
 
@@ -28,14 +29,14 @@ type SourceToken interface {
 	SendSignedTxData(hash string, txData []byte) ([]byte, error)
 	CreateUnWrapTxData(addr string, amount *big.Int, extra []byte) ([]byte, []byte, error)
 	ValiditeUnWrapTxData(hash, txData []byte) (BaseTransaction, error)
-	SendUnWrap(txid string, amount *big.Int, to string) ([]byte, error)
+	SendUnWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error)
 }
 
 type DestinationToken interface {
 	Token
 	StartUnWrapListen(chan *SwapOrder)
 	CheckUnWrapTx(txid []byte, to, symbol string, amount *big.Int) error
-	SendWrap(txid string, amount *big.Int, to string) ([]byte, error)
+	SendWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error)
 }
 
 type BaseTransaction struct {

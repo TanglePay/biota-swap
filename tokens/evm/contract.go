@@ -25,12 +25,11 @@ type EvmToken struct {
 	chainId    *big.Int
 	symbol     string
 	contract   common.Address
-	address    common.Address
-	privateKey *ecdsa.PrivateKey
+	account    common.Address
 	ListenType int //0: listen event, 1: scan block
 }
 
-func NewEvmToken(uri, conAddr, symbol string, prv *ecdsa.PrivateKey, _listenType int) (*EvmToken, error) {
+func NewEvmToken(uri, conAddr, symbol string, _account common.Address, _listenType int) (*EvmToken, error) {
 	c, err := ethclient.Dial("https://" + uri)
 	if err != nil {
 		return nil, err
@@ -46,8 +45,7 @@ func NewEvmToken(uri, conAddr, symbol string, prv *ecdsa.PrivateKey, _listenType
 		chainId:    chainId,
 		symbol:     symbol,
 		contract:   common.HexToAddress(conAddr),
-		address:    crypto.PubkeyToAddress(prv.PublicKey),
-		privateKey: prv,
+		account:    _account,
 		ListenType: _listenType,
 	}, err
 }
@@ -117,7 +115,7 @@ func (ei *EvmToken) SendSignedTxData(signedHash string, txData []byte) ([]byte, 
 	return signedTx.Hash().Bytes(), nil
 }
 
-func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string) ([]byte, error) {
+func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
 	txHash := common.FromHex(txid)
 	if len(txHash) > 32 {
 		txHash = txHash[:32]
@@ -134,13 +132,13 @@ func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string) ([]byte, e
 		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
 	}
 
-	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.address)
+	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.account)
 	if err != nil {
 		return nil, err
 	}
 	tx := types.NewTransaction(nonce, ei.contract, value, gl.GasLimit, gasPrice, data)
 
-	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(ei.chainId), ei.privateKey)
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(ei.chainId), prv)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +151,7 @@ func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string) ([]byte, e
 	return signedTx.Hash().Bytes(), nil
 }
 
-func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string) ([]byte, error) {
+func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
 	txHash := common.FromHex(txid)
 	if len(txHash) > 32 {
 		txHash = txHash[:32]
@@ -170,13 +168,13 @@ func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string) ([]byte,
 		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
 	}
 
-	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.address)
+	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.account)
 	if err != nil {
 		return nil, err
 	}
 	tx := types.NewTransaction(nonce, ei.contract, value, gl.GasLimit, gasPrice, data)
 
-	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(ei.chainId), ei.privateKey)
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(ei.chainId), prv)
 	if err != nil {
 		return nil, err
 	}

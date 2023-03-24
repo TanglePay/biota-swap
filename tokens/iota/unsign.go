@@ -5,6 +5,7 @@ import (
 	"bwrap/tokens"
 	"bytes"
 	"context"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -330,7 +331,7 @@ func (it *IotaToken) SendSignedTxData(hash string, txData []byte) ([]byte, error
 	return id[:], nil
 }
 
-func (it *IotaToken) SendUnWrap(txid string, amount *big.Int, to string) ([]byte, error) {
+func (it *IotaToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
 	return nil, fmt.Errorf("Don't support this method")
 }
 

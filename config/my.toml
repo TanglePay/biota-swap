@@ -41,7 +41,7 @@ PublicKey = "8786dc216e64b7f20c8ccb45ca0474d4e9819734cfe60e25c7aacae1bc8bcd6f"
 MinAmount = 1000000
 
 [[Tokens]]
-Symbol = "ETH"
+Symbol = "MATIC"
 NodeUrl = "rpc-mumbai.maticvigil.com"
 ScanEventType = 1
 MultiSignType = 0
@@ -51,7 +51,7 @@ MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "WBTC"
-NodeUrl = "rpc-mumbai.maticvigil.com"
+NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 ScanEventType = 1
 MultiSignType = 0
 Contract = "0x108f44932E5817eD8131261E1967233385cE39e9"
@@ -59,35 +59,35 @@ KeyStore = "./config/k"
 MinAmount = 10000
 
 # target tokens
-#sETH deployed to 0x2c9D7E34e41d763f55b4539B9aFebfE7C1C89bE3
-#sWBTC deployed to 0x742DBFF28338Cfe3a4a6545D0F6e9ca7EDf77E76
-#sMIOTA deployed to 0x60E903085231a54161e4bF474874f5C074906e33
+# sMATIC deployed to 0xB97efbB5e3Ac72b8e3502CB7dC9bb8C7F334848B
+# sWBTC deployed to 0x085dE71C2F983b4Fb701467A2d1497447Eecd241
+# sMIOTA deployed to 0x874A73429C90e57Ef07F6632B7575CDB0EF8f76F
 [[Tokens]]
 Symbol = "sMIOTA"
 NodeUrl = "json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
 MultiSignType = 0
-Contract = "0x60E903085231a54161e4bF474874f5C074906e33"
+Contract = "0x874A73429C90e57Ef07F6632B7575CDB0EF8f76F"
 KeyStore = "./config/k"
-MinAmount = 1200000
+MinAmount = 1000000
 
 [[Tokens]]
-Symbol = "sETH"
+Symbol = "sMATIC"
 NodeUrl = "json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
 MultiSignType = 0
-Contract = "0x2c9D7E34e41d763f55b4539B9aFebfE7C1C89bE3"
+Contract = "0xB97efbB5e3Ac72b8e3502CB7dC9bb8C7F334848B"
 KeyStore = "./config/k"
-MinAmount = 1000000000
+MinAmount = 1
 
 [[Tokens]]
 Symbol = "sWBTC"
 NodeUrl = "json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
 MultiSignType = 0
-Contract = "0x742DBFF28338Cfe3a4a6545D0F6e9ca7EDf77E76"
+Contract = "0x085dE71C2F983b4Fb701467A2d1497447Eecd241"
 KeyStore = "./config/k"
-MinAmount = 1000000
+MinAmount = 1
 
 # Pairs is the bridge pair. 
 # SrcToken to DestToken. They must beed in the "Tokens".
@@ -96,8 +96,8 @@ SrcToken = "ATOI"
 DestToken = "sMIOTA"
 
 [[Pairs]]
-SrcToken = "ETH"
-DestToken = "sETH"
+SrcToken = "MATIC"
+DestToken = "sMATIC"
 
 [[Pairs]]
 SrcToken = "WBTC"

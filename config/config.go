@@ -49,15 +49,16 @@ func Load(pwd string, _seeds [4]uint64) {
 	Tokens = make(map[string]*Token)
 	var err error
 	for _, t := range all.Tokens {
+		tt := t
 		if len(t.KeyStore) > 0 {
 			var keyjson []byte
 			keyjson, err := ioutil.ReadFile(t.KeyStore)
 			if err != nil {
 				log.Panicf("Read keystore file fail. %s : %v\n", t.KeyStore, err)
 			}
-			t.KeyStore = string(keyjson)
+			tt.KeyStore = string(keyjson)
 		}
-		Tokens[t.Symbol] = &t
+		Tokens[t.Symbol] = &tt
 		if t.MinAmount == nil {
 			log.Panicf("%s's MinAmount must to be set.", t.Symbol)
 		}
@@ -79,8 +80,12 @@ func Load(pwd string, _seeds [4]uint64) {
 }
 
 func checkKeyStore() {
+	keyJsons = make(map[string][]byte)
 	pwd := tools.GetDecryptString(password, seeds)
 	for symbol, t := range Tokens {
+		if len(t.KeyStore) == 0 {
+			continue
+		}
 		keyjson := []byte(t.KeyStore)
 		keyWrapper, err := keystore.DecryptKey(keyjson, string(pwd))
 		if err != nil {

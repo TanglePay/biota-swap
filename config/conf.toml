@@ -101,6 +101,3 @@ DestToken = "SMATIC"
 [[Pairs]]
 SrcToken = "TT1"
 DestToken = "STT1"
-
-# the keystores' encrypted password 
-Password = ""

@@ -58,13 +58,14 @@ func readRand() (string, [4]uint64) {
 	seeds[3] = tools.GenerateRandomSeed()
 
 	pwd := tools.GetEncryptString(string(data), seeds)
-	return string(pwd), seeds
+	return pwd, seeds
 }
 
 func input() {
 	var pwd string
 	fmt.Println("input password:")
 	fmt.Scanf("%s", &pwd)
+	//pwd = "secret"
 	if err := os.WriteFile("rand.data", []byte(pwd), 0666); err != nil {
 		log.Panicf("write rand.data error. %v", err)
 	}

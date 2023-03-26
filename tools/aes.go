@@ -109,11 +109,11 @@ func AesCBCDecrypt(encrypt string, key []byte, aesCbcIv []byte) string {
 	return string(enData)
 }
 
-func GetEncryptString(source string, seeds [4]uint64) []byte {
+func GetEncryptString(source string, seeds [4]uint64) string {
 	key, iv := getKeyAndIv(seeds)
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil
+		return ""
 	}
 
 	blockSize := block.BlockSize()
@@ -126,7 +126,7 @@ func GetEncryptString(source string, seeds [4]uint64) []byte {
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(cipherText, rawData)
 
-	return cipherText
+	return hex.EncodeToString(cipherText)
 }
 
 func GetDecryptString(encrypt string, seeds [4]uint64) []byte {

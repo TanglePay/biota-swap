@@ -26,7 +26,7 @@ func ListenTokens() {
 		srcTokens[src] = NewSourceChain(config.Tokens[src])
 		destTokens[dest] = NewDestinationChain(config.Tokens[dest])
 
-		log.Infof("src: %s", srcTokens[src].Address())
+		log.Infof("src %s : %s, dest %s : %s", src, srcTokens[src].Address(), dest, destTokens[dest].Address())
 
 		go ListenWrap(srcTokens[src], destTokens[dest])
 		go ListenUnWrap(srcTokens[src], destTokens[dest])
@@ -37,7 +37,7 @@ func ListenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	for {
 		orderC := make(chan *tokens.SwapOrder, 10)
 		go t1.StartWrapListen(orderC)
-		gl.OutLogger.Info("Begin to listen source token %s.", t1.Symbol())
+		gl.OutLogger.Info("Begin to listen source token %s : %s.", t1.Symbol(), t1.Address())
 	FOR:
 		for {
 			select {
@@ -66,7 +66,7 @@ func ListenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	for {
 		orderC := make(chan *tokens.SwapOrder, 10000)
 		go t2.StartUnWrapListen(orderC)
-		gl.OutLogger.Info("Begin to listen dest token %s.", t2.Symbol())
+		gl.OutLogger.Info("Begin to listen dest token %s : %s.", t2.Symbol(), t2.Address())
 	FOR:
 		for {
 			select {

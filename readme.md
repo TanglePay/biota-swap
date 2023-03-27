@@ -84,8 +84,7 @@ However, the effectiveness of this layer of protection depends on the attacker n
 
 Although validators can now provide stable services without rewriting the encryption algorithm, in the aspect of protecting the community and user assets, we still recommend validators do so.
 ### example of CreateKey
-* Input a seed of random uint64
-* Return a key for []byte with a 16 bytes length.
+This function must 
 ```go
 func CreateKey(seed uint64, nSize uint64) []byte {
 	if (nSize != 16) && (nSize != 32) && (nSize != 64) {
@@ -111,7 +110,10 @@ func CreateKey(seed uint64, nSize uint64) []byte {
 	return hs.Sum(nil)
 }
 ```
-like the function above, you can rewrite the 
+Function objective :
+* input a seed of random uint64
+* return a key for []byte with a 16 bytes length.
+like the function above, you can rewrite the formula `d`
 ```go
 	d := seed+i
 ```
@@ -120,5 +122,3 @@ to more complex formula, as follows. The more complex of the formula, the safer 
 	d := seed*math.Sin(i)
 	d = seed * math.Cos(i) + i * seed
 ```
-
-

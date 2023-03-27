@@ -84,7 +84,6 @@ However, the effectiveness of this layer of protection depends on the attacker n
 
 Although validators can now provide stable services without rewriting the encryption algorithm, in the aspect of protecting the community and user assets, we still recommend validators do so.
 ### example of CreateKey
-This function must 
 ```go
 func CreateKey(seed uint64, nSize uint64) []byte {
 	if (nSize != 16) && (nSize != 32) && (nSize != 64) {

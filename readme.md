@@ -77,7 +77,8 @@ As an infrastructure within the community, security is our top concern. Currentl
 * First, the MPC mechanism is a form of security protection. In 4/6, a hacker would need to breach four validators. In the future, we will add a bounty to reward attackers who can breach a validator, so that we can promptly adjust for risky validators.
 * Second, the server on which each validator is located provides another layer of protection. Validators have the duty to protect their own servers from being breached.
 * Third, each validator starts its service with a password. In many MPC platforms, passwords are stored in configuration files. However, in our system design, once the password is entered, it doesn’t exist outside the memory, thereby increasing security.
-* To further enhance the security, we suggest a fourth mechanism: in the latest version of the bridge, the password is no longer exposed in memory but is encrypted using an encryption algorithm provided in the function createKey(). Even if an attacker gains access to the data in memory, he cannot obtain the password without cracking the encryption.
+
+To further enhance the security, we suggest a fourth mechanism: in the latest version of the bridge, the password is no longer exposed in memory but is encrypted using an encryption algorithm provided in the function createKey(). Even if an attacker gains access to the data in memory, he cannot obtain the password without cracking the encryption.
   
 However, the effectiveness of this layer of protection depends on the attacker not knowing the encryption algorithm. Since the current method is semi-public (at least all of us validators can now see this algorithm), this layer of protection is not fully meaningful. To achieve maximum protection, validators can rewrite the function createkey() and implement an encryption algorithm that is different from each other, which will provide a unique layer of protection.
 

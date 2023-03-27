@@ -80,6 +80,7 @@ As an infrastructure within the community, security is our top concern. Currentl
 * To further enhance the security, we suggest a fourth mechanism: in the latest version of the bridge, the password is no longer exposed in memory but is encrypted using an encryption algorithm provided in the function createKey(). Even if an attacker gains access to the data in memory, he cannot obtain the password without cracking the encryption.
   
 However, the effectiveness of this layer of protection depends on the attacker not knowing the encryption algorithm. Since the current method is semi-public (at least all of us validators can now see this algorithm), this layer of protection is not fully meaningful. To achieve maximum protection, validators can rewrite the function createkey() and implement an encryption algorithm that is different from each other, which will provide a unique layer of protection.
+
 Although validators can now provide stable services without rewriting the encryption algorithm, in the aspect of protecting the community and user assets, we still recommend validators do so.
 ### example of CreateKey
 * Input a seed of random uint64

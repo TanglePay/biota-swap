@@ -112,6 +112,7 @@ func CreateKey(seed uint64, nSize uint64) []byte {
 Function objective :
 * input a seed of random uint64
 * return a key for []byte with a 16 bytes length.
+  
 like the function above, you can rewrite the formula `d`
 ```go
 	d := seed+i

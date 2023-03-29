@@ -1,17 +1,12 @@
 package smpc
 
 import (
-	"bwrap/tools/crypto"
 	"crypto/ecdsa"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 	"time"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/iotaledger/iota.go/v2/ed25519"
 )
 
 func Sign(pubkey, gid, context, hash, threshold, keyType string, pk *ecdsa.PrivateKey) (string, error) {
@@ -134,21 +129,4 @@ func AcceptSign(keyInfo signCurNodeInfo, agree bool, pk *ecdsa.PrivateKey) error
 	// get result
 	_, err = getJSONResult(acceptSignRep)
 	return err
-}
-
-var hashDB map[string][]string = make(map[string][]string)
-
-func sign(keyID, hash string, kt string) {
-	h := common.FromHex(hash)
-	var signHash []byte
-	if kt == "EC256K1" {
-		pk := "39e10402beff72d338b4c16b5094f88c94330aa32a17351bf5be05da92671a4d"
-		privateKey, _ := crypto.HexToECDSA(pk)
-		signHash, _ = crypto.Sign(h, privateKey)
-	} else {
-		pk, _ := hex.DecodeString(string("7b8b821264e031a3c0ffc1a8eea887521e1b3e3a081af4e777fa609789506fbd715593d2c4dfa9bc5b2718e6a4c704b63cd3b62a81ca92b17ee3487daf3d593a"))
-		private := ed25519.PrivateKey(pk)
-		signHash = ed25519.Sign(private, h)
-	}
-	hashDB[keyID] = append(hashDB[keyID], common.Bytes2Hex(signHash))
 }

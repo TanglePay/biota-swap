@@ -3,7 +3,6 @@ package evm
 import (
 	"bwrap/gl"
 	"bwrap/tokens"
-	"bwrap/tools/crypto"
 	"bytes"
 	"context"
 	"crypto/ecdsa"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 

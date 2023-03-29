@@ -78,3 +78,13 @@ type SwapOrder struct {
 	Error     error
 	Type      int // 0 need to reconnect and 1 only need to record
 }
+
+type TxErrorRecord struct {
+	txid       []byte
+	fromCoin   string
+	toCoin     string
+	amount     *big.Int
+	failedTxes [][]byte
+	Error      error
+	Type       int // 0 need to reconnect and 1 only need to record
+}

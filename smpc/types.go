@@ -1,7 +1,7 @@
 package smpc
 
 import (
-	"bwrap/tools/rlp"
+	//"bwrap/tools/rlp"
 	"crypto/ecdsa"
 	"encoding/json"
 	"errors"
@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 var SmpcToAddr string = "0x00000000000000000000000000000000000000dc"

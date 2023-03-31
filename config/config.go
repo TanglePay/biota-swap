@@ -14,28 +14,30 @@ import (
 )
 
 var (
-	Env       string
-	Server    ServerConfig
-	Smpc      SmpcConfig
-	Db        Database
-	Tokens    map[string]*Token
-	WrapPairs map[string]string
-	seeds     [4]uint64
-	password  string
-	keyJsons  map[string][]byte
+	Env           string
+	Server        ServerConfig
+	Smpc          SmpcConfig
+	Db            Database
+	Tokens        map[string]*Token
+	WrapPairs     map[string]string
+	seeds         [4]uint64
+	password      string
+	keyJsons      map[string][]byte
+	TxErrorRecord TxErrorRecordConfig
 )
 
 //Load load config file
 func Load(pwd string, _seeds [4]uint64) {
 	password, seeds = pwd, _seeds
 	type AllConfig struct {
-		Env      string
-		Server   ServerConfig
-		Smpc     SmpcConfig
-		Db       Database
-		Tokens   []Token
-		Pairs    []WrapPair
-		KeyStore string
+		Env           string
+		Server        ServerConfig
+		Smpc          SmpcConfig
+		Db            Database
+		Tokens        []Token
+		Pairs         []WrapPair
+		KeyStore      string
+		TxErrorRecord TxErrorRecordConfig
 	}
 	all := &AllConfig{}
 	if _, err := toml.DecodeFile("./config/conf.toml", all); err != nil {
@@ -46,6 +48,7 @@ func Load(pwd string, _seeds [4]uint64) {
 	Server = all.Server
 	Smpc = all.Smpc
 	Db = all.Db
+	TxErrorRecord = all.TxErrorRecord
 	Tokens = make(map[string]*Token)
 	var err error
 	for _, t := range all.Tokens {
@@ -140,6 +143,13 @@ type ServerConfig struct {
 	DetectTime     time.Duration
 	AcceptTime     time.Duration
 	AcceptOverTime int64
+}
+
+type TxErrorRecordConfig struct {
+	NodeUrl       string
+	Contract      string
+	ScanEventType int
+	TimePeriod    time.Duration
 }
 
 func GetPrivateKey(symbol string) (common.Address, *ecdsa.PrivateKey, error) {

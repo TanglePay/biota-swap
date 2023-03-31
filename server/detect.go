@@ -214,11 +214,14 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 		gl.OutLogger.Info("Require Sign to smpc for unwrap. %s", keyID)
 	}
 
-	detectSignStatus(keyID, txData, t1)
-	time.Sleep(60 * time.Second)
+	if txid := detectSignStatus(keyID, txData, t1); txid != nil {
+		time.Sleep(60 * time.Second)
+		wo.Hash = hex.EncodeToString(txid)
+		sentIotaTxes.push(&wo, t1)
+	}
 }
 
-func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) {
+func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) []byte {
 	gl.OutLogger.Info("Waiting %s to accept... ", keyID)
 	for i := 0; i < config.Server.DetectCount; i++ {
 		rsvs, err := smpc.GetSignStatus(keyID)
@@ -231,12 +234,14 @@ func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) {
 		if len(rsvs) > 0 {
 			if txID, err := t.SendSignedTxData(rsvs[0], txData); err != nil {
 				gl.OutLogger.Error("SendSignedTxData error. %v, %v", keyID, err)
+				return nil
 			} else {
 				gl.OutLogger.Info("SendSignedTxData OK. %s", hex.EncodeToString(txID))
+				return txID
 			}
-			return
 		}
 		time.Sleep(config.Server.DetectTime * time.Second)
 	}
 	gl.OutLogger.Warn("Waiting %s to accept over time.", keyID)
+	return nil
 }

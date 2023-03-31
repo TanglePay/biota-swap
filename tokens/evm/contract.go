@@ -6,18 +6,29 @@ import (
 	"bytes"
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 )
 
 var MethodWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,uint256,address)"))
 var MethodSend = crypto.Keccak256Hash([]byte("send(bytes32,uint256,address)"))
 var MethodUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,bytes32,uint256)"))
+
+//wrap(address to, bytes32 symbol)
+//wrap(address to, bytes32 symbol, uint256 amount)
+//unWrap(bytes32 to, bytes32 symbol, uint256 amount)
+var MethodUserWrapEth = crypto.Keccak256Hash([]byte("wrap(address,bytes32)"))
+var MethodUserWrapErc20 = crypto.Keccak256Hash([]byte("wrap(address,bytes32,uint256)"))
+var MethodUserUnWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,bytes32,uint256)"))
 
 type EvmToken struct {
 	client     *ethclient.Client
@@ -68,6 +79,128 @@ func (ei *EvmToken) KeyType() string {
 
 func (ei *EvmToken) Address() string {
 	return ei.contract.Hex()
+}
+
+func (ei *EvmToken) CheckSentTx(txid []byte) (bool, error) {
+	hash := common.BytesToHash(txid)
+	ftx, err := ei.client.TransactionReceipt(context.Background(), hash)
+	if err != nil {
+		return true, fmt.Errorf("TransactionReceipt error. %v", err)
+	}
+	if ftx.Status == 0 { //failed
+		return false, fmt.Errorf("tx sent error. %s", hash.Hex())
+	}
+	return true, nil
+}
+
+func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, string, *big.Int, error) {
+	hash := common.BytesToHash(txid)
+	tx, isPending, err := ei.client.TransactionByHash(context.Background(), hash)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("client.TransactionByHash error. %s, %v", hash.Hex(), err)
+	}
+	if isPending {
+		return "", "", nil, fmt.Errorf("tx is pending status. %s", hash.Hex())
+	}
+	signer := types.NewEIP155Signer(tx.ChainId())
+	from, err := signer.Sender(tx)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("Get from address from tx error. %s : %v", hash.Hex(), err)
+	}
+
+	data := tx.Data()
+	usrD := 0
+	if bytes.Compare(data[:4], MethodUserWrapEth[:4]) != 0 {
+		usrD = 1
+	} else if bytes.Compare(data[:4], MethodUserWrapErc20[:4]) != 0 {
+		usrD = 1
+	} else if bytes.Compare(data[:4], MethodUserUnWrap[:4]) != 0 {
+		usrD = -1
+	}
+	if d != usrD {
+		return "", "", nil, fmt.Errorf("d error. %d", d)
+	}
+	data = data[4:]
+
+	to := ""
+	if d == 1 {
+		to = common.BytesToAddress(data[:32]).Hex()
+	} else {
+		to = hex.EncodeToString(data[:32])
+	}
+
+	sy, _, _ := bytes.Cut(data[32:64], []byte{0})
+	if string(sy) != toCoin {
+		return "", "", nil, fmt.Errorf("symbol is not equal. %s :%s", string(data), toCoin)
+	}
+
+	amount := tx.Value()
+	if amount.Uint64() == 0 {
+		amount = new(big.Int).SetBytes(data[64:])
+	}
+
+	return from.Hex(), to, amount, nil
+}
+
+func (ei *EvmToken) CheckTxFailed(failedTx, txid []byte, to string, amount *big.Int, d int) error {
+	c, err := rpc.Dial("https://" + ei.url)
+	if err != nil {
+		return fmt.Errorf("rpc.Dial error.  %v", err)
+	}
+
+	var r *Receipt
+	txHash := common.BytesToHash(failedTx)
+	err = c.CallContext(context.Background(), &r, "eth_getTransactionReceipt", txHash)
+	if err == nil {
+		if r == nil {
+			return fmt.Errorf("failedTx not found. %s", txHash.Hex())
+		}
+	}
+	if err != nil {
+		return fmt.Errorf("eth_getTransactionReceipt error. %v", err)
+	}
+
+	if r.Status != 0 {
+		return fmt.Errorf("tx(%s) success", txHash.Hex())
+	}
+
+	if bytes.Compare(ei.account[:], r.From[:]) != 0 {
+		return fmt.Errorf("the `from` address is not equal. %s : %s : %s", ei.account.Hex(), r.From.Hex(), txHash.Hex())
+	}
+
+	tx, isPending, err := ei.client.TransactionByHash(context.Background(), txHash)
+	if err != nil {
+		return fmt.Errorf("client.TransactionByHash error. %s, %v", txHash.Hex(), err)
+	}
+	if isPending {
+		return fmt.Errorf("tx is pending status. %s", txHash.Hex())
+	}
+
+	data := tx.Data()
+	if d == -1 {
+		if bytes.Compare(data[:4], MethodSend[:4]) != 0 {
+			return fmt.Errorf("tx is not send.")
+		}
+	} else {
+		if bytes.Compare(data[:4], MethodWrap[:4]) != 0 {
+			return fmt.Errorf("tx is not wrap.")
+		}
+	}
+	data = data[4:]
+
+	if bytes.Compare(data[:32], txid) != 0 {
+		return fmt.Errorf("txid is not equal. %s : %s", hex.EncodeToString(data[:32]), hex.EncodeToString(txid))
+	}
+
+	a := new(big.Int).SetBytes(data[32:64])
+	if a.Cmp(amount) != 0 {
+		return fmt.Errorf("amounts are not equal. %s : %s", a.String(), amount.String())
+	}
+
+	if to != common.BytesToAddress(data[64:]).Hex() {
+		return fmt.Errorf("to addresses are not equal. %s : %s", common.BytesToAddress(data[64:]).Hex(), to)
+	}
+	return nil
 }
 
 func (ei *EvmToken) CheckUnWrapTx(txid []byte, to, symbol string, amount *big.Int) error {
@@ -193,4 +326,34 @@ func (ei *EvmToken) CreateUnWrapTxData(addr string, amount *big.Int, extra []byt
 
 func (ei *EvmToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {
 	return tokens.BaseTransaction{}, fmt.Errorf("Don't support this method")
+}
+
+type Receipt struct {
+	// Consensus fields: These fields are defined by the Yellow Paper
+	From   common.Address `json:"from"`
+	To     common.Address `json:"to"`
+	Status uint64         `json:"status"`
+}
+
+// UnmarshalJSON unmarshals from JSON.
+func (r *Receipt) UnmarshalJSON(input []byte) error {
+	type Receipt struct {
+		From   *common.Address `json:"from"`
+		To     *common.Address `json:"to"`
+		Status *hexutil.Uint64 `json:"status"`
+	}
+	var dec Receipt
+	if err := json.Unmarshal(input, &dec); err != nil {
+		return err
+	}
+	if dec.From != nil {
+		r.From = *dec.From
+	}
+	if dec.To != nil {
+		r.To = *dec.To
+	}
+	if dec.Status != nil {
+		r.Status = uint64(*dec.Status)
+	}
+	return nil
 }

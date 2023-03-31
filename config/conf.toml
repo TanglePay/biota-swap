@@ -27,6 +27,12 @@ DbName = "smpc"
 Usr="root"
 Pwd="851012"
 
+[TxErrorRecord]
+NodeUrl = "rpc-mumbai.maticvigil.com"
+Contract = "0xfb55F7f7694F22658FfE6d0fDE37D39384996C4a"
+ScanEventType = 1
+TimePeriod = 3600
+
 # Tokens contain "ATOI", "IOTA", SMIOTA", "MATIC"
 # Symbol is the unique
 # ScanEventType, 0: listen event as websockt or mqtt; 1: scan block to get event logs.

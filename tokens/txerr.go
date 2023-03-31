@@ -14,8 +14,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-var EventUnWrapFailed = crypto.Keccak256Hash([]byte("UnWrapFailed(bytes32,bytes32,bytes32,uint256)"))
-var EventWrapFailed = crypto.Keccak256Hash([]byte("WrapFailed(bytes32,bytes32,bytes32,uint256)"))
+var EventUnWrapFailed = crypto.Keccak256Hash([]byte("UnWrapFailed(bytes32,bytes32,bytes32)"))
+var EventWrapFailed = crypto.Keccak256Hash([]byte("WrapFailed(bytes32,bytes32,bytes32)"))
 var MethodGetFailTxes = crypto.Keccak256Hash([]byte("getFailTxes(bytes32)"))
 
 type TxErrorRecordContract struct {
@@ -103,9 +103,9 @@ func (c *TxErrorRecordContract) scanBlock(ch chan *TxErrorRecord) {
 				continue
 			}
 			if bytes.Compare(logs[i].Topics[0][:], EventUnWrapFailed[:]) == 0 {
-				c.dealUnWrapFailed(&logs[i], ch)
+				c.dealFailedEvent(-1, &logs[i], ch)
 			} else if bytes.Compare(logs[i].Topics[0][:], EventWrapFailed[:]) == 0 {
-				c.dealUnWrapFailed(&logs[i], ch)
+				c.dealFailedEvent(1, &logs[i], ch)
 			}
 		}
 		fromHeight = toHeight + 1
@@ -146,16 +146,16 @@ func (c *TxErrorRecordContract) listenEvent(ch chan *TxErrorRecord) {
 			if vLog.Removed {
 				continue
 			}
-			if vLog.Topics[0].Hex() == "" {
-				c.dealUnWrapFailed(&vLog, ch)
-			} else {
-				c.dealUnWrapFailed(&vLog, ch)
+			if bytes.Compare(vLog.Topics[0][:], EventUnWrapFailed[:]) == 0 {
+				c.dealFailedEvent(-1, &vLog, ch)
+			} else if bytes.Compare(vLog.Topics[0][:], EventWrapFailed[:]) == 0 {
+				c.dealFailedEvent(1, &vLog, ch)
 			}
 		}
 	}
 }
 
-func (c *TxErrorRecordContract) dealUnWrapFailed(vLog *types.Log, ch chan *TxErrorRecord) {
+func (c *TxErrorRecordContract) dealFailedEvent(d int, vLog *types.Log, ch chan *TxErrorRecord) {
 	tx := vLog.TxHash.Hex()
 	if len(vLog.Data) != 128 {
 		ch <- &TxErrorRecord{
@@ -167,16 +167,15 @@ func (c *TxErrorRecordContract) dealUnWrapFailed(vLog *types.Log, ch chan *TxErr
 	txid := vLog.Data[:32]
 	fromCoin, _, _ := bytes.Cut(vLog.Data[32:64], []byte{0})
 	toCoin, _, _ := bytes.Cut(vLog.Data[64:96], []byte{0})
-	amount := new(big.Int).SetBytes(vLog.Data[96:])
 	ter := &TxErrorRecord{
-		txid:     txid,
-		fromCoin: string(fromCoin),
-		toCoin:   string(toCoin),
-		amount:   amount,
+		D:        d,
+		Txid:     txid,
+		FromCoin: string(fromCoin),
+		ToCoin:   string(toCoin),
 	}
 	data := make([]byte, 0)
 	data = append(data, MethodGetFailTxes[:4]...)
-	data = append(data, ter.txid...)
+	data = append(data, ter.Txid...)
 	msg := ethereum.CallMsg{From: c.account, To: &c.contract, Data: data}
 	result, err := c.client.CallContract(context.Background(), msg, nil)
 	if err != nil {
@@ -193,7 +192,7 @@ func (c *TxErrorRecordContract) dealUnWrapFailed(vLog *types.Log, ch chan *TxErr
 		failedTxes = append(failedTxes, data[:32])
 		data = data[32:]
 	}
-	ter.failedTxes = failedTxes
+	ter.FailedTxes = failedTxes
 
 	ch <- ter
 }

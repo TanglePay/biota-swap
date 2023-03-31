@@ -2,6 +2,7 @@ package server
 
 import (
 	"bwrap/config"
+	"bwrap/model"
 	"bwrap/tokens"
 	"bwrap/tokens/evm"
 	"bwrap/tokens/iota"
@@ -43,11 +44,38 @@ func (doc *DealedOrdersCheck) expired() {
 	}
 }
 
+type SentIotaTx struct {
+	orders []*model.SwapOrder
+	ts     []tokens.Token
+	mu     sync.Mutex
+}
+
+func (sit *SentIotaTx) push(order *model.SwapOrder, t tokens.Token) {
+	sit.mu.Lock()
+	defer sit.mu.Unlock()
+	sit.orders = append(sit.orders, order)
+	sit.ts = append(sit.ts, t)
+}
+
+func (sit *SentIotaTx) pop() (*model.SwapOrder, tokens.Token) {
+	sit.mu.Lock()
+	defer sit.mu.Unlock()
+	if len(sit.orders) == 0 {
+		return nil, nil
+	}
+	txid := sit.orders[0]
+	sit.orders = sit.orders[1:]
+	t := sit.ts[0]
+	sit.ts = sit.ts[1:]
+	return txid, t
+}
+
 var (
 	client       *ethrpc.EthRPC
 	srcTokens    map[string]tokens.SourceToken
 	destTokens   map[string]tokens.DestinationToken
 	dealedOrders *DealedOrdersCheck
+	sentIotaTxes SentIotaTx
 
 	seeds [4]uint64
 )

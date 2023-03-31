@@ -62,6 +62,158 @@ func (it *IotaToken) Address() string {
 	return it.walletAddr.Bech32(it.hrp)
 }
 
+func (it *IotaToken) CheckSentTx(txid []byte) (bool, error) {
+	var msgid iotago.MessageID
+	copy(msgid[:], txid)
+	res, err := it.nodeAPI.MessageMetadataByMessageID(context.Background(), msgid)
+	if err != nil {
+		return true, err
+	}
+	if !res.Solid {
+		return true, fmt.Errorf("Txid has not solid. %s", hex.EncodeToString(txid))
+	}
+	if res.ConflictReason != 0 {
+		return false, fmt.Errorf("%d : %s : %s", res.ConflictReason, *res.LedgerInclusionState, hex.EncodeToString(txid))
+	}
+	return true, nil
+}
+
+func (it *IotaToken) CheckUserTx(txid []byte, toCoin string, d int) (string, string, *big.Int, error) {
+	if d != 1 {
+		return "", "", nil, fmt.Errorf("iota network d error. %d", d)
+	}
+	var msgID iotago.MessageID
+	if len(txid) != iotago.MessageIDLength {
+		return "", "", nil, fmt.Errorf("txid error. %s", hex.EncodeToString(txid))
+	}
+	copy(msgID[:], txid)
+
+	meta, err := it.nodeAPI.MessageMetadataByMessageID(context.Background(), msgID)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("MessageMetadataByMessageID error. %s, %v", hex.EncodeToString(txid), err)
+	}
+	if meta.ConflictReason != 0 {
+		return "", "", nil, fmt.Errorf("ConflictReason is not confirm. %s : %d", hex.EncodeToString(txid), meta.ConflictReason)
+	}
+
+	message, err := it.nodeAPI.MessageByMessageID(context.Background(), msgID)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("MessageByMessageID error. %s, %v", hex.EncodeToString(txid), err)
+	}
+
+	//Unmarshal the payload of message
+	data, err := message.Payload.MarshalJSON()
+	if err != nil {
+		return "", "", nil, fmt.Errorf("MarshalJSON for(data) error. %v, %s", err, hex.EncodeToString(txid))
+	}
+	payload := Payload{}
+	err = json.Unmarshal(data, &payload)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("Unmarshal payload error. %v, %s", err, hex.EncodeToString(txid))
+	}
+	if payload.Type != 0 { //payload's type must be 0
+		return "", "", nil, fmt.Errorf("payload type is not 0. %d : %s", payload.Type, hex.EncodeToString(txid))
+	}
+
+	//caculate the total amount of message from outputs
+	totalAmount := uint64(0)
+	for _, output := range payload.Essence.Outputs {
+		if output.Type != 0 {
+			continue
+		}
+		addr := output.Addr.Addr
+		if output.Addr.Type == iotago.AddressEd25519 {
+			addr = iotago.MustParseEd25519AddressFromHexString(output.Addr.Addr).Bech32(it.hrp)
+		}
+		if addr != it.Address() {
+			continue
+		}
+		totalAmount += output.Amount
+	}
+	if totalAmount == 0 || len(payload.UnlockBlocks) == 0 {
+		return "", "", nil, fmt.Errorf("message outputs amount is 0 or unlockBlocks is empty. %s : %d", hex.EncodeToString(txid), len(payload.UnlockBlocks))
+	}
+
+	pubKey, _ := hex.DecodeString(payload.UnlockBlocks[0].Sign.PublicKey)
+	from := iotago.AddressFromEd25519PubKey(pubKey)
+	bech32Addr := from.Bech32(it.hrp)
+
+	payloadData := EssencePayloadData{}
+	if err = json.Unmarshal([]byte(payload.Essence.EssPayload.Data), &payloadData); err != nil {
+		return "", "", nil, fmt.Errorf("payload Unmarshal error. %s : %v", payload.Essence.EssPayload.Data, err)
+	}
+
+	if toCoin != payloadData.Symbol {
+		return "", "", nil, fmt.Errorf("payload symbols not equal. %s : %s", payloadData.Symbol, toCoin)
+	}
+
+	return bech32Addr, payloadData.To, new(big.Int).SetUint64(totalAmount), nil
+}
+
+func (it *IotaToken) CheckTxFailed(failedTx, txid []byte, ed25519Addr string, amount *big.Int, d int) error {
+	if d != -1 {
+		return fmt.Errorf("iota network d error. %d", d)
+	}
+	var msgID iotago.MessageID
+	copy(msgID[:], failedTx)
+	meta, err := it.nodeAPI.MessageMetadataByMessageID(context.Background(), msgID)
+	if err != nil {
+		return fmt.Errorf("MessageMetadataByMessageID error. %s, %v", msgID, err)
+	}
+	if meta.ConflictReason == 0 {
+		return fmt.Errorf("tx success. %s", msgID)
+	}
+
+	message, err := it.nodeAPI.MessageByMessageID(context.Background(), msgID)
+	if err != nil {
+		return fmt.Errorf("MessageByMessageID error. %s, %v", msgID, err)
+	}
+
+	//Unmarshal the payload of message
+	data, err := message.Payload.MarshalJSON()
+	if err != nil {
+		return fmt.Errorf("MarshalJSON for(data) error. %v, %s", err, msgID)
+	}
+	payload := Payload{}
+	err = json.Unmarshal(data, &payload)
+	if err != nil {
+		return fmt.Errorf("Unmarshal payload error. %v, %s", err, msgID)
+	}
+	if payload.Type != 0 { //payload's type must be 0
+		return fmt.Errorf("payload type is not 0. %d : %s", payload.Type, msgID)
+	}
+
+	//to, err := iotago.ParseEd25519AddressFromHexString(ed25519Addr)
+	//if err != nil {
+	//	return nil, nil, fmt.Errorf("iota to address error. %v : %s", err, ed25519Addr)
+	//}
+	pubKey, err := hex.DecodeString(payload.UnlockBlocks[0].Sign.PublicKey)
+	if err != nil || bytes.Compare(it.publicKey, pubKey) != 0 {
+		return fmt.Errorf("publickeys are not equal. %s", payload.UnlockBlocks[0].Sign.PublicKey)
+	}
+
+	payloadData := make(map[string]string)
+	if err = json.Unmarshal([]byte(payload.Essence.EssPayload.Data), &payloadData); err != nil {
+		return fmt.Errorf("payload Unmarshal error. %s : %d", payload.Essence.EssPayload.Data, err)
+	}
+
+	tx, err := hex.DecodeString(payloadData["txid"])
+	if err != nil || bytes.Compare(txid, tx) != 0 {
+		return fmt.Errorf("txids are not equal. %s : %s", payloadData["txid"], hex.EncodeToString(txid))
+	}
+
+	if ed25519Addr != payloadData["to"] {
+		return fmt.Errorf("to addresses are not equal. %s : %s", payloadData["to"], ed25519Addr)
+	}
+
+	a, b := new(big.Int).SetString(payloadData["amount"], 10)
+	if !b || a.Cmp(amount) != 0 {
+		return fmt.Errorf("amounts are not equal. %s : %s", payloadData["amount"], a.String())
+	}
+
+	return nil
+}
+
 func (it *IotaToken) CreateUnWrapTxData(ed25519Addr string, amount *big.Int, extra []byte) ([]byte, []byte, error) {
 	sendAmount := amount.Uint64()
 
@@ -184,73 +336,6 @@ func (it *IotaToken) GetWrapTxByHash(txHash string) (tokens.BaseTransaction, err
 	}
 	baseTx.To = payloadData.To
 	return baseTx, nil
-}
-
-func (it *IotaToken) CheckTxData(txid []byte, to string, amount *big.Int) error {
-	var msgID iotago.MessageID
-	if len(txid) != iotago.MessageIDLength {
-		return fmt.Errorf("txid error. %s", hex.EncodeToString(txid))
-	}
-	copy(msgID[:], txid)
-
-	meta, err := it.nodeAPI.MessageMetadataByMessageID(context.Background(), msgID)
-	if err != nil {
-		return fmt.Errorf("MessageMetadataByMessageID error. %s, %v", hex.EncodeToString(txid), err)
-	}
-	if meta.ConflictReason != 0 {
-		return fmt.Errorf("ConflictReason is not confirm. %s : %d", hex.EncodeToString(txid), meta.ConflictReason)
-	}
-
-	message, err := it.nodeAPI.MessageByMessageID(context.Background(), msgID)
-	if err != nil {
-		return fmt.Errorf("MessageByMessageID error. %s, %v", hex.EncodeToString(txid), err)
-	}
-
-	//Unmarshal the payload of message
-	data, err := message.Payload.MarshalJSON()
-	if err != nil {
-		return fmt.Errorf("MarshalJSON for(data) error. %v, %s", err, hex.EncodeToString(txid))
-	}
-	payload := Payload{}
-	err = json.Unmarshal(data, &payload)
-	if err != nil {
-		return fmt.Errorf("Unmarshal payload error. %v, %s", err, hex.EncodeToString(txid))
-	}
-	if payload.Type != 0 { //payload's type must be 0
-		return fmt.Errorf("payload type is not 0. %d : %s", payload.Type, hex.EncodeToString(txid))
-	}
-
-	//caculate the total amount of message from outputs
-	totalAmount := uint64(0)
-	for _, output := range payload.Essence.Outputs {
-		if output.Type != 0 {
-			continue
-		}
-		addr := output.Addr.Addr
-		if output.Addr.Type == iotago.AddressEd25519 {
-			addr = iotago.MustParseEd25519AddressFromHexString(output.Addr.Addr).Bech32(it.hrp)
-		}
-		if addr != it.Address() {
-			continue
-		}
-		totalAmount += output.Amount
-	}
-	if totalAmount == 0 || len(payload.UnlockBlocks) == 0 {
-		return fmt.Errorf("message outputs amount is 0 or unlockBlocks is empty. %s : %d", hex.EncodeToString(txid), len(payload.UnlockBlocks))
-	}
-
-	if amount.Uint64() != totalAmount {
-		return fmt.Errorf("amount is not equal. %d : %d", amount.Uint64(), totalAmount)
-	}
-
-	payloadData := EssencePayloadData{}
-	if err = json.Unmarshal([]byte(payload.Essence.EssPayload.Data), &payloadData); err != nil {
-		return fmt.Errorf("payload Unmarshal error. %s : %v", payload.Essence.EssPayload.Data, err)
-	}
-	if to != payloadData.To {
-		return fmt.Errorf("to address is not equal. %s : %s", to, payloadData.To)
-	}
-	return nil
 }
 
 func (it *IotaToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {

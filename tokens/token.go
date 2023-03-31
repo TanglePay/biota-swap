@@ -20,6 +20,9 @@ type Token interface {
 	Symbol() string
 	KeyType() string
 	Address() string
+	CheckSentTx(txid []byte) (bool, error)
+	CheckUserTx(txid []byte, toCoin string, d int) (string, string, *big.Int, error)
+	CheckTxFailed(failedTx, txid []byte, to string, amount *big.Int, d int) error // if return nil, means Tx is failed
 }
 
 type SourceToken interface {
@@ -80,11 +83,11 @@ type SwapOrder struct {
 }
 
 type TxErrorRecord struct {
-	txid       []byte
-	fromCoin   string
-	toCoin     string
-	amount     *big.Int
-	failedTxes [][]byte
+	D          int // 1 is wrap, -1 is unwrap
+	Txid       []byte
+	FromCoin   string
+	ToCoin     string
+	FailedTxes [][]byte
 	Error      error
 	Type       int // 0 need to reconnect and 1 only need to record
 }

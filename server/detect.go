@@ -28,12 +28,12 @@ func ListenTokens() {
 
 		log.Infof("src %s : %s, dest %s : %s", src, srcTokens[src].Address(), dest, destTokens[dest].Address())
 
-		go ListenWrap(srcTokens[src], destTokens[dest])
-		go ListenUnWrap(srcTokens[src], destTokens[dest])
+		go listenWrap(srcTokens[src], destTokens[dest])
+		go listenUnWrap(srcTokens[src], destTokens[dest])
 	}
 }
 
-func ListenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
+func listenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	for {
 		orderC := make(chan *tokens.SwapOrder, 10)
 		go t1.StartWrapListen(orderC)
@@ -62,7 +62,7 @@ func ListenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	}
 }
 
-func ListenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
+func listenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	for {
 		orderC := make(chan *tokens.SwapOrder, 10000)
 		go t2.StartUnWrapListen(orderC)

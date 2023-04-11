@@ -78,6 +78,7 @@ var (
 	sentIotaTxes SentIotaTx
 
 	seeds [4]uint64
+	wg    sync.WaitGroup
 )
 
 const (

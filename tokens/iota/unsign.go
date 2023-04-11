@@ -154,6 +154,7 @@ func (it *IotaToken) CheckTxFailed(failedTx, txid []byte, ed25519Addr string, am
 	if d != -1 {
 		return fmt.Errorf("iota network d error. %d", d)
 	}
+
 	var msgID iotago.MessageID
 	copy(msgID[:], failedTx)
 	meta, err := it.nodeAPI.MessageMetadataByMessageID(context.Background(), msgID)

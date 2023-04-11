@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func runRecheckIota() {
+func RecheckIota() {
 	ticker := time.NewTicker(time.Minute * 1)
 	for range ticker.C {
 		order, t := sentIotaTxes.pop()

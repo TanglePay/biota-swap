@@ -106,7 +106,7 @@ func NewSourceChain(conf *config.Token) tokens.SourceToken {
 	case "ATOI":
 		return iota.NewIotaToken(conf.NodeUrl, conf.PublicKey, "atoi")
 	default:
-		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock)
+		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock, conf.ScanMaxHeight)
 		if err != nil {
 			panic(err)
 		}
@@ -115,7 +115,7 @@ func NewSourceChain(conf *config.Token) tokens.SourceToken {
 }
 
 func NewDestinationChain(conf *config.Token) tokens.DestinationToken {
-	if chain, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock); err != nil {
+	if chain, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock, conf.ScanMaxHeight); err != nil {
 		panic(err)
 	} else {
 		return chain

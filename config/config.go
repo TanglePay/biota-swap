@@ -109,6 +109,7 @@ type Token struct {
 	Symbol        string
 	NodeUrl       string
 	ScanEventType int
+	ScanMaxHeight uint64
 	MultiSignType int
 	PublicKey     string
 	Contract      string

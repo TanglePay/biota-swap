@@ -65,6 +65,9 @@ func (ei *EvmToken) scanBlock(event common.Hash, ch chan *tokens.SwapOrder) {
 			continue
 		}
 
+		if (toHeight - fromHeight) > ei.ScanMaxHeight {
+			toHeight = fromHeight + ei.ScanMaxHeight - 1
+		}
 		query.FromBlock = new(big.Int).SetUint64(fromHeight)
 		query.ToBlock = new(big.Int).SetUint64(toHeight)
 		logs, err := ei.client.FilterLogs(context.Background(), query)

@@ -31,16 +31,17 @@ var MethodUserWrapErc20 = crypto.Keccak256Hash([]byte("wrap(address,bytes32,uint
 var MethodUserUnWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,bytes32,uint256)"))
 
 type EvmToken struct {
-	client     *ethclient.Client
-	url        string
-	chainId    *big.Int
-	symbol     string
-	contract   common.Address
-	account    common.Address
-	ListenType int //0: listen event, 1: scan block
+	client        *ethclient.Client
+	url           string
+	chainId       *big.Int
+	symbol        string
+	contract      common.Address
+	account       common.Address
+	ListenType    int //0: listen event, 1: scan block
+	ScanMaxHeight uint64
 }
 
-func NewEvmToken(uri, conAddr, symbol string, _account common.Address, _listenType int) (*EvmToken, error) {
+func NewEvmToken(uri, conAddr, symbol string, _account common.Address, _listenType int, maxHeight uint64) (*EvmToken, error) {
 	c, err := ethclient.Dial("https://" + uri)
 	if err != nil {
 		return nil, err
@@ -51,13 +52,14 @@ func NewEvmToken(uri, conAddr, symbol string, _account common.Address, _listenTy
 	}
 
 	return &EvmToken{
-		url:        uri,
-		client:     c,
-		chainId:    chainId,
-		symbol:     symbol,
-		contract:   common.HexToAddress(conAddr),
-		account:    _account,
-		ListenType: _listenType,
+		url:           uri,
+		client:        c,
+		chainId:       chainId,
+		symbol:        symbol,
+		contract:      common.HexToAddress(conAddr),
+		account:       _account,
+		ListenType:    _listenType,
+		ScanMaxHeight: maxHeight,
 	}, err
 }
 

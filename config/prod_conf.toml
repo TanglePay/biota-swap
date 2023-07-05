@@ -61,16 +61,16 @@ KeyStore = "./config/k"
 MinAmount = 1
 
 # target tokens
-# sMATIC deployed to 0x1245028D6f762a37488e981d17ef5344556b5D7a
-# sWBTC deployed to 0xbE723f26ef2BD23361732f9a88D1366f47D72AdB
-# sMIOTA deployed to 0x7104ECfa69adCe72AeFFf6ff75d7bc738C45B112
+# sMATIC deployed to 0x5700072F7Fa92742F163B5C576dC6EE5A784040B
+# sWBTC deployed to 0x55F8Fb5BdAb94f29022a1FAaF7031Ef556bCe952
+# sMIOTA deployed to 0xe8519Db7cbd37947bE3fA8C5B75B00D3416d2a84
 [[Tokens]]
 Symbol = "sMIOTA"
 NodeUrl = "json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
 ScanMaxHeight = 10000
 MultiSignType = 0
-Contract = "0x2A0AB37de4921E6B7d3a313CA5D98332D7f43EE1"
+Contract = "0xe8519Db7cbd37947bE3fA8C5B75B00D3416d2a84"
 KeyStore = "./config/k"
 MinAmount = 1000000
 
@@ -80,7 +80,7 @@ NodeUrl = "json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
 ScanMaxHeight = 10000
 MultiSignType = 0
-Contract = "0x2A0AB37de4921E6B7d3a313CA5D98332D7f43EE1"
+Contract = "0x5700072F7Fa92742F163B5C576dC6EE5A784040B"
 KeyStore = "./config/k"
 MinAmount = 1
 
@@ -90,7 +90,7 @@ NodeUrl = "json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
 ScanMaxHeight = 10000
 MultiSignType = 0
-Contract = "0xaeCba1548d6775E7F79Ae3b65076A4a2AF172fd7"
+Contract = "0x55F8Fb5BdAb94f29022a1FAaF7031Ef556bCe952"
 KeyStore = "./config/k"
 MinAmount = 1
 

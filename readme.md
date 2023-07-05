@@ -59,7 +59,7 @@ One of the keystore file:
 Detail infomation for this, can see [smpc-node keygen and sign workflow](https://github.com/TanglePay/smpc-node).
 
 ### 4. Config the bridge service
-Before run this service, you must fill the config/conf.toml file with the right parameter. Detail is in the exmaple conf.toml file.
+Before run this service, you must fill the config/conf.toml file with the right parameter. Detail is in the exmaple prod_conf.toml file.
 
 ## Run the Bridge service
 ```shell

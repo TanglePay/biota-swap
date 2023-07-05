@@ -63,7 +63,7 @@ func readRand() (string, [4]uint64) {
 
 func input() {
 	var pwd string
-	fmt.Println("input password:")
+	fmt.Printf("input password: ")
 	fmt.Scanf("%s", &pwd)
 	//pwd = "secret"
 	if err := os.WriteFile("rand.data", []byte(pwd), 0666); err != nil {

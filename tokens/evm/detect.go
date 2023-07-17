@@ -91,7 +91,6 @@ func (ei *EvmToken) scanBlock(event common.Hash, ch chan *tokens.SwapOrder) {
 }
 
 func (ei *EvmToken) listenEvent(event common.Hash, ch chan *tokens.SwapOrder) {
-	nodeUrl := "wss://" + ei.url
 	//Set the query filter
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{ei.contract},
@@ -101,7 +100,7 @@ func (ei *EvmToken) listenEvent(event common.Hash, ch chan *tokens.SwapOrder) {
 	errOrder := &tokens.SwapOrder{Type: 0}
 
 	//Create the ethclient
-	c, err := ethclient.Dial(nodeUrl)
+	c, err := ethclient.Dial(ei.wss)
 	if err != nil {
 		errOrder.Error = fmt.Errorf("The EthWssClient redial error. %v\nThe EthWssClient will be redialed later...\n", err)
 		ch <- errOrder

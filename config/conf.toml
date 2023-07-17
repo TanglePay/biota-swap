@@ -28,7 +28,7 @@ Usr="root"
 Pwd="851012"
 
 [TxErrorRecord]
-NodeUrl = "rpc-mumbai.maticvigil.com"
+NodeRpc = "https://rpc-mumbai.maticvigil.com"
 Contract = "0xfb55F7f7694F22658FfE6d0fDE37D39384996C4a"
 ScanEventType = 1
 TimePeriod = 3600
@@ -41,8 +41,9 @@ TimePeriod = 3600
 # MultiSignType = 2: Contract and KeyStore is null
 [[Tokens]]
 Symbol = "ATOI"
-#NodeUrl = "chrysalis-nodes.iota.org"
-NodeUrl = "api.lb-0.h.chrysalis-devnet.iota.cafe"
+#NodeRpc = "https://chrysalis-nodes.iota.org"
+NodeRpc = "https://api.lb-0.h.chrysalis-devnet.iota.cafe"
+NodeWss = "wss://api.lb-0.h.chrysalis-devnet.iota.cafe/mqtt"
 ScanEventType = 0
 MultiSignType = 2
 PublicKey = "8c187002a32bf4143ae9260f3a08aca19ebea321d91f47fb7f8dfd2281f3d41a"
@@ -51,7 +52,8 @@ MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "MATIC"
-NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+NodeRpc = "https://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+NodeWss = "wss://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 ScanEventType = 1
 ScanMaxHeight = 10000
 MultiSignType = 0
@@ -61,7 +63,8 @@ MinAmount = 100000000000
 
 [[Tokens]]
 Symbol = "TT1"
-NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+NodeRpc = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+NodeWss = "wss://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 ScanEventType = 1
 ScanMaxHeight = 10000
 MultiSignType = 0
@@ -71,9 +74,10 @@ MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "SMIOTA"
-NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
+NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
+NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
-ScanMaxHeight = 10000
+ScanMaxHeight = 1000
 MultiSignType = 0
 Contract = "0xCB03Ebd74417AA792fC68a750F35c7b8F585027B"
 KeyStore = "./config/k"
@@ -81,9 +85,10 @@ MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "SMATIC"
-NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
-ScanEventType = 1
-ScanMaxHeight = 10000
+NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
+NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
+ScanEventType = 0
+ScanMaxHeight = 1000
 MultiSignType = 0
 Contract = "0xB1359205E429fbdF52199692b5Adb09D1d70fa93"
 KeyStore = "./config/k"
@@ -91,9 +96,10 @@ MinAmount = 1000000000
 
 [[Tokens]]
 Symbol = "STT1"
-NodeUrl = "api.sc.testnet.shimmer.network/evm/jsonrpc"
-ScanEventType = 1
-ScanMaxHeight = 10000
+NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
+NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
+ScanEventType = 0
+ScanMaxHeight = 1000
 MultiSignType = 0
 Contract = "0x358BDE78b3a94Ba8cA996f481113B63A8847A155"
 KeyStore = "./config/k"

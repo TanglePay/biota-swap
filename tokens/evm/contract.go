@@ -32,7 +32,8 @@ var MethodUserUnWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,bytes32,uint256
 
 type EvmToken struct {
 	client        *ethclient.Client
-	url           string
+	rpc           string
+	wss           string
 	chainId       *big.Int
 	symbol        string
 	contract      common.Address
@@ -41,8 +42,8 @@ type EvmToken struct {
 	ScanMaxHeight uint64
 }
 
-func NewEvmToken(uri, conAddr, symbol string, _account common.Address, _listenType int, maxHeight uint64) (*EvmToken, error) {
-	c, err := ethclient.Dial("https://" + uri)
+func NewEvmToken(rpc, wss, conAddr, symbol string, _account common.Address, _listenType int, maxHeight uint64) (*EvmToken, error) {
+	c, err := ethclient.Dial(rpc)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +53,8 @@ func NewEvmToken(uri, conAddr, symbol string, _account common.Address, _listenTy
 	}
 
 	return &EvmToken{
-		url:           uri,
+		rpc:           rpc,
+		wss:           wss,
 		client:        c,
 		chainId:       chainId,
 		symbol:        symbol,
@@ -145,7 +147,7 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 }
 
 func (ei *EvmToken) CheckTxFailed(failedTx, txid []byte, to string, amount *big.Int, d int) error {
-	c, err := rpc.Dial("https://" + ei.url)
+	c, err := rpc.Dial(ei.rpc)
 	if err != nil {
 		return fmt.Errorf("rpc.Dial error.  %v", err)
 	}

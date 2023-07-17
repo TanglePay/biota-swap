@@ -102,11 +102,11 @@ type MsgContext struct {
 func NewSourceChain(conf *config.Token) tokens.SourceToken {
 	switch conf.Symbol {
 	case "IOTA":
-		return iota.NewIotaToken(conf.NodeUrl, conf.PublicKey, "iota")
+		return iota.NewIotaToken(conf.NodeRpc, conf.NodeWss, conf.PublicKey, "iota")
 	case "ATOI":
-		return iota.NewIotaToken(conf.NodeUrl, conf.PublicKey, "atoi")
+		return iota.NewIotaToken(conf.NodeRpc, conf.NodeWss, conf.PublicKey, "atoi")
 	default:
-		token, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock, conf.ScanMaxHeight)
+		token, err := evm.NewEvmToken(conf.NodeRpc, conf.NodeWss, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock, conf.ScanMaxHeight)
 		if err != nil {
 			panic(err)
 		}
@@ -115,7 +115,7 @@ func NewSourceChain(conf *config.Token) tokens.SourceToken {
 }
 
 func NewDestinationChain(conf *config.Token) tokens.DestinationToken {
-	if chain, err := evm.NewEvmToken(conf.NodeUrl, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock, conf.ScanMaxHeight); err != nil {
+	if chain, err := evm.NewEvmToken(conf.NodeRpc, conf.NodeWss, conf.Contract, conf.Symbol, conf.Account, tokens.ScanBlock, conf.ScanMaxHeight); err != nil {
 		panic(err)
 	} else {
 		return chain

@@ -33,8 +33,9 @@ Pwd="123456"
 # MultiSignType, 0 is contract multiSign, 2 is smpc multiSign
 [[Tokens]]
 Symbol = "ATOI"
-#NodeUrl = "chrysalis-nodes.iota.org"
-NodeUrl = "api.lb-0.h.chrysalis-devnet.iota.cafe"
+#NodeUrl = "https://chrysalis-nodes.iota.org"
+NodeRpc = "https://api.lb-0.h.chrysalis-devnet.iota.cafe"
+NodeWss = "wss://api.lb-0.h.chrysalis-devnet.iota.cafe/mqtt"
 ScanEventType = 0
 MultiSignType = 2
 PublicKey = "fe944ff27add4acc90adb09438f9661b8e28dba2612ddb82559d604dfc428d1e"
@@ -42,9 +43,10 @@ MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "MATIC"
-NodeUrl = "rpc-mumbai.maticvigil.com"
+NodeRpc = "https://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+NodeWss = "wss://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 ScanEventType = 1
-ScanMaxHeight = 10000
+ScanMaxHeight = 1000
 MultiSignType = 0
 Contract = "0x869A79ef105619e55a0b20FFAd091c2EFf8bf9eF"
 KeyStore = "./config/k"
@@ -52,9 +54,10 @@ MinAmount = 1
 
 [[Tokens]]
 Symbol = "WBTC"
-NodeUrl = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+NodeRpc = "https://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
+NodeWss = "wss://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
 ScanEventType = 1
-ScanMaxHeight = 10000
+ScanMaxHeight = 1000
 MultiSignType = 0
 Contract = "0x2023D77Aea434afD7433fD9f8b4E1B61Df237Ec2"
 KeyStore = "./config/k"
@@ -66,9 +69,10 @@ MinAmount = 1
 # sMIOTA deployed to 0xe8519Db7cbd37947bE3fA8C5B75B00D3416d2a84
 [[Tokens]]
 Symbol = "sMIOTA"
-NodeUrl = "json-rpc.evm.testnet.shimmer.network/"
+NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
+NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
-ScanMaxHeight = 10000
+ScanMaxHeight = 1000
 MultiSignType = 0
 Contract = "0xe8519Db7cbd37947bE3fA8C5B75B00D3416d2a84"
 KeyStore = "./config/k"
@@ -76,9 +80,10 @@ MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "sMATIC"
-NodeUrl = "json-rpc.evm.testnet.shimmer.network/"
+NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
+NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
-ScanMaxHeight = 10000
+ScanMaxHeight = 1000
 MultiSignType = 0
 Contract = "0x5700072F7Fa92742F163B5C576dC6EE5A784040B"
 KeyStore = "./config/k"
@@ -86,9 +91,10 @@ MinAmount = 1
 
 [[Tokens]]
 Symbol = "sWBTC"
-NodeUrl = "json-rpc.evm.testnet.shimmer.network/"
+NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
+NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 1
-ScanMaxHeight = 10000
+ScanMaxHeight = 1000
 MultiSignType = 0
 Contract = "0x55F8Fb5BdAb94f29022a1FAaF7031Ef556bCe952"
 KeyStore = "./config/k"

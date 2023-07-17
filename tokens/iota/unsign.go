@@ -18,7 +18,8 @@ import (
 )
 
 type IotaToken struct {
-	url        string
+	rpc        string
+	wss        string
 	nodeAPI    *iotago.NodeHTTPAPIClient
 	publicKey  []byte
 	hrp        iotago.NetworkPrefix
@@ -27,14 +28,15 @@ type IotaToken struct {
 
 // NewIotaToken
 // url don't contain the prefix of "https://"
-func NewIotaToken(_url, publicKey, _hrp string) *IotaToken {
+func NewIotaToken(_rpc, _wss, publicKey, _hrp string) *IotaToken {
 	pubKey, err := hex.DecodeString(publicKey)
 	if err != nil {
 		panic(err)
 	}
 	return &IotaToken{
-		url:        _url,
-		nodeAPI:    iotago.NewNodeHTTPAPIClient("https://" + _url),
+		rpc:        _rpc,
+		wss:        _wss,
+		nodeAPI:    iotago.NewNodeHTTPAPIClient(_rpc),
 		publicKey:  pubKey,
 		hrp:        iotago.NetworkPrefix(_hrp),
 		walletAddr: iotago.AddressFromEd25519PubKey(pubKey),

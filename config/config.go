@@ -107,7 +107,8 @@ func checkKeyStore() {
 
 type Token struct {
 	Symbol        string
-	NodeUrl       string
+	NodeRpc       string
+	NodeWss       string
 	ScanEventType int
 	ScanMaxHeight uint64
 	MultiSignType int

@@ -59,10 +59,9 @@ func (it *IotaToken) StartWrapListen(ch chan *tokens.SwapOrder) {
 	//Get the contract addresses for listening the iota output event
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
-	eventUrl := "wss://" + it.url + "/mqtt"
-	nodeEventClient := iotagox.NewNodeEventAPIClient(eventUrl)
+	nodeEventClient := iotagox.NewNodeEventAPIClient(it.wss)
 	if err := nodeEventClient.Connect(ctx); err != nil {
-		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("Connect to iota node error. %s, %v", eventUrl, err)}
+		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("Connect to iota node error. %s, %v", it.wss, err)}
 		return
 	}
 	addrMsg := nodeEventClient.AddressOutputs(&it.walletAddr, it.hrp)

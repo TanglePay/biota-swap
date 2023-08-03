@@ -1,5 +1,5 @@
 # NodeUrl is the node url of smpc
-# Gid is the group id of "3"
+# Gid is the subgroup id
 # ThresHold is the group rule. It can be "2/3", "3/5", "4/6" ...
 # KeyStore is the key of the node of smpc
 [Smpc]

@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
 
 func main() {
@@ -19,6 +21,9 @@ func main() {
 		if len(os.Args) == 2 {
 			os.Args[1] = "daemon"
 		}
+	} else if (len(os.Args) == 2) && (os.Args[1] == "-key") {
+		createKeyStore()
+		return
 	}
 
 	if len(os.Args) == 2 && os.Args[1] == "daemon" {
@@ -68,5 +73,16 @@ func input() {
 	//pwd = "secret"
 	if err := os.WriteFile("rand.data", []byte(pwd), 0666); err != nil {
 		log.Panicf("write rand.data error. %v", err)
+	}
+}
+
+func createKeyStore() {
+	var pwd string
+	fmt.Printf("input the keystore's password: ")
+	fmt.Scanf("%s", &pwd)
+
+	ks := keystore.NewKeyStore("./keystores", keystore.StandardScryptN, keystore.StandardScryptP)
+	if _, err := ks.NewAccount(pwd); err != nil {
+		log.Fatal(err)
 	}
 }

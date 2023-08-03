@@ -62,6 +62,11 @@ Detail infomation for this, can see [smpc-node keygen and sign workflow](https:/
 Before run this service, you must fill the config/conf.toml file with the right parameter. Detail is in the exmaple prod_conf.toml file.
 
 ## Run the Bridge service
+Create keystores
+```shell
+go build -ldflags "-w -s"
+./bwrap -key
+```
 ```shell
 go build -ldflags "-w -s"
 ./bwrap -d

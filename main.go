@@ -9,6 +9,7 @@ import (
 	"bwrap/smpc"
 	"bwrap/tools"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -21,8 +22,8 @@ func main() {
 		if len(os.Args) == 2 {
 			os.Args[1] = "daemon"
 		}
-	} else if (len(os.Args) == 2) && (os.Args[1] == "-key") {
-		createKeyStore()
+	} else if (len(os.Args) == 3) && (os.Args[1] == "-key") {
+		createKeyStore(os.Args[2])
 		return
 	}
 
@@ -76,13 +77,22 @@ func input() {
 	}
 }
 
-func createKeyStore() {
+func createKeyStore(filename string) {
 	var pwd string
 	fmt.Printf("input the keystore's password: ")
 	fmt.Scanf("%s", &pwd)
 
 	ks := keystore.NewKeyStore("./keystores", keystore.StandardScryptN, keystore.StandardScryptP)
-	if _, err := ks.NewAccount(pwd); err != nil {
+	account, err := ks.NewAccount(pwd)
+	if err != nil {
+		log.Fatal(err)
+	}
+	jsonData, err := ks.Export(account, pwd, pwd)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := ioutil.WriteFile("../keystore/"+filename, jsonData, 0666); err != nil {
 		log.Fatal(err)
 	}
 }

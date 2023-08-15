@@ -22,8 +22,8 @@ func main() {
 		if len(os.Args) == 2 {
 			os.Args[1] = "daemon"
 		}
-	} else if (len(os.Args) == 3) && (os.Args[1] == "-key") {
-		createKeyStore(os.Args[2])
+	} else if (len(os.Args) == 4) && (os.Args[1] == "-key") {
+		createKeyStore(os.Args[2], os.Args[3])
 		return
 	}
 
@@ -77,11 +77,7 @@ func input() {
 	}
 }
 
-func createKeyStore(filename string) {
-	var pwd string
-	fmt.Printf("input the keystore's password: ")
-	fmt.Scanf("%s", &pwd)
-
+func createKeyStore(pwd, filename string) {
 	ks := keystore.NewKeyStore("./keystores", keystore.StandardScryptN, keystore.StandardScryptP)
 	account, err := ks.NewAccount(pwd)
 	if err != nil {

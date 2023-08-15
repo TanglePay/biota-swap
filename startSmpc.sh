@@ -1,6 +1,14 @@
 rpcport=5871
 port=48541
 boot="enode://c9774dfbcc77dc3f6c849e7ab972a2bed3e3e6304364aa9aafb0a830c1f12e55bc34f3da428e3e1ffb4e3f57fccb4413fe32fb71005657882a6e2f510e660825@18.162.150.38:4440"
+result=`go version`
+if [[ $result == "" ]] ; then
+    exit
+fi
+result=`make -v`
+if [[ $result == "" ]] ; then
+    exit
+fi
 if [ ! -n "$1" ];then
     echo "panic : must input the password for keystores"
     exit

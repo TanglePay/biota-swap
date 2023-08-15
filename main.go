@@ -88,7 +88,7 @@ func createKeyStore(pwd, filename string) {
 		log.Fatal(err)
 	}
 
-	if err := ioutil.WriteFile("../keystore/"+filename, jsonData, 0666); err != nil {
+	if err := ioutil.WriteFile(filename, jsonData, 0666); err != nil {
 		log.Fatal(err)
 	}
 }

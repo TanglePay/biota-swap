@@ -62,3 +62,5 @@ if [ $result -ne 1 ]; then
 fi
 
 ./gsmpc-client -cmd EnodeSig -url http://127.0.0.1:$rpcport --keystore ./keystores/smpc_k --passwd $1
+
+echo "Your keystore wallets are all stored in the folder ./keystores, please safekeeping"

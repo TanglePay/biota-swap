@@ -47,7 +47,7 @@ fi
 
 result=`echo -e "\n" | telnet 127.0.0.1 $rpcport 2> /dev/null | grep Connected | wc -l`
 if [ $result -ne 1 ]; then
-    nohup ./gsmpc --rpcport $rpcport --bootnodes $boot --port $port --nodekey "./logs/node.key" --verbosity 3 > ./logs/node.log 2>&1 &
+    nohup ./gsmpc --rpcport $rpcport --bootnodes $boot --port $port --nodekey "./logs/node.key" --verbosity 4 > ./logs/node.log 2>&1 &
     echo "wait for a few seconds to start gsmpc service."
     for i in {1..300}
     do 
@@ -64,4 +64,4 @@ fi
 
 ./gsmpc-client -cmd EnodeSig -url http://127.0.0.1:$rpcport --keystore ./keystores/smpc_k --passwd $1
 
-echo "Your keystore wallets are all stored in the folder ./keystores, please safekeeping"
+echo "Your keystore wallets are all stored in the folder ./keystores, please safekeeping!"

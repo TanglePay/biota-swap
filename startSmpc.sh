@@ -30,6 +30,10 @@ if [ ! -f "./keystores/smpc_k" ];then
     fi    
     cd ..
 fi
+if [ ! -f "./keystores/smpc_k" ];then
+    echo "panic : ./keystores/smpc_k : no such file"
+    exit
+fi
 if [ ! -f "./gsmpc" ] || [ ! -f "./gsmpc-client" ];then
     rm -rf ./smpc-node
     git clone https://github.com/TanglePay/smpc-node

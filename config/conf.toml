@@ -1,11 +1,11 @@
-# NodeUrl is the node url of smpc
+# NodeUrl is the smpc node rpc url
 # Gid is the subgroup id
 # ThresHold is the group rule. It can be "2/3", "3/5", "4/6" ...
-# KeyStore is the key of the node of smpc
+# KeyStore is the wallet account of the node of smpc
 [Smpc]
 NodeUrl = "http://127.0.0.1:5871"
-Gid = "e7fd1f3b48865f158dbccfcbc7d2af7ac7cab0783726ce43b0724b96cf83a8632cc637f6da880f06c4bb246b23fb96e0ef9a33b8dde72df7d1108294bf1aa33f"
-ThresHold   ="2/3"
+Gid = "20b5e962f662e74eca9e63596c57bfce2b160aded631b3b613148ebd47696cfe710a2128de153c48d17e29fdf11230ba40d04b626dd32b2af6fcf5e93a0cc52e"
+ThresHold   ="4/6"
 KeyStore = "./config/smpc_k"
 
 # The Server config
@@ -18,19 +18,20 @@ DetectTime = 10
 AcceptTime = 30
 AcceptOverTime = 7200
 
-# database driver is mysql
+# database driver is mysql 46768bacc61d97fe9d459fcb01181dcb6fae36f9
 # the dabasebase name is "smpc" and the table to see the "readme"
 [Db]
-Host = "127.0.0.1"
+Host = "18.162.150.38"
 Port = "3306"
 DbName = "smpc"
-Usr="root"
-Pwd="851012"
+Usr= "root"
+Pwd= "851012"
 
 [TxErrorRecord]
-NodeRpc = "https://rpc-mumbai.maticvigil.com"
-Contract = "0xfb55F7f7694F22658FfE6d0fDE37D39384996C4a"
-ScanEventType = 1
+NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
+NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
+Contract = "0xac1A077b6F9f52Bd225d3E43Bc4EdBb7F464bA31"
+ScanEventType = 0
 TimePeriod = 3600
 
 # Tokens contain "ATOI", "IOTA", SMIOTA", "MATIC"
@@ -41,80 +42,79 @@ TimePeriod = 3600
 # MultiSignType = 2: Contract and KeyStore is null
 [[Tokens]]
 Symbol = "ATOI"
-#NodeRpc = "https://chrysalis-nodes.iota.org"
 NodeRpc = "https://api.lb-0.h.chrysalis-devnet.iota.cafe"
 NodeWss = "wss://api.lb-0.h.chrysalis-devnet.iota.cafe/mqtt"
 ScanEventType = 0
 MultiSignType = 2
-PublicKey = "8c187002a32bf4143ae9260f3a08aca19ebea321d91f47fb7f8dfd2281f3d41a"
-# Dave's pubkey fe944ff27add4acc90adb09438f9661b8e28dba2612ddb82559d604dfc428d1e
+PublicKey = "b477a4b11a54a6a1a3aa792878f50b49e21536bf0bfdd0876ec99fae4e4bdb08"
 MinAmount = 1000000
 
 [[Tokens]]
 Symbol = "MATIC"
-NodeRpc = "https://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
-NodeWss = "wss://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
-ScanEventType = 1
+NodeRpc = "https://polygon-mumbai.g.alchemy.com/v2/fXcphe9VsC6eWwEjRWaSz2ATxI_Sxn0K"
+NodeWss = "wss://polygon-mumbai.g.alchemy.com/v2/fXcphe9VsC6eWwEjRWaSz2ATxI_Sxn0K"
+ScanEventType = 0
 ScanMaxHeight = 10000
 MultiSignType = 0
-Contract = "0x3e83D58F34AdbC830546F88AACa9590186f4d92f"
-KeyStore = "./config/k"
-MinAmount = 100000000000
+Contract = "0x0F326747787Ec6894e9be2Af691d7451ea596660"
+MinAmount = 1
+KeyStore = "./config/smpc_k"
 
 [[Tokens]]
-Symbol = "TT1"
-NodeRpc = "weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
-NodeWss = "wss://weathered-wild-county.matic-testnet.discover.quiknode.pro/459dfab8557cd04a86ea4c32b46164febe78449d/"
-ScanEventType = 1
+Symbol = "WBTC"
+NodeRpc = "https://polygon-mumbai.g.alchemy.com/v2/fXcphe9VsC6eWwEjRWaSz2ATxI_Sxn0K"
+NodeWss = "wss://polygon-mumbai.g.alchemy.com/v2/fXcphe9VsC6eWwEjRWaSz2ATxI_Sxn0K"
+ScanEventType = 0
 ScanMaxHeight = 10000
 MultiSignType = 0
-Contract = "0xB4B74f0FE409Ab69B0C8885E62964c5e9CABBbd3"
-KeyStore = "./config/k"
-MinAmount = 1000000
+Contract = "0xBF2F528b7d6b30Ede64a7a2D6C4819802831551b"
+MinAmount = 1
+KeyStore = "./config/smpc_k"
 
 [[Tokens]]
-Symbol = "SMIOTA"
-NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
-NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
-ScanEventType = 1
-ScanMaxHeight = 1000
-MultiSignType = 0
-Contract = "0xCB03Ebd74417AA792fC68a750F35c7b8F585027B"
-KeyStore = "./config/k"
-MinAmount = 1000000
-
-[[Tokens]]
-Symbol = "SMATIC"
+Symbol = "sMIOTA"
 NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
 NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 0
 ScanMaxHeight = 1000
 MultiSignType = 0
-Contract = "0xB1359205E429fbdF52199692b5Adb09D1d70fa93"
-KeyStore = "./config/k"
-MinAmount = 1000000000
+Contract = "0x1f7A07357e1E3e74A564fDeE8030f06F296AD540"
+MinAmount = 1000000
+KeyStore = "./config/smpc_k"
 
 [[Tokens]]
-Symbol = "STT1"
+Symbol = "sMATIC"
 NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
 NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
 ScanEventType = 0
 ScanMaxHeight = 1000
 MultiSignType = 0
-Contract = "0x358BDE78b3a94Ba8cA996f481113B63A8847A155"
-KeyStore = "./config/k"
-MinAmount = 1000000
+Contract = "0xB6D0FBe198bf48c7E7dad8b457994a0dBac795Ef"
+MinAmount = 1
+KeyStore = "./config/smpc_k"
+
+[[Tokens]]
+Symbol = "sWTBC"
+NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
+NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
+ScanEventType = 0
+ScanMaxHeight = 1000
+MultiSignType = 0
+Contract = "0x69499Cf6b0244AD7CEA28F6eeeb4EF4d8cd1Bc33"
+MinAmount = 1
+KeyStore = "./config/smpc_k"
+
 
 # Pairs is the bridge pair. 
-# SrcToken to DestToken. They must beed in the "Tokens".
+# SrcToken to DestToken. They must be in the "Tokens".
 [[Pairs]]
 SrcToken = "ATOI"
-DestToken = "SMIOTA"
+DestToken = "sMIOTA"
 
 [[Pairs]]
 SrcToken = "MATIC"
-DestToken = "SMATIC"
+DestToken = "sMATIC"
 
 [[Pairs]]
-SrcToken = "TT1"
-DestToken = "STT1"
+SrcToken = "WBTC"
+DestToken = "sWBTC"

@@ -35,7 +35,7 @@ if [ ! -f "./keystores/smpc_k" ];then
     echo "panic : ./keystores/smpc_k : no such file"
     exit
 fi
-#if [ ! -f "./gsmpc" ] || [ ! -f "./gsmpc-client" ];then
+if [ ! -f "./gsmpc" ] || [ ! -f "./gsmpc-client" ];then
     rm -rf ./smpc-node
     git clone https://github.com/TanglePay/smpc-node
     cd smpc-node && make all
@@ -48,7 +48,7 @@ fi
         exit
     fi
     cd ..
-#fi
+fi
 
 result=`echo -e "\n" | telnet 127.0.0.1 $rpcport 2> /dev/null | grep Connected | wc -l`
 if [ $result -ne 1 ]; then

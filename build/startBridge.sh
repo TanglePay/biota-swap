@@ -183,7 +183,7 @@ MinAmount = 1
 KeyStore = "./config/smpc_k"
 
 [[Tokens]]
-Symbol = "sWTBC"
+Symbol = "sWBTC"
 NodeRpc = "$SmrRpcUrl"
 NodeWss = "$SmrWssUrl"
 ScanEventType = 0

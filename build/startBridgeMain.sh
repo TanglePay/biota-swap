@@ -12,7 +12,7 @@ if [[ $result == "" ]] ; then
     exit
 fi
 
-pkill bswap_test
+pkill bwrap_main
 if [ ! -f "./bwrap_main" ]; then
     rm -rf ./biota-swap
     git clone https://github.com/TanglePay/biota-swap

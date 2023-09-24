@@ -6,19 +6,19 @@ if [ -z "$pwd" ];then
     exit
 fi
 
-pkill bswap
 result=`go version`
 if [[ $result == "" ]] ; then
     echo -e "\e[31m !!! panic : golang is not installed"
     exit
 fi
 
-if [ ! -f "./bwrap" ]; then
+pkill bswap_test
+if [ ! -f "./bswap_test" ]; then
     rm -rf ./biota-swap
     git clone https://github.com/TanglePay/biota-swap
     cd biota-swap
     go build -ldflags "-w -s"
-    cp bwrap ../
+    cp bwrap ../bswap_test
     cd ..
 fi
 
@@ -35,17 +35,10 @@ if [ ! -f "./config/smpc_k" ];then
     exit
 fi
 
-if [ $1 = "test" ]; then
-    SmrRpcUrl="https://json-rpc.evm.testnet.shimmer.network/"
-    SmrWssUrl="wss://ws.json-rpc.evm.testnet.shimmer.network/"
-    IotaRpcUrl="https://api.lb-0.h.chrysalis-devnet.iota.cafe"
-    IotaWssUrl="wss://api.lb-0.h.chrysalis-devnet.iota.cafe/mqtt"
-else
-    SmrRpcUrl="https://json-rpc.evm.mainnet.shimmer.network/"
-    SmrWssUrl="wss://ws.json-rpc.evm.mainnet.shimmer.network/"
-    IotaRpcUrl="https://chrysalis-nodes.iota.org"
-    IotaWssUrl="wss://chrysalis-nodes.iota.org/mqtt"
-fi
+SmrRpcUrl="https://json-rpc.evm.testnet.shimmer.network/"
+SmrWssUrl="wss://ws.json-rpc.evm.testnet.shimmer.network/"
+IotaRpcUrl="https://api.lb-0.h.chrysalis-devnet.iota.cafe"
+IotaWssUrl="wss://api.lb-0.h.chrysalis-devnet.iota.cafe/mqtt"
 
 tanglePay=$(echo "0xfb6e712F4f71D418A298EBe239889A2496f1359b" | tr '[:upper:]' '[:lower:]')
 soonavers=$(echo "0x3Fdd4B2d69848F74E44765e6AD423198bdBD94fa" | tr '[:upper:]' '[:lower:]')
@@ -209,4 +202,4 @@ SrcToken = "WBTC"
 DestToken = "sWBTC"
 :EOF
 
-./bwrap -d
+./bswap_test -d

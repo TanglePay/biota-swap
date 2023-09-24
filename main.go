@@ -71,7 +71,7 @@ func input() {
 	var pwd string
 	fmt.Printf("Enter keystore's password: ")
 	fmt.Scanf("%s", &pwd)
-	//pwd = "123456"
+	//pwd = "1234567"
 	if err := os.WriteFile("rand.data", []byte(pwd), 0666); err != nil {
 		log.Panicf("write rand.data error. %v", err)
 	}

@@ -129,7 +129,7 @@ NodeWss = "$EthWssUrl"
 ScanEventType = 0
 ScanMaxHeight = 10000
 MultiSignType = 0
-Contract = "0xB32437b48F47BD685a82AD1627cE9F0a9BE01e43"
+Contract = "0x7C32097EB6bA75Dc5eF370BEC9019FD09D96ab9d"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
 
@@ -140,7 +140,7 @@ NodeWss = "$EthWssUrl"
 ScanEventType = 0
 ScanMaxHeight = 10000
 MultiSignType = 0
-Contract = "0x1660854c03b461E6BC07f94567D1D6E6bF99a1A9"
+Contract = "0x6c2F73072bD9bc9052D99983e36411f48fa6cDf0"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
 

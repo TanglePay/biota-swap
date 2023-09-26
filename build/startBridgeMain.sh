@@ -151,7 +151,7 @@ NodeWss = "$SmrWssUrl"
 ScanEventType = 0
 ScanMaxHeight = 1000
 MultiSignType = 0
-Contract = "0x7C32097EB6bA75Dc5eF370BEC9019FD09D96ab9d"
+Contract = "0xa158A39d00C79019A01A6E86c56E96C461334Eb0"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
 
@@ -162,7 +162,7 @@ NodeWss = "$SmrWssUrl"
 ScanEventType = 0
 ScanMaxHeight = 1000
 MultiSignType = 0
-Contract = "0x6c2F73072bD9bc9052D99983e36411f48fa6cDf0"
+Contract = "0x1cDF3F46DbF8Cf099D218cF96A769cea82F75316"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
 

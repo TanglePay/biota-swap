@@ -3,9 +3,9 @@
 # ThresHold is the group rule. It can be "2/3", "3/5", "4/6" ...
 # KeyStore is the wallet account of the node of smpc
 [Smpc]
-NodeUrl = "http://127.0.0.1:5871"
-Gid = "20b5e962f662e74eca9e63596c57bfce2b160aded631b3b613148ebd47696cfe710a2128de153c48d17e29fdf11230ba40d04b626dd32b2af6fcf5e93a0cc52e"
-ThresHold   ="4/6"
+NodeUrl = ""
+Gid = ""
+ThresHold   =""
 KeyStore = "./config/smpc_k"
 
 # The Server config
@@ -50,6 +50,7 @@ MultiSignType = 3
 PublicKey = "19ebbd746d8893dde6a7d7bf351269958532f0a8de24c0b012d1ae9b59019312"
 Contract = "0884298fe9b82504d26ddb873dbd234a344c120da3a4317d8063dbcf96d356aa9d0100000000"
 MinAmount = 1
+KeyStore = "./config/smpc_k"
 
 [[Tokens]]
 Symbol = "sSOON"
@@ -58,7 +59,7 @@ NodeWss = "wss://ws.json-rpc.evm.shimmer.network"
 ScanEventType = 0
 ScanMaxHeight = 1000
 MultiSignType = 0
-Contract = "0x69499Cf6b0244AD7CEA28F6eeeb4EF4d8cd1Bc33"
+Contract = "0x39DEE4dFA8A94fB02F4004a38543c853F859d79E"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
 

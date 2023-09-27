@@ -59,7 +59,7 @@ func (st *ShimmerToken) SendWrap(txid string, amount *big.Int, to string, prv *e
 }
 
 func (st *ShimmerToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
-	prefix, toAddr, err := iotago.ParseBech32(to)
+	toAddr, err := iotago.ParseEd25519AddressFromHexString("0x" + to)
 	if err != nil {
 		return nil, fmt.Errorf("send shimmer address error. %s, %v", to, err)
 	}
@@ -88,9 +88,9 @@ func (st *ShimmerToken) SendUnWrap(txid string, amount *big.Int, to string, prv 
 	}
 	outputTo.Amount = uint64(info.Protocol.RentStructure.VByteCost) * uint64(outputTo.VBytes(&info.Protocol.RentStructure, nil))
 	txBuilder.AddOutput(outputTo)
-	leftTokenAmount, leftSmrAmount, err := st.getNativeTokenOutputs(txBuilder, amount, prefix, addr)
+	leftTokenAmount, leftSmrAmount, err := st.getNativeTokenOutputs(txBuilder, amount, st.hrp, addr)
 	if err != nil {
-		return nil, fmt.Errorf("get native token outputs error. %s,%s, %v", st.tokenID.ToHex(), addr.Bech32(prefix), err)
+		return nil, fmt.Errorf("get native token outputs error. %s,%s, %v", st.tokenID.ToHex(), addr.Bech32(st.hrp), err)
 	}
 	needSmrAmount := outputTo.Amount
 	if leftTokenAmount.Cmp(big.NewInt(0)) > 0 {
@@ -110,9 +110,9 @@ func (st *ShimmerToken) SendUnWrap(txid string, amount *big.Int, to string, prv 
 		txBuilder.AddOutput(outputSelf)
 	}
 	if needSmrAmount != leftSmrAmount {
-		left, err := st.getBasiceUnSpentOutputs(txBuilder, prefix, addr)
+		left, err := st.getBasiceUnSpentOutputs(txBuilder, st.hrp, addr)
 		if err != nil {
-			return nil, fmt.Errorf("get basic shimmer outputs error. %s, %v", addr.Bech32(prefix), err)
+			return nil, fmt.Errorf("get basic shimmer outputs error. %s, %v", addr.Bech32(st.hrp), err)
 		}
 		left += leftSmrAmount
 		smrOutput := &iotago.BasicOutput{
@@ -128,7 +128,7 @@ func (st *ShimmerToken) SendUnWrap(txid string, amount *big.Int, to string, prv 
 		txBuilder.AddOutput(smrOutput)
 	}
 
-	txBuilder.AddTaggedDataPayload(&iotago.TaggedData{Tag: []byte("Iotabee")})
+	txBuilder.AddTaggedDataPayload(&iotago.TaggedData{Tag: []byte("TpBridge")})
 
 	blockBuilder := txBuilder.BuildAndSwapToBlockBuilder(&info.Protocol, signer, nil)
 

@@ -37,9 +37,10 @@ func main() {
 
 	model.ConnectToMysql()
 
-	smpc.InitSmpc(config.Smpc.NodeUrl, config.Smpc.Account)
-
-	server.Accept()
+	if len(config.Smpc.NodeUrl) > 0 {
+		smpc.InitSmpc(config.Smpc.NodeUrl, config.Smpc.Account)
+		server.Accept()
+	}
 
 	server.ListenTokens()
 

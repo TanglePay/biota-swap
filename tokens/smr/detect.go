@@ -33,11 +33,7 @@ type ShimmerToken struct {
 // cid, chainid
 // addr, the wallet address like "smr1abc2334691..."
 // _symbols, tokenid -> symbol
-func NewShimmerToken(url, _publicKey, addr string, _symbol, _tokenID string) *ShimmerToken {
-	netPrefix, edAddr, err := iotago.ParseBech32(addr)
-	if err != nil {
-		panic(err.Error() + " : " + addr)
-	}
+func NewShimmerToken(url, _publicKey, _symbol, _tokenID, hrp string) *ShimmerToken {
 	nativeID, err := hex.DecodeString(_tokenID)
 	if err != nil {
 		log.Fatalf("tokenID error, %s : %v", _tokenID, err)
@@ -48,13 +44,14 @@ func NewShimmerToken(url, _publicKey, addr string, _symbol, _tokenID string) *Sh
 	if err != nil {
 		panic(err)
 	}
+	edAddr := iotago.Ed25519AddressFromPubKey(pubKey)
 	return &ShimmerToken{
 		rpc:        url,
 		nodeAPI:    nodeclient.New(url),
-		hrp:        netPrefix,
+		hrp:        iotago.NetworkPrefix(hrp),
 		publicKey:  pubKey,
-		address:    edAddr,
-		walletAddr: addr,
+		address:    &edAddr,
+		walletAddr: edAddr.Bech32(iotago.NetworkPrefix(hrp)),
 		symbol:     _symbol,
 		tokenID:    foundryID,
 	}

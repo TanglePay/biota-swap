@@ -6,6 +6,7 @@ import (
 	"bwrap/tokens"
 	"bwrap/tokens/evm"
 	"bwrap/tokens/iota"
+	"bwrap/tokens/smr"
 	"sync"
 	"time"
 
@@ -105,6 +106,8 @@ func NewSourceChain(conf *config.Token) tokens.SourceToken {
 		return iota.NewIotaToken(conf.NodeRpc, conf.NodeWss, conf.PublicKey, "iota")
 	case "ATOI":
 		return iota.NewIotaToken(conf.NodeRpc, conf.NodeWss, conf.PublicKey, "atoi")
+	case "SOON":
+		return smr.NewShimmerToken(conf.NodeRpc, conf.PublicKey, conf.Symbol, conf.Contract, "smr")
 	default:
 		token, err := evm.NewEvmToken(conf.NodeRpc, conf.NodeWss, conf.Contract, conf.Symbol, conf.Account, conf.ScanEventType, conf.ScanMaxHeight)
 		if err != nil {

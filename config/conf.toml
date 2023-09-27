@@ -21,7 +21,7 @@ AcceptOverTime = 7200
 # database driver is mysql 46768bacc61d97fe9d459fcb01181dcb6fae36f9
 # the dabasebase name is "smpc" and the table to see the "readme"
 [Db]
-Host = "18.162.150.38"
+Host = "127.0.0.1"
 Port = "3306"
 DbName = "smpc"
 Usr= "root"
@@ -40,63 +40,21 @@ TimePeriod = 3600
 # MultiSignType, 0 is contract multiSign, 2 is smpc multiSign
 # MultiSignType = 0: PublicKey is null
 # MultiSignType = 2: Contract and KeyStore is null
+# MultiSignType = 2: Center
 [[Tokens]]
-Symbol = "ATOI"
-NodeRpc = "https://api.lb-0.h.chrysalis-devnet.iota.cafe"
-NodeWss = "wss://api.lb-0.h.chrysalis-devnet.iota.cafe/mqtt"
+Symbol = "SOON"
+NodeRpc = "https://api.shimmer.network"
+NodeWss = "https://api.shimmer.network"
 ScanEventType = 0
-MultiSignType = 2
-PublicKey = "b477a4b11a54a6a1a3aa792878f50b49e21536bf0bfdd0876ec99fae4e4bdb08"
-MinAmount = 1000000
-
-[[Tokens]]
-Symbol = "MATIC"
-NodeRpc = "https://polygon-mumbai.g.alchemy.com/v2/fXcphe9VsC6eWwEjRWaSz2ATxI_Sxn0K"
-NodeWss = "wss://polygon-mumbai.g.alchemy.com/v2/fXcphe9VsC6eWwEjRWaSz2ATxI_Sxn0K"
-ScanEventType = 0
-ScanMaxHeight = 10000
-MultiSignType = 0
-Contract = "0x0F326747787Ec6894e9be2Af691d7451ea596660"
+MultiSignType = 3
+PublicKey = "19ebbd746d8893dde6a7d7bf351269958532f0a8de24c0b012d1ae9b59019312"
+Contract = "0884298fe9b82504d26ddb873dbd234a344c120da3a4317d8063dbcf96d356aa9d0100000000"
 MinAmount = 1
-KeyStore = "./config/smpc_k"
 
 [[Tokens]]
-Symbol = "WBTC"
-NodeRpc = "https://polygon-mumbai.g.alchemy.com/v2/fXcphe9VsC6eWwEjRWaSz2ATxI_Sxn0K"
-NodeWss = "wss://polygon-mumbai.g.alchemy.com/v2/fXcphe9VsC6eWwEjRWaSz2ATxI_Sxn0K"
-ScanEventType = 0
-ScanMaxHeight = 10000
-MultiSignType = 0
-Contract = "0xBF2F528b7d6b30Ede64a7a2D6C4819802831551b"
-MinAmount = 1
-KeyStore = "./config/smpc_k"
-
-[[Tokens]]
-Symbol = "sMIOTA"
-NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
-NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
-ScanEventType = 0
-ScanMaxHeight = 1000
-MultiSignType = 0
-Contract = "0x1f7A07357e1E3e74A564fDeE8030f06F296AD540"
-MinAmount = 1000000
-KeyStore = "./config/smpc_k"
-
-[[Tokens]]
-Symbol = "sMATIC"
-NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
-NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
-ScanEventType = 0
-ScanMaxHeight = 1000
-MultiSignType = 0
-Contract = "0xB6D0FBe198bf48c7E7dad8b457994a0dBac795Ef"
-MinAmount = 1
-KeyStore = "./config/smpc_k"
-
-[[Tokens]]
-Symbol = "sWTBC"
-NodeRpc = "https://json-rpc.evm.testnet.shimmer.network/"
-NodeWss = "wss://ws.json-rpc.evm.testnet.shimmer.network/"
+Symbol = "sSOON"
+NodeRpc = "https://json-rpc.evm.shimmer.network"
+NodeWss = "wss://ws.json-rpc.evm.shimmer.network"
 ScanEventType = 0
 ScanMaxHeight = 1000
 MultiSignType = 0
@@ -108,13 +66,5 @@ KeyStore = "./config/smpc_k"
 # Pairs is the bridge pair. 
 # SrcToken to DestToken. They must be in the "Tokens".
 [[Pairs]]
-SrcToken = "ATOI"
-DestToken = "sMIOTA"
-
-[[Pairs]]
-SrcToken = "MATIC"
-DestToken = "sMATIC"
-
-[[Pairs]]
-SrcToken = "WBTC"
-DestToken = "sWBTC"
+SrcToken = "SOON"
+DestToken = "sSOON"

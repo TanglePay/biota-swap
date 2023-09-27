@@ -159,13 +159,13 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 		if !strings.HasPrefix(err.Error(), "Error 1062") {
 			gl.OutLogger.Error("store the unwrap order to db error(%v). %v", err, wo)
 		}
-		if t1.MultiSignType() == tokens.SmpcSign {
+		if t1.MultiSignType() != tokens.EvmMultiSign {
 			return
 		}
 	}
 
 	// When the MultiSignType is Contract, this process don't need the smpc to sign.
-	if t1.MultiSignType() == tokens.EvmMultiSign {
+	if t1.MultiSignType() != tokens.SmpcSign {
 		// Get Private Key
 		_, prv, err := config.GetPrivateKey(t1.Symbol())
 		if err != nil {

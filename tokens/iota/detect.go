@@ -102,7 +102,7 @@ func (it *IotaToken) dealTransferMessage(ch chan *tokens.SwapOrder, msg *iotago.
 	}
 
 	extraData := EssencePayloadData{}
-	if err = json.Unmarshal(common.Hex2Bytes(payload.Essence.EssPayload.Data), &extraData); err != nil {
+	if err = json.Unmarshal(common.FromHex(payload.Essence.EssPayload.Data), &extraData); err != nil {
 		return fmt.Errorf("payload data Unmarshal error. %s : %s : %v", msg.MessageID, payload.Essence.EssPayload.Data, err)
 	}
 

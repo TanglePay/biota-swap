@@ -8,6 +8,7 @@ import (
 const (
 	EvmMultiSign int = 0
 	SmpcSign     int = 2
+	CenterSign   int = 3
 )
 
 const (

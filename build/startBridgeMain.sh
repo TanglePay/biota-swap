@@ -13,14 +13,14 @@ if [[ $result == "" ]] ; then
 fi
 
 pkill bwrap_main
-if [ ! -f "./bwrap_main" ]; then
+#if [ ! -f "./bwrap_main" ]; then
     rm -rf ./biota-swap
     git clone https://github.com/TanglePay/biota-swap
     cd biota-swap
     go build -ldflags "-w -s"
     cp bwrap ../bwrap_main
     cd ..
-fi
+#fi
 
 if [ ! -d "./config" ];then
     mkdir config

@@ -116,6 +116,7 @@ type Token struct {
 	MinAmount     *big.Int
 	KeyStore      string
 	Account       common.Address
+	GasPriceUpper int64
 }
 
 type WrapPair struct {

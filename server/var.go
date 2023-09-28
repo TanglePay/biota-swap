@@ -109,7 +109,7 @@ func NewSourceChain(conf *config.Token) tokens.SourceToken {
 	case "SOON":
 		return smr.NewShimmerToken(conf.NodeRpc, conf.PublicKey, conf.Symbol, conf.Contract, "smr")
 	default:
-		token, err := evm.NewEvmToken(conf.NodeRpc, conf.NodeWss, conf.Contract, conf.Symbol, conf.Account, conf.ScanEventType, conf.ScanMaxHeight)
+		token, err := evm.NewEvmToken(conf.NodeRpc, conf.NodeWss, conf.Contract, conf.Symbol, conf.Account, conf.ScanEventType, conf.ScanMaxHeight, conf.GasPriceUpper)
 		if err != nil {
 			panic(err)
 		}
@@ -118,7 +118,7 @@ func NewSourceChain(conf *config.Token) tokens.SourceToken {
 }
 
 func NewDestinationChain(conf *config.Token) tokens.DestinationToken {
-	if chain, err := evm.NewEvmToken(conf.NodeRpc, conf.NodeWss, conf.Contract, conf.Symbol, conf.Account, conf.ScanEventType, conf.ScanMaxHeight); err != nil {
+	if chain, err := evm.NewEvmToken(conf.NodeRpc, conf.NodeWss, conf.Contract, conf.Symbol, conf.Account, conf.ScanEventType, conf.ScanMaxHeight, conf.GasPriceUpper); err != nil {
 		panic(err)
 	} else {
 		return chain

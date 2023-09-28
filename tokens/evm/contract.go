@@ -40,9 +40,10 @@ type EvmToken struct {
 	account       common.Address
 	ListenType    int //0: listen event, 1: scan block
 	ScanMaxHeight uint64
+	GasPriceUpper int64
 }
 
-func NewEvmToken(rpc, wss, conAddr, symbol string, _account common.Address, _listenType int, maxHeight uint64) (*EvmToken, error) {
+func NewEvmToken(rpc, wss, conAddr, symbol string, _account common.Address, _listenType int, maxHeight uint64, gasPriceUpper int64) (*EvmToken, error) {
 	c, err := ethclient.Dial(rpc)
 	if err != nil {
 		return nil, err
@@ -50,6 +51,9 @@ func NewEvmToken(rpc, wss, conAddr, symbol string, _account common.Address, _lis
 	chainId, err := c.NetworkID(context.Background())
 	if err != nil {
 		return nil, err
+	}
+	if gasPriceUpper > 100 {
+		return nil, fmt.Errorf("GasPriceUpper is over 100 : %d", gasPriceUpper)
 	}
 
 	return &EvmToken{
@@ -62,6 +66,7 @@ func NewEvmToken(rpc, wss, conAddr, symbol string, _account common.Address, _lis
 		account:       _account,
 		ListenType:    _listenType,
 		ScanMaxHeight: maxHeight,
+		GasPriceUpper: gasPriceUpper,
 	}, err
 }
 
@@ -304,6 +309,8 @@ func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecd
 	if err != nil {
 		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
 	}
+	gasPrice.Mul(gasPrice, big.NewInt(100+ei.GasPriceUpper))
+	gasPrice.Div(gasPrice, big.NewInt(100))
 
 	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.account)
 	if err != nil {

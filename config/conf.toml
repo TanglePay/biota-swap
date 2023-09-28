@@ -62,7 +62,7 @@ MultiSignType = 0
 Contract = "0x39DEE4dFA8A94fB02F4004a38543c853F859d79E"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
-
+GasPriceUpper = 1
 
 # Pairs is the bridge pair. 
 # SrcToken to DestToken. They must be in the "Tokens".

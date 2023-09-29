@@ -42,6 +42,8 @@ func main() {
 		server.Accept()
 	}
 
+	fmt.Printf("Smpc Bridge Version %s is starting...\n", config.Version)
+
 	server.ListenTokens()
 
 	daemon.WaitForKill()

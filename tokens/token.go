@@ -3,6 +3,8 @@ package tokens
 import (
 	"crypto/ecdsa"
 	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const (
@@ -18,6 +20,7 @@ const (
 
 type Token interface {
 	MultiSignType() int
+	ChainID() string
 	Symbol() string
 	KeyType() string
 	Address() string
@@ -41,6 +44,11 @@ type DestinationToken interface {
 	StartUnWrapListen(chan *SwapOrder)
 	CheckUnWrapTx(txid []byte, to, symbol string, amount *big.Int) error
 	SendWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error)
+}
+
+type EvmToken interface {
+	Symbol() string
+	CheckPendingAndSpeedUp(txHash common.Hash, prv *ecdsa.PrivateKey) (common.Hash, error)
 }
 
 type BaseTransaction struct {

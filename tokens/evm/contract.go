@@ -74,6 +74,10 @@ func (ei *EvmToken) MultiSignType() int {
 	return tokens.EvmMultiSign
 }
 
+func (ei *EvmToken) ChainID() string {
+	return ei.chainId.String()
+}
+
 func (ei *EvmToken) Symbol() string {
 	return ei.symbol
 }
@@ -269,15 +273,18 @@ func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa
 	data = append(data, common.LeftPadBytes(common.FromHex(to), 32)...)
 	value := big.NewInt(0)
 
-	gasPrice, err := ei.client.SuggestGasPrice(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
-	}
-
 	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.account)
 	if err != nil {
 		return nil, err
 	}
+
+	gasPrice, err := ei.client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
+	}
+	gasPrice.Mul(gasPrice, big.NewInt(100+ei.GasPriceUpper))
+	gasPrice.Div(gasPrice, big.NewInt(100))
+
 	tx := types.NewTransaction(nonce, ei.contract, value, gl.GasLimit, gasPrice, data)
 
 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(ei.chainId), prv)
@@ -305,6 +312,11 @@ func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecd
 	data = append(data, common.LeftPadBytes(common.FromHex(to), 32)...)
 	value := big.NewInt(0)
 
+	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.account)
+	if err != nil {
+		return nil, err
+	}
+
 	gasPrice, err := ei.client.SuggestGasPrice(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
@@ -312,10 +324,6 @@ func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecd
 	gasPrice.Mul(gasPrice, big.NewInt(100+ei.GasPriceUpper))
 	gasPrice.Div(gasPrice, big.NewInt(100))
 
-	nonce, err := ei.client.PendingNonceAt(context.Background(), ei.account)
-	if err != nil {
-		return nil, err
-	}
 	tx := types.NewTransaction(nonce, ei.contract, value, gl.GasLimit, gasPrice, data)
 
 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(ei.chainId), prv)
@@ -337,6 +345,41 @@ func (ei *EvmToken) CreateUnWrapTxData(addr string, amount *big.Int, extra []byt
 
 func (ei *EvmToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {
 	return tokens.BaseTransaction{}, fmt.Errorf("Don't support this method")
+}
+
+func (ei *EvmToken) CheckPendingAndSpeedUp(txHash common.Hash, prv *ecdsa.PrivateKey) (common.Hash, error) {
+	tx, isPending, err := ei.client.TransactionByHash(context.Background(), txHash)
+	if err != nil {
+		return txHash, fmt.Errorf("get tx by hash error. %v", err)
+	}
+
+	if !isPending {
+		return txHash, nil
+	}
+
+	gasPrice, err := ei.client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return txHash, fmt.Errorf("get SuggestGasPrice error. %v", err)
+	}
+	gasPrice.Mul(gasPrice, big.NewInt(100+ei.GasPriceUpper+20))
+	gasPrice.Div(gasPrice, big.NewInt(100))
+	if gasPrice.Cmp(tx.GasPrice()) < 0 {
+		return txHash, fmt.Errorf("gasPrice suggest is lower than old tx. %s < %s", gasPrice.String(), tx.GasPrice().String())
+	}
+
+	tx = types.NewTransaction(tx.Nonce(), *tx.To(), tx.Value(), tx.Gas(), gasPrice, tx.Data())
+
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(ei.chainId), prv)
+	if err != nil {
+		return txHash, fmt.Errorf("sign tx error. %v", err)
+	}
+
+	err = ei.client.SendTransaction(context.Background(), signedTx)
+	if err != nil {
+		return signedTx.Hash(), fmt.Errorf("send tx error. %v", err)
+	}
+
+	return signedTx.Hash(), nil
 }
 
 type Receipt struct {

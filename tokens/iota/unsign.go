@@ -44,8 +44,12 @@ func NewIotaToken(_rpc, _wss, publicKey, _hrp string) *IotaToken {
 }
 
 //
-func (ei *IotaToken) MultiSignType() int {
+func (it *IotaToken) MultiSignType() int {
 	return tokens.SmpcSign
+}
+
+func (it *IotaToken) ChainID() string {
+	return string(it.hrp)
 }
 
 func (it *IotaToken) Symbol() string {

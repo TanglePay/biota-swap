@@ -90,7 +90,7 @@ func (t *ShimmerToken) StartWrapListen(ch chan *tokens.SwapOrder) {
 				ch <- &tokens.SwapOrder{Type: 1, Error: err}
 			}
 		case err := <-eventAPI.Errors:
-			ch <- &tokens.SwapOrder{Type: 1, Error: fmt.Errorf("Shimmer node event connect error. %v.", err)}
+			ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("Shimmer node event connect error. %v.", err)}
 			return
 		}
 	}

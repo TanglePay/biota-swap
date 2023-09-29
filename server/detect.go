@@ -22,14 +22,34 @@ func init() {
 }
 
 func ListenTokens() {
+	sentEvmTxes = make(map[string]*SentEvmTxQueue)
 	for src, dest := range config.WrapPairs {
 		srcTokens[src] = NewSourceChain(config.Tokens[src])
 		destTokens[dest] = NewDestinationChain(config.Tokens[dest])
 
 		log.Infof("src %s : %s, dest %s : %s", src, srcTokens[src].Address(), dest, destTokens[dest].Address())
 
+		// recheck the tx is pending or not
+		if srcTokens[src].MultiSignType() == tokens.EvmMultiSign {
+			key := srcTokens[src].Address() + srcTokens[src].ChainID()
+			if _, exist := sentEvmTxes[key]; !exist {
+				sentEvmTxes[key] = NewSentEvmTxQueue()
+			}
+		}
+		if destTokens[dest].MultiSignType() == tokens.EvmMultiSign {
+			key := destTokens[dest].Address() + destTokens[dest].ChainID()
+			if _, exist := sentEvmTxes[key]; !exist {
+				sentEvmTxes[key] = NewSentEvmTxQueue()
+			}
+		}
+
 		go listenWrap(srcTokens[src], destTokens[dest])
 		go listenUnWrap(srcTokens[src], destTokens[dest])
+	}
+
+	for key, q := range sentEvmTxes {
+		log.Infof("Start to recheck evm tx pending : %s", key)
+		go recheckEvmTx(q)
 	}
 }
 
@@ -53,11 +73,11 @@ func listenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 						gl.OutLogger.Error("The amount of %s is smaller than %s", t1.Symbol(), config.Tokens[t1.Symbol()].MinAmount.String())
 						continue
 					}
-					dealWrapOrder(t1, t2, order)
+					dealWrapOrder(t2, order)
 				}
 			}
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 3)
 		gl.OutLogger.Error("try to connect node again.")
 	}
 }
@@ -82,7 +102,7 @@ func listenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 						gl.OutLogger.Error("The amount of %s is smaller than %s", t1.Symbol(), config.Tokens[t2.Symbol()].MinAmount.String())
 						continue
 					}
-					dealUnWrapOrder(t1, t2, order)
+					dealUnWrapOrder(t1, order)
 				}
 			}
 		}
@@ -91,7 +111,7 @@ func listenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	}
 }
 
-func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tokens.SwapOrder) {
+func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) {
 	if order.ToToken != t2.Symbol() {
 		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.ToToken, t2.Symbol())
 		return
@@ -130,10 +150,18 @@ func dealWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tok
 		gl.OutLogger.Error("SendWrap error. %s, %v", order.TxID, err)
 	} else {
 		gl.OutLogger.Info("SendWrap. %s => %s OK. %s", wo.SrcToken, wo.DestToken, hex.EncodeToString(id))
+		if t2.MultiSignType() == tokens.EvmMultiSign {
+			if t, ok := t2.(tokens.EvmToken); ok {
+				key := t2.Address() + t2.ChainID()
+				sentEvmTxes[key].Push(common.BytesToHash(id), t, time.Now().Unix())
+			} else {
+				gl.OutLogger.Error("Don't support RecheckEvmTxes. %s", t2.Symbol())
+			}
+		}
 	}
 }
 
-func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *tokens.SwapOrder) {
+func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {
 	if order.ToToken != t1.Symbol() {
 		gl.OutLogger.Error("The tx unwrap order's target token is error. %s, %s", order.ToToken, t1.Symbol())
 		return
@@ -178,6 +206,14 @@ func dealUnWrapOrder(t1 tokens.SourceToken, t2 tokens.DestinationToken, order *t
 			gl.OutLogger.Error("SendUnWrap error. %s, %v", order.TxID, err)
 		} else {
 			gl.OutLogger.Info("SendUnWrap. %s => %s OK. %s", order.FromToken, order.ToToken, hex.EncodeToString(id))
+			if t1.MultiSignType() == tokens.EvmMultiSign {
+				if t, ok := t1.(tokens.EvmToken); ok {
+					key := t1.Address() + t1.ChainID()
+					sentEvmTxes[key].Push(common.BytesToHash(id), t, time.Now().Unix())
+				} else {
+					gl.OutLogger.Error("Don't support RecheckEvmTxes. %s", t1.Symbol())
+				}
+			}
 		}
 		return
 	}

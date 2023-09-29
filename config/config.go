@@ -14,7 +14,8 @@ import (
 )
 
 var (
-	Env           string
+	Version       string
+	PendingTime   int64
 	Server        ServerConfig
 	Smpc          SmpcConfig
 	Db            Database
@@ -30,13 +31,13 @@ var (
 func Load(pwd string, _seeds [4]uint64) {
 	password, seeds = pwd, _seeds
 	type AllConfig struct {
-		Env           string
+		Version       string
+		PendingTime   int64
 		Server        ServerConfig
 		Smpc          SmpcConfig
 		Db            Database
 		Tokens        []Token
 		Pairs         []WrapPair
-		KeyStore      string
 		TxErrorRecord TxErrorRecordConfig
 	}
 	all := &AllConfig{}
@@ -44,7 +45,8 @@ func Load(pwd string, _seeds [4]uint64) {
 		panic(err)
 	}
 
-	Env = all.Env
+	Version = all.Version
+	PendingTime = all.PendingTime
 	Server = all.Server
 	Smpc = all.Smpc
 	Db = all.Db

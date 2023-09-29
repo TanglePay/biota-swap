@@ -80,6 +80,11 @@ else
 fi
 
 cat> config/conf.toml << :EOF
+# Version
+Version = "0.9.1"
+# PendingTime is time of seconds for a tx keep pending status
+PendingTime = 300
+
 # NodeUrl is the smpc node rpc url
 # Gid is the subgroup id
 # ThresHold is the group rule. It can be "2/3", "3/5", "4/6" ...

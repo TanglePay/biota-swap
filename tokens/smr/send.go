@@ -18,6 +18,10 @@ func (st *ShimmerToken) MultiSignType() int {
 	return tokens.CenterSign
 }
 
+func (st *ShimmerToken) ChainID() string {
+	return string(st.hrp)
+}
+
 func (st *ShimmerToken) Symbol() string {
 	return st.symbol
 }

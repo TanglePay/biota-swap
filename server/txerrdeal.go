@@ -69,8 +69,8 @@ func dealTxErrorRecord(o *tokens.TxErrorRecord) {
 	}
 
 	if o.D == 1 {
-		dealWrapOrder(srcTokens[o.FromCoin], destTokens[o.ToCoin], order)
+		dealWrapOrder(destTokens[o.ToCoin], order)
 	} else {
-		dealUnWrapOrder(srcTokens[o.ToCoin], destTokens[o.FromCoin], order)
+		dealUnWrapOrder(srcTokens[o.ToCoin], order)
 	}
 }

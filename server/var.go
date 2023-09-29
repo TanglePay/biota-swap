@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/onrik/ethrpc"
 )
 
@@ -71,12 +72,67 @@ func (sit *SentIotaTx) pop() (*model.SwapOrder, tokens.Token) {
 	return txid, t
 }
 
+type SentEvmTxQueue struct {
+	txHashs []common.Hash
+	chains  []tokens.EvmToken
+	times   []int64
+	sync.RWMutex
+}
+
+func NewSentEvmTxQueue() *SentEvmTxQueue {
+	return &SentEvmTxQueue{
+		txHashs: make([]common.Hash, 0),
+		chains:  make([]tokens.EvmToken, 0),
+		times:   make([]int64, 0),
+	}
+}
+
+func (q *SentEvmTxQueue) Push(txHash common.Hash, t tokens.EvmToken, ts int64) {
+	q.Lock()
+	defer q.Unlock()
+	q.txHashs = append(q.txHashs, txHash)
+	q.chains = append(q.chains, t)
+	q.times = append(q.times, ts)
+}
+
+func (q *SentEvmTxQueue) Pop() {
+	q.Lock()
+	defer q.Unlock()
+	if len(q.txHashs) == 0 {
+		return
+	}
+	q.txHashs = q.txHashs[1:]
+	q.chains = q.chains[1:]
+	q.times = q.times[1:]
+}
+
+func (q *SentEvmTxQueue) Top() (common.Hash, tokens.EvmToken, int64) {
+	q.RLock()
+	defer q.RUnlock()
+	if len(q.txHashs) == 0 {
+		return common.Hash{}, nil, 0
+	}
+	return q.txHashs[0], q.chains[0], q.times[0]
+}
+
+func (q *SentEvmTxQueue) UpdateTop(txHash common.Hash, t tokens.EvmToken, ts int64) {
+	q.Lock()
+	defer q.Unlock()
+	if len(q.txHashs) == 0 {
+		return
+	}
+	q.txHashs[0] = txHash
+	q.chains[0] = t
+	q.times[0] = ts
+}
+
 var (
 	client       *ethrpc.EthRPC
 	srcTokens    map[string]tokens.SourceToken
 	destTokens   map[string]tokens.DestinationToken
 	dealedOrders *DealedOrdersCheck
 	sentIotaTxes SentIotaTx
+	sentEvmTxes  map[string]*SentEvmTxQueue // key : address+chainid
 
 	seeds [4]uint64
 	wg    sync.WaitGroup

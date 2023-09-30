@@ -213,6 +213,8 @@ func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {
 				} else {
 					gl.OutLogger.Error("Don't support RecheckEvmTxes. %s", t1.Symbol())
 				}
+			} else {
+				time.Sleep(60 * time.Second) // wait for 1 minute to make sure the smr outputs update.
 			}
 		}
 		return

@@ -1,8 +1,7 @@
-
 # Version
 Version = "0.9.1"
 # PendingTime is time of minutes for a tx keep pending status
-PendingTime = 10
+PendingTime = 300
 
 # NodeUrl is the smpc node rpc url
 # Gid is the subgroup id
@@ -65,10 +64,10 @@ NodeWss = "wss://ws.json-rpc.evm.shimmer.network"
 ScanEventType = 0
 ScanMaxHeight = 1000
 MultiSignType = 0
-Contract = "0x39DEE4dFA8A94fB02F4004a38543c853F859d79E"
+Contract = "0x3C844FB5AD27A078d945dDDA8076A4084A76E513"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
-GasPriceUpper = 1
+GasPriceUpper = 10
 
 # Pairs is the bridge pair. 
 # SrcToken to DestToken. They must be in the "Tokens".

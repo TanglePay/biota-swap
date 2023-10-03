@@ -46,6 +46,10 @@ func main() {
 
 	server.ListenTokens()
 
+	if len(config.TxErrorRecord.Contract) > 0 {
+		go server.ListenTxErrorRecord()
+	}
+
 	daemon.WaitForKill()
 }
 

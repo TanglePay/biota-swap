@@ -174,10 +174,18 @@ func (st *ShimmerToken) getNativeTokenOutputs(b *builder.TransactionBuilder, amo
 	}
 
 	hasNativeToken := true
+	hasExpiration := false
+	hasTimelock := false
 	query := nodeclient.BasicOutputsQuery{
 		AddressBech32: addr.Bech32(prefix),
 		IndexerNativeTokenParas: nodeclient.IndexerNativeTokenParas{
 			HasNativeTokens: &hasNativeToken,
+		},
+		IndexerExpirationParas: nodeclient.IndexerExpirationParas{
+			HasExpiration: &hasExpiration,
+		},
+		IndexerTimelockParas: nodeclient.IndexerTimelockParas{
+			HasTimelock: &hasTimelock,
 		},
 	}
 	res, err := indexer.Outputs(context.Background(), &query)

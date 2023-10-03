@@ -8,7 +8,7 @@ import (
 )
 
 func ListenTxErrorRecord() {
-	contract, err := tokens.NewTxErrorRecordContract(config.TxErrorRecord.NodeUrl, config.TxErrorRecord.Contract, config.TxErrorRecord.ScanEventType, config.TxErrorRecord.TimePeriod)
+	contract, err := tokens.NewTxErrorRecordContract(config.TxErrorRecord.NodeRpc, config.TxErrorRecord.NodeWss, config.TxErrorRecord.Contract, config.TxErrorRecord.ScanEventType, config.TxErrorRecord.TimePeriod)
 	if err != nil {
 		panic(err)
 	}
@@ -16,7 +16,7 @@ func ListenTxErrorRecord() {
 	for {
 		orderC := make(chan *tokens.TxErrorRecord)
 		go contract.StartListen(orderC)
-		gl.OutLogger.Info("Begin to listen TxErrorRecord.")
+		gl.OutLogger.Info("Begin to listen TxErrorRecord : %s", config.TxErrorRecord.Contract)
 	FOR:
 		for {
 			select {

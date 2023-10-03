@@ -30,6 +30,8 @@ var MethodUserWrapEth = crypto.Keccak256Hash([]byte("wrap(address,bytes32)"))
 var MethodUserWrapErc20 = crypto.Keccak256Hash([]byte("wrap(address,bytes32,uint256)"))
 var MethodUserUnWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,bytes32,uint256)"))
 
+var zeroAddr common.Address
+
 type EvmToken struct {
 	client        *ethclient.Client
 	rpc           string
@@ -262,6 +264,10 @@ func (ei *EvmToken) SendSignedTxData(signedHash string, txData []byte) ([]byte, 
 }
 
 func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
+	if len(common.FromHex(to)) != 20 {
+		return nil, fmt.Errorf("To address error. %s", to)
+	}
+
 	txHash := common.FromHex(txid)
 	if len(txHash) > 32 {
 		txHash = txHash[:32]
@@ -301,6 +307,10 @@ func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa
 }
 
 func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
+	if len(common.FromHex(to)) != 20 {
+		return nil, fmt.Errorf("To address error. %s", to)
+	}
+
 	txHash := common.FromHex(txid)
 	if len(txHash) > 32 {
 		txHash = txHash[:32]

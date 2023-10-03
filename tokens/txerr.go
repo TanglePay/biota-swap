@@ -20,16 +20,17 @@ var MethodGetFailTxes = crypto.Keccak256Hash([]byte("getFailTxes(bytes32)"))
 
 type TxErrorRecordContract struct {
 	client     *ethclient.Client
-	url        string
+	rpc        string
+	wss        string
 	chainId    *big.Int
 	account    common.Address
 	contract   common.Address
-	ListenType int //0: listen event, 1: scan block
-	TimePeriod time.Duration
+	ListenType int           //0: listen event, 1: scan block
+	TimePeriod time.Duration //only for scan block
 }
 
-func NewTxErrorRecordContract(uri, conAddr string, _listenType int, seconds time.Duration) (*TxErrorRecordContract, error) {
-	c, err := ethclient.Dial("https://" + uri)
+func NewTxErrorRecordContract(_rpc, _wss, conAddr string, _listenType int, seconds time.Duration) (*TxErrorRecordContract, error) {
+	c, err := ethclient.Dial(_rpc)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +40,8 @@ func NewTxErrorRecordContract(uri, conAddr string, _listenType int, seconds time
 	}
 
 	return &TxErrorRecordContract{
-		url:        uri,
+		rpc:        _rpc,
+		wss:        _wss,
 		client:     c,
 		chainId:    chainId,
 		account:    common.HexToAddress("0x96216849c49358B10257cb55b28eA603c874b05E"),
@@ -51,6 +53,7 @@ func NewTxErrorRecordContract(uri, conAddr string, _listenType int, seconds time
 
 func (c *TxErrorRecordContract) StartListen(ch chan *TxErrorRecord) {
 	if c.ListenType == ListenEvent {
+		c.listenEvent(ch)
 	} else if c.ListenType == ScanBlock {
 		c.scanBlock(ch)
 	}
@@ -113,7 +116,6 @@ func (c *TxErrorRecordContract) scanBlock(ch chan *TxErrorRecord) {
 }
 
 func (c *TxErrorRecordContract) listenEvent(ch chan *TxErrorRecord) {
-	nodeUrl := "wss://" + c.url
 	//Set the query filter
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{c.contract},
@@ -123,7 +125,7 @@ func (c *TxErrorRecordContract) listenEvent(ch chan *TxErrorRecord) {
 	errOrder := &TxErrorRecord{Type: 0}
 
 	//Create the ethclient
-	client, err := ethclient.Dial(nodeUrl)
+	client, err := ethclient.Dial(c.wss)
 	if err != nil {
 		errOrder.Error = fmt.Errorf("The EthWssClient redial error. %v\nThe EthWssClient will be redialed later...\n", err)
 		ch <- errOrder

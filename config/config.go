@@ -150,7 +150,8 @@ type ServerConfig struct {
 }
 
 type TxErrorRecordConfig struct {
-	NodeUrl       string
+	NodeRpc       string
+	NodeWss       string
 	Contract      string
 	ScanEventType int
 	TimePeriod    time.Duration

@@ -5,6 +5,7 @@ import (
 	"bwrap/gl"
 	"bwrap/tokens"
 	"encoding/hex"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -77,7 +78,7 @@ func dealTxErrorRecord(o *tokens.TxErrorRecord) {
 	}
 }
 
-func DealWrapError(src, dest, txid, failedTxid string) []byte {
+func DealWrapError(src, dest, txid, failedTxid string) ([]byte, error) {
 	t1 := NewSourceChain(config.Tokens[src])
 	t2 := NewDestinationChain(config.Tokens[dest])
 
@@ -85,15 +86,13 @@ func DealWrapError(src, dest, txid, failedTxid string) []byte {
 	//verify the txid
 	from, to, amount, err := t1.CheckUserTx(hash, dest, 1)
 	if err != nil {
-		gl.OutLogger.Error("txid check error in dealTxErrorRecord. %s : %v", txid, err)
-		return nil
+		return nil, fmt.Errorf("txid check error in dealTxErrorRecord. %s : %v", txid, err)
 	}
 
 	if len(failedTxid) > 0 {
 		failedHash := common.FromHex(failedTxid)
 		if err := t2.CheckTxFailed(failedHash, hash, to, amount, 1); err != nil {
-			gl.OutLogger.Error("CheckTxFailed. %s : %v", failedHash, err)
-			return nil
+			return nil, fmt.Errorf("CheckTxFailed. %s : %v", failedHash, err)
 		}
 	}
 

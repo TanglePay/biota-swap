@@ -9,6 +9,7 @@ import (
 	"bwrap/tokens"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -111,10 +112,10 @@ func listenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	}
 }
 
-func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) []byte {
+func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) ([]byte, error) {
 	if order.ToToken != t2.Symbol() {
 		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.ToToken, t2.Symbol())
-		return nil
+		return nil, fmt.Errorf("the tx order's target token is error. %s, %s", order.ToToken, t2.Symbol())
 	}
 	wo := model.SwapOrder{
 		TxID:      order.TxID,
@@ -128,7 +129,7 @@ func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) []byte {
 	}
 
 	if !dealedOrders.Check(order.TxID) {
-		return nil
+		return nil, fmt.Errorf("Have sent. %s", order.TxID)
 	}
 
 	// check the chain tx
@@ -142,7 +143,7 @@ func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) []byte {
 	_, prv, err := config.GetPrivateKey(t2.Symbol())
 	if err != nil {
 		gl.OutLogger.Error("GetPrivateKey error. %s, %v", t2.Symbol(), err)
-		return nil
+		return nil, fmt.Errorf("getPrivateKey error. %s, %v", t2.Symbol(), err)
 	}
 	// mint the wrapped token in chain t2
 	id, err := t2.SendWrap(order.TxID, order.Amount, order.To, prv)
@@ -159,7 +160,7 @@ func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) []byte {
 			}
 		}
 	}
-	return id
+	return id, nil
 }
 
 func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {

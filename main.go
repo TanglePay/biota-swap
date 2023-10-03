@@ -42,8 +42,8 @@ func main() {
 		return
 	}
 
-	id := server.DealWrapError(srcToken, desToken, txid, "")
-	fmt.Println(hex.EncodeToString(id))
+	id, err := server.DealWrapError(srcToken, desToken, txid, "")
+	fmt.Println(hex.EncodeToString(id), err)
 }
 
 func readRand() (string, [4]uint64) {

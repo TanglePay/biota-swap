@@ -120,7 +120,7 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 	signer := types.NewEIP155Signer(tx.ChainId())
 	from, err := signer.Sender(tx)
 	if err != nil {
-		return "", "", nil, fmt.Errorf("Get from address from tx error. %s : %v", hash.Hex(), err)
+		return "", "", nil, fmt.Errorf("Get from address from tx error. %s : %d : %v", hash.Hex(), tx.Type(), err)
 	}
 
 	data := tx.Data()

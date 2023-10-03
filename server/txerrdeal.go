@@ -79,6 +79,9 @@ func dealTxErrorRecord(o *tokens.TxErrorRecord) {
 }
 
 func DealWrapError(src, dest, txid, failedTxid string) ([]byte, error) {
+	sentEvmTxes[src] = NewSentEvmTxQueue()
+	sentEvmTxes[dest] = NewSentEvmTxQueue()
+
 	t1 := NewSourceChain(config.Tokens[src])
 	t2 := NewDestinationChain(config.Tokens[dest])
 

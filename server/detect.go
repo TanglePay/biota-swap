@@ -19,10 +19,10 @@ import (
 
 func init() {
 	client = ethrpc.New(config.Smpc.NodeUrl)
+	sentEvmTxes = make(map[string]*SentEvmTxQueue)
 }
 
 func ListenTokens() {
-	sentEvmTxes = make(map[string]*SentEvmTxQueue)
 	for src, dest := range config.WrapPairs {
 		srcTokens[src] = NewSourceChain(config.Tokens[src])
 		destTokens[dest] = NewDestinationChain(config.Tokens[dest])
@@ -111,10 +111,10 @@ func listenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 	}
 }
 
-func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) {
+func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) []byte {
 	if order.ToToken != t2.Symbol() {
 		gl.OutLogger.Error("The tx order's target token is error. %s, %s", order.ToToken, t2.Symbol())
-		return
+		return nil
 	}
 	wo := model.SwapOrder{
 		TxID:      order.TxID,
@@ -128,7 +128,7 @@ func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) {
 	}
 
 	if !dealedOrders.Check(order.TxID) {
-		return
+		return nil
 	}
 
 	// check the chain tx
@@ -142,7 +142,7 @@ func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) {
 	_, prv, err := config.GetPrivateKey(t2.Symbol())
 	if err != nil {
 		gl.OutLogger.Error("GetPrivateKey error. %s, %v", t2.Symbol(), err)
-		return
+		return nil
 	}
 	// mint the wrapped token in chain t2
 	id, err := t2.SendWrap(order.TxID, order.Amount, order.To, prv)
@@ -159,6 +159,7 @@ func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) {
 			}
 		}
 	}
+	return id
 }
 
 func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {

@@ -2,12 +2,11 @@ package main
 
 import (
 	"bwrap/config"
-	"bwrap/daemon"
 	"bwrap/gl"
 	"bwrap/model"
 	"bwrap/server"
-	"bwrap/smpc"
 	"bwrap/tools"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -17,19 +16,7 @@ import (
 )
 
 func main() {
-	if (len(os.Args) == 1) || (os.Args[1] == "-d") {
-		input()
-		if len(os.Args) == 2 {
-			os.Args[1] = "daemon"
-		}
-	} else if (len(os.Args) == 4) && (os.Args[1] == "-key") {
-		createKeyStore(os.Args[2], os.Args[3])
-		return
-	}
-
-	if len(os.Args) == 2 && os.Args[1] == "daemon" {
-		daemon.Background("./out.log", true)
-	}
+	input()
 
 	config.Load(readRand())
 
@@ -37,20 +24,26 @@ func main() {
 
 	model.ConnectToMysql()
 
-	if len(config.Smpc.NodeUrl) > 0 {
-		smpc.InitSmpc(config.Smpc.NodeUrl, config.Smpc.Account)
-		server.Accept()
+	fmt.Printf("Smpc Bridge Error Deal Version %s\n", config.Version)
+
+	if len(os.Args) < 4 {
+		fmt.Printf("Args error. %v\n", os.Args)
+		return
+	}
+	srcToken := os.Args[1]
+	desToken := os.Args[2]
+	txid := os.Args[3]
+	if _, exist := config.Tokens[srcToken]; !exist {
+		fmt.Printf("Args 1 src token symbol error. %s\n", os.Args[1])
+		return
+	}
+	if _, exist := config.Tokens[desToken]; !exist {
+		fmt.Printf("Args 2 dest token symbol error. %s\n", os.Args[2])
+		return
 	}
 
-	fmt.Printf("Smpc Bridge Version %s is starting...\n", config.Version)
-
-	server.ListenTokens()
-
-	if len(config.TxErrorRecord.Contract) > 0 {
-		go server.ListenTxErrorRecord()
-	}
-
-	daemon.WaitForKill()
+	id := server.DealWrapError(srcToken, desToken, txid, "")
+	fmt.Println(hex.EncodeToString(id))
 }
 
 func readRand() (string, [4]uint64) {

@@ -117,7 +117,7 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 	if isPending {
 		return "", "", nil, fmt.Errorf("tx is pending status. %s", hash.Hex())
 	}
-	signer := types.NewEIP155Signer(tx.ChainId())
+	signer := types.NewLondonSigner(tx.ChainId())
 	from, err := signer.Sender(tx)
 	if err != nil {
 		return "", "", nil, fmt.Errorf("Get from address from tx error. %s : %d : %v", hash.Hex(), tx.Type(), err)

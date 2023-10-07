@@ -87,6 +87,7 @@ type SwapOrder struct {
 	From      string
 	To        string
 	Amount    *big.Int
+	Org       string // tag the platform, "IotaBee", "TangleSwap"
 	Error     error
 	Type      int // 0 need to reconnect and 1 only need to record
 }

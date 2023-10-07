@@ -139,8 +139,10 @@ func (ei *EvmToken) dealWrapEvent(ch chan *tokens.SwapOrder, vLog *types.Log) {
 	}
 	fromAddr := common.BytesToAddress(vLog.Topics[1][:]).Hex()
 	toAddr := common.BytesToAddress(vLog.Topics[2][:]).Hex()
-	symbol, _, _ := bytes.Cut(vLog.Data[:32], []byte{0})
+	symbol, org, _ := bytes.Cut(vLog.Data[:32], []byte{0})
+	org, _, _ = bytes.Cut(org, []byte{0})
 	amount := new(big.Int).SetBytes(vLog.Data[32:])
+	org, _, _ = bytes.Cut(org, []byte{0})
 
 	order := &tokens.SwapOrder{
 		TxID:      tx,
@@ -149,7 +151,7 @@ func (ei *EvmToken) dealWrapEvent(ch chan *tokens.SwapOrder, vLog *types.Log) {
 		From:      fromAddr,
 		To:        toAddr,
 		Amount:    amount,
-		Error:     nil,
+		Org:       string(org),
 	}
 	ch <- order
 }
@@ -162,7 +164,8 @@ func (ei *EvmToken) dealUnWrapEvent(ch chan *tokens.SwapOrder, vLog *types.Log) 
 		ch <- errOrder
 		return
 	}
-	symbol, _, _ := bytes.Cut(vLog.Data[:32], []byte{0})
+	symbol, org, _ := bytes.Cut(vLog.Data[:32], []byte{0})
+	org, _, _ = bytes.Cut(org, []byte{0})
 	amount := new(big.Int).SetBytes(vLog.Data[32:])
 
 	order := &tokens.SwapOrder{
@@ -172,7 +175,7 @@ func (ei *EvmToken) dealUnWrapEvent(ch chan *tokens.SwapOrder, vLog *types.Log) 
 		From:      common.BytesToAddress(vLog.Topics[1][:]).Hex(),
 		To:        common.Bytes2Hex(vLog.Topics[2][:]),
 		Amount:    amount,
-		Error:     nil,
+		Org:       string(org),
 	}
 	ch <- order
 }

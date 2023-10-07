@@ -39,9 +39,9 @@ func NewShimmerToken(url, _publicKey, _symbol, _tokenID, hrp string) *ShimmerTok
 	}
 	var foundryID iotago.FoundryID
 	copy(foundryID[:], nativeID)
-	pubKey, err := hex.DecodeString(_publicKey)
-	if err != nil {
-		panic(err)
+	pubKey := common.FromHex(_publicKey)
+	if len(pubKey) != 32 {
+		panic("NewShimmerToken, wrong public key : " + _publicKey)
 	}
 	edAddr := iotago.Ed25519AddressFromPubKey(pubKey)
 	return &ShimmerToken{
@@ -150,6 +150,7 @@ func (t *ShimmerToken) dealNewOutput(protoParas *iotago.ProtocolParameters, outp
 		From:      wrapOrder.From,
 		To:        wrapOrder.To,
 		Amount:    userAmount,
+		Org:       wrapOrder.Tag,
 	}
 	ch <- order
 	return fmt.Errorf("Use Payload Data to Wrap")

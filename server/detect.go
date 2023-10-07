@@ -125,6 +125,7 @@ func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) {
 		To:        order.To,
 		Amount:    order.Amount.String(),
 		Ts:        time.Now().UnixMilli(),
+		Org:       order.Org,
 	}
 
 	if !dealedOrders.Check(order.TxID) {
@@ -176,6 +177,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {
 		To:        order.To,
 		Amount:    order.Amount.String(),
 		Ts:        time.Now().UnixMilli(),
+		Org:       order.Org,
 	}
 
 	if !dealedOrders.Check(order.TxID) {

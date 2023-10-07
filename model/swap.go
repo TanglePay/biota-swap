@@ -12,10 +12,11 @@ type SwapOrder struct {
 	Hash      string
 	State     int
 	Ts        int64
+	Org       string
 }
 
 func StoreSwapOrder(wo *SwapOrder) error {
-	_, err := db.Exec("insert into `swap_order`(`txid`,`src_token`,`dest_token`,`wrap`,`from`,`to`,`amount`,`ts`) values(?,?,?,?,?,?,?,?)", wo.TxID, wo.SrcToken, wo.DestToken, wo.Wrap, wo.From, wo.To, wo.Amount, wo.Ts)
+	_, err := db.Exec("insert into `swap_order`(`txid`,`src_token`,`dest_token`,`wrap`,`from`,`to`,`amount`,`ts`,`org`) values(?,?,?,?,?,?,?,?,?)", wo.TxID, wo.SrcToken, wo.DestToken, wo.Wrap, wo.From, wo.To, wo.Amount, wo.Ts, wo.Org)
 	return err
 }
 
@@ -33,7 +34,7 @@ func MoveOrderToError(wo *SwapOrder) error {
 		return err
 	}
 
-	if _, err = tx.Exec("insert into `error_order`(`txid`,`src_token`,`dest_token`,`wrap`,`from`,`to`,`amount`,`hash`,`state`,`ts`) values(?,?,?,?,?,?,?,?,?,?)", wo.TxID, wo.SrcToken, wo.DestToken, wo.Wrap, wo.From, wo.To, wo.Amount, wo.Hash, wo.State, wo.Ts); err != nil {
+	if _, err = tx.Exec("insert into `error_order`(`txid`,`src_token`,`dest_token`,`wrap`,`from`,`to`,`amount`,`hash`,`state`,`ts`,`org`) values(?,?,?,?,?,?,?,?,?,?,?)", wo.TxID, wo.SrcToken, wo.DestToken, wo.Wrap, wo.From, wo.To, wo.Amount, wo.Hash, wo.State, wo.Ts, wo.Org); err != nil {
 		tx.Rollback()
 		return err
 	}

@@ -16,6 +16,9 @@ type SwapOrder struct {
 }
 
 func StoreSwapOrder(wo *SwapOrder) error {
+	if len(wo.Org) == 0 {
+		wo.Org = "IotaBee"
+	}
 	_, err := db.Exec("insert into `swap_order`(`txid`,`src_token`,`dest_token`,`wrap`,`from`,`to`,`amount`,`ts`,`org`) values(?,?,?,?,?,?,?,?,?)", wo.TxID, wo.SrcToken, wo.DestToken, wo.Wrap, wo.From, wo.To, wo.Amount, wo.Ts, wo.Org)
 	return err
 }

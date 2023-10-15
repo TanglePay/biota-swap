@@ -9,11 +9,11 @@ import (
 	"bwrap/smpc"
 	"bwrap/tools"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"golang.org/x/term"
 )
 
 func main() {
@@ -75,11 +75,12 @@ func readRand() (string, [4]uint64) {
 }
 
 func input() {
-	var pwd string
-	fmt.Printf("Enter keystore's password: ")
-	fmt.Scanf("%s", &pwd)
-	//pwd = "1234567"
-	if err := os.WriteFile("rand.data", []byte(pwd), 0666); err != nil {
+	fmt.Printf("Input password \n:")
+	pwd, err := term.ReadPassword(int(os.Stdin.Fd()))
+	if err != nil {
+		panic("read pwd error:" + err.Error())
+	}
+	if err := os.WriteFile("rand.data", pwd, 0666); err != nil {
 		log.Panicf("write rand.data error. %v", err)
 	}
 }
@@ -95,7 +96,7 @@ func createKeyStore(pwd, filename string) {
 		log.Fatal(err)
 	}
 
-	if err := ioutil.WriteFile(filename, jsonData, 0666); err != nil {
+	if err := os.WriteFile(filename, jsonData, 0666); err != nil {
 		log.Fatal(err)
 	}
 }

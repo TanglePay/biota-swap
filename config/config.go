@@ -4,8 +4,8 @@ import (
 	"bwrap/log"
 	"bwrap/tools"
 	"crypto/ecdsa"
-	"io/ioutil"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -27,7 +27,7 @@ var (
 	TxErrorRecord TxErrorRecordConfig
 )
 
-//Load load config file
+// Load load config file
 func Load(pwd string, _seeds [4]uint64) {
 	password, seeds = pwd, _seeds
 	type AllConfig struct {
@@ -57,7 +57,7 @@ func Load(pwd string, _seeds [4]uint64) {
 		tt := t
 		if len(t.KeyStore) > 0 {
 			var keyjson []byte
-			keyjson, err := ioutil.ReadFile(t.KeyStore)
+			keyjson, err := os.ReadFile(t.KeyStore)
 			if err != nil {
 				log.Panicf("Read keystore file fail. %s : %v\n", t.KeyStore, err)
 			}
@@ -74,7 +74,7 @@ func Load(pwd string, _seeds [4]uint64) {
 	}
 
 	var keyjson []byte
-	keyjson, err = ioutil.ReadFile(all.Smpc.KeyStore)
+	keyjson, err = os.ReadFile(all.Smpc.KeyStore)
 	if err != nil {
 		log.Panicf("Read keystore file fail. %s : %v\n", all.Smpc.KeyStore, err)
 	}

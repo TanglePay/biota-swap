@@ -52,7 +52,8 @@ require (
 	github.com/triplefi/go-logger v0.0.0-20220307105310-4b8a2a5b29c1
 	golang.org/x/crypto v0.2.0
 	golang.org/x/net v0.2.0 // indirect
-	golang.org/x/sys v0.2.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/term v0.13.0
 	golang.org/x/text v0.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20220923205249-dd2d53f1fffc // indirect
 	google.golang.org/grpc v1.49.0 // indirect

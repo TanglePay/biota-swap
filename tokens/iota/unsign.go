@@ -43,7 +43,6 @@ func NewIotaToken(_rpc, _wss, publicKey, _hrp string) *IotaToken {
 	}
 }
 
-//
 func (it *IotaToken) MultiSignType() int {
 	return tokens.SmpcSign
 }

@@ -159,7 +159,7 @@ MultiSignType = 0
 Contract = "0xa158A39d00C79019A01A6E86c56E96C461334Eb0"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
-GasPriceUpper = 10
+GasPriceUpper = 0
 
 [[Tokens]]
 Symbol = "sBTC"
@@ -171,7 +171,7 @@ MultiSignType = 0
 Contract = "0x1cDF3F46DbF8Cf099D218cF96A769cea82F75316"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
-GasPriceUpper = 10
+GasPriceUpper = 0
 
 # Pairs is the bridge pair. 
 # SrcToken to DestToken. They must be in the "Tokens".

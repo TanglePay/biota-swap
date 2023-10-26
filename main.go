@@ -17,19 +17,11 @@ import (
 )
 
 func main() {
-	if (len(os.Args) == 1) || (os.Args[1] == "-d") {
+	if os.Args[len(os.Args)-1] != "-d" {
 		input()
-		if len(os.Args) == 2 {
-			os.Args[1] = "daemon"
-		}
-	} else if (len(os.Args) == 4) && (os.Args[1] == "-key") {
-		createKeyStore(os.Args[2], os.Args[3])
-		return
+		os.Args = append(os.Args, "-d")
 	}
-
-	if len(os.Args) == 2 && os.Args[1] == "daemon" {
-		daemon.Background("./out.log", true)
-	}
+	daemon.Background("./out.log", true)
 
 	config.Load(readRand())
 
@@ -80,12 +72,12 @@ func input() {
 	if err != nil {
 		panic("read pwd error:" + err.Error())
 	}
-	if err := os.WriteFile("rand.data", pwd, 0666); err != nil {
+	if err := os.WriteFile("rand.data", []byte(pwd), 0666); err != nil {
 		log.Panicf("write rand.data error. %v", err)
 	}
 }
 
-func createKeyStore(pwd, filename string) {
+func CreateKeyStore(pwd, filename string) {
 	ks := keystore.NewKeyStore("./keystores", keystore.StandardScryptN, keystore.StandardScryptP)
 	account, err := ks.NewAccount(pwd)
 	if err != nil {

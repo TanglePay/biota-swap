@@ -1,4 +1,4 @@
-package smr
+package iotasmr
 
 import (
 	"bwrap/tokens"
@@ -22,8 +22,8 @@ type IotaSmrToken struct {
 	hrp        iotago.NetworkPrefix
 	addr       iotago.Address
 	addrBech32 string // bech32 address
-	tokenID    iotago.FoundryID
 	symbol     string
+	tokenID    iotago.FoundryID
 }
 
 // NewShimmerToken
@@ -33,9 +33,11 @@ type IotaSmrToken struct {
 // if tokenID is empty, it means smr or iota token; else it is L1 token
 // hrp, smr or iota
 func NewIotaSmrToken(url, _publicKey, _symbol, _tokenID, hrp string) *IotaSmrToken {
-	nativeID := common.FromHex(_tokenID)
 	var foundryID iotago.FoundryID
-	copy(foundryID[:], nativeID)
+	nativeID := common.FromHex(_tokenID)
+	if len(nativeID) == iotago.FoundryIDLength {
+		copy(foundryID[:], nativeID)
+	}
 	pubKey := common.FromHex(_publicKey)
 	if len(pubKey) != 32 {
 		panic("NewIotaSmrToken, wrong public key : " + _publicKey)

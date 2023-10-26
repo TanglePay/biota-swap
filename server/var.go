@@ -5,13 +5,12 @@ import (
 	"bwrap/model"
 	"bwrap/tokens"
 	"bwrap/tokens/evm"
-	"bwrap/tokens/iota"
+	"bwrap/tokens/iotasmr"
 	"bwrap/tokens/smr"
 	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/onrik/ethrpc"
 )
 
 type DealedOrdersCheck struct {
@@ -127,15 +126,11 @@ func (q *SentEvmTxQueue) UpdateTop(txHash common.Hash, t tokens.EvmToken, ts int
 }
 
 var (
-	client       *ethrpc.EthRPC
 	srcTokens    map[string]tokens.SourceToken
 	destTokens   map[string]tokens.DestinationToken
 	dealedOrders *DealedOrdersCheck
 	sentIotaTxes SentIotaTx
 	sentEvmTxes  map[string]*SentEvmTxQueue // key : address+chainid
-
-	seeds [4]uint64
-	wg    sync.WaitGroup
 )
 
 const (
@@ -159,9 +154,9 @@ type MsgContext struct {
 func NewSourceChain(conf *config.Token) tokens.SourceToken {
 	switch conf.Symbol {
 	case "IOTA":
-		return iota.NewIotaToken(conf.NodeRpc, conf.NodeWss, conf.PublicKey, "iota")
+		return iotasmr.NewIotaSmrToken(conf.NodeRpc, conf.PublicKey, conf.Symbol, conf.Contract, "iota")
 	case "ATOI":
-		return iota.NewIotaToken(conf.NodeRpc, conf.NodeWss, conf.PublicKey, "atoi")
+		return iotasmr.NewIotaSmrToken(conf.NodeRpc, conf.PublicKey, conf.Symbol, conf.Contract, "atoi")
 	case "SOON":
 		return smr.NewShimmerToken(conf.NodeRpc, conf.PublicKey, conf.Symbol, conf.Contract, "smr")
 	default:

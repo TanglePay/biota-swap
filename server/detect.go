@@ -14,12 +14,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/onrik/ethrpc"
 )
-
-func init() {
-	client = ethrpc.New(config.Smpc.NodeUrl)
-}
 
 func ListenTokens() {
 	sentEvmTxes = make(map[string]*SentEvmTxQueue)

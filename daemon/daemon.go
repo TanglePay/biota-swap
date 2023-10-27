@@ -2,7 +2,6 @@ package daemon
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -60,8 +59,8 @@ func Background(logFile string, isExit bool) (*exec.Cmd, error) {
 // wait for a kill(9) single to exit
 func WaitForKill() {
 	if pid := os.Getpid(); pid != 1 {
-		ioutil.WriteFile("process.pid", []byte(strconv.Itoa(pid)), 0666)
-		ioutil.WriteFile("stop.sh", []byte("kill `cat process.pid`"), 0777)
+		os.WriteFile("process.pid", []byte(strconv.Itoa(pid)), 0666)
+		os.WriteFile("stop.sh", []byte("kill `cat process.pid`"), 0777)
 		defer os.Remove("process.pid")
 		defer os.Remove("stop.sh")
 	}

@@ -23,14 +23,12 @@ var MethodWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,uint256,address)"))
 var MethodSend = crypto.Keccak256Hash([]byte("send(bytes32,uint256,address)"))
 var MethodUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,bytes32,uint256)"))
 
-//wrap(address to, bytes32 symbol)
-//wrap(address to, bytes32 symbol, uint256 amount)
-//unWrap(bytes32 to, bytes32 symbol, uint256 amount)
+// wrap(address to, bytes32 symbol)
+// wrap(address to, bytes32 symbol, uint256 amount)
+// unWrap(bytes32 to, bytes32 symbol, uint256 amount)
 var MethodUserWrapEth = crypto.Keccak256Hash([]byte("wrap(address,bytes32)"))
 var MethodUserWrapErc20 = crypto.Keccak256Hash([]byte("wrap(address,bytes32,uint256)"))
 var MethodUserUnWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,bytes32,uint256)"))
-
-var zeroAddr common.Address
 
 type EvmToken struct {
 	client        *ethclient.Client
@@ -100,7 +98,7 @@ func (ei *EvmToken) CheckSentTx(txid []byte) (bool, error) {
 	hash := common.BytesToHash(txid)
 	ftx, err := ei.client.TransactionReceipt(context.Background(), hash)
 	if err != nil {
-		return true, fmt.Errorf("TransactionReceipt error. %v", err)
+		return true, fmt.Errorf("transactionReceipt error. %v", err)
 	}
 	if ftx.Status == 0 { //failed
 		return false, fmt.Errorf("tx sent error. %s", hash.Hex())
@@ -120,16 +118,16 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 	signer := types.NewEIP155Signer(tx.ChainId())
 	from, err := signer.Sender(tx)
 	if err != nil {
-		return "", "", nil, fmt.Errorf("Get from address from tx error. %s : %v", hash.Hex(), err)
+		return "", "", nil, fmt.Errorf("get from address from tx error. %s : %v", hash.Hex(), err)
 	}
 
 	data := tx.Data()
 	usrD := 0
-	if bytes.Compare(data[:4], MethodUserWrapEth[:4]) != 0 {
+	if !bytes.Equal(data[:4], MethodUserWrapEth[:4]) {
 		usrD = 1
-	} else if bytes.Compare(data[:4], MethodUserWrapErc20[:4]) != 0 {
+	} else if !bytes.Equal(data[:4], MethodUserWrapErc20[:4]) {
 		usrD = 1
-	} else if bytes.Compare(data[:4], MethodUserUnWrap[:4]) != 0 {
+	} else if !bytes.Equal(data[:4], MethodUserUnWrap[:4]) {
 		usrD = -1
 	}
 	if d != usrD {
@@ -179,7 +177,7 @@ func (ei *EvmToken) CheckTxFailed(failedTx, txid []byte, to string, amount *big.
 		return fmt.Errorf("tx(%s) success", txHash.Hex())
 	}
 
-	if bytes.Compare(ei.account[:], r.From[:]) != 0 {
+	if !bytes.Equal(ei.account[:], r.From[:]) {
 		return fmt.Errorf("the `from` address is not equal. %s : %s : %s", ei.account.Hex(), r.From.Hex(), txHash.Hex())
 	}
 
@@ -193,17 +191,17 @@ func (ei *EvmToken) CheckTxFailed(failedTx, txid []byte, to string, amount *big.
 
 	data := tx.Data()
 	if d == -1 {
-		if bytes.Compare(data[:4], MethodSend[:4]) != 0 {
-			return fmt.Errorf("tx is not send.")
+		if !bytes.Equal(data[:4], MethodSend[:4]) {
+			return fmt.Errorf("tx is not send")
 		}
 	} else {
-		if bytes.Compare(data[:4], MethodWrap[:4]) != 0 {
-			return fmt.Errorf("tx is not wrap.")
+		if !bytes.Equal(data[:4], MethodWrap[:4]) {
+			return fmt.Errorf("tx is not wrap")
 		}
 	}
 	data = data[4:]
 
-	if bytes.Compare(data[:32], txid) != 0 {
+	if !bytes.Equal(data[:32], txid) {
 		return fmt.Errorf("txid is not equal. %s : %s", hex.EncodeToString(data[:32]), hex.EncodeToString(txid))
 	}
 
@@ -229,13 +227,13 @@ func (ei *EvmToken) CheckUnWrapTx(txid []byte, to, symbol string, amount *big.In
 	}
 
 	data := tx.Data()
-	if bytes.Compare(data[:4], MethodUnWrap[:4]) != 0 {
-		return fmt.Errorf("tx is not UnWrap.")
+	if !bytes.Equal(data[:4], MethodUnWrap[:4]) {
+		return fmt.Errorf("tx is not UnWrap")
 	}
 	data = data[4:]
 
-	if bytes.Compare(common.Hex2Bytes(to), data[:32]) != 0 {
-		return fmt.Errorf("to address is not equal. %s : %s", to, common.Bytes2Hex(data[:32]))
+	if !bytes.Equal(common.FromHex(to), data[:32]) {
+		return fmt.Errorf("to address is not equal. %s : %s", to, hex.EncodeToString(data[:32]))
 	}
 	data = data[32:]
 
@@ -265,7 +263,7 @@ func (ei *EvmToken) SendSignedTxData(signedHash string, txData []byte) ([]byte, 
 
 func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
 	if len(common.FromHex(to)) != 20 {
-		return nil, fmt.Errorf("To address error. %s", to)
+		return nil, fmt.Errorf("to address error. %s", to)
 	}
 
 	txHash := common.FromHex(txid)
@@ -286,7 +284,7 @@ func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa
 
 	gasPrice, err := ei.client.SuggestGasPrice(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
+		return nil, fmt.Errorf("get SuggestGasPrice error. %v", err)
 	}
 	gasPrice.Mul(gasPrice, big.NewInt(100+ei.GasPriceUpper))
 	gasPrice.Div(gasPrice, big.NewInt(100))
@@ -308,7 +306,7 @@ func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa
 
 func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
 	if len(common.FromHex(to)) != 20 {
-		return nil, fmt.Errorf("To address error. %s", to)
+		return nil, fmt.Errorf("to address error. %s", to)
 	}
 
 	txHash := common.FromHex(txid)
@@ -329,7 +327,7 @@ func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecd
 
 	gasPrice, err := ei.client.SuggestGasPrice(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("Get SuggestGasPrice error. %v", err)
+		return nil, fmt.Errorf("get SuggestGasPrice error. %v", err)
 	}
 	gasPrice.Mul(gasPrice, big.NewInt(100+ei.GasPriceUpper))
 	gasPrice.Div(gasPrice, big.NewInt(100))
@@ -350,11 +348,11 @@ func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecd
 }
 
 func (ei *EvmToken) CreateUnWrapTxData(addr string, amount *big.Int, extra []byte) ([]byte, []byte, error) {
-	return nil, nil, fmt.Errorf("Don't support this method")
+	return nil, nil, fmt.Errorf("don't support this method")
 }
 
 func (ei *EvmToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {
-	return tokens.BaseTransaction{}, fmt.Errorf("Don't support this method")
+	return tokens.BaseTransaction{}, fmt.Errorf("don't support this method")
 }
 
 func (ei *EvmToken) CheckPendingAndSpeedUp(txHash common.Hash, prv *ecdsa.PrivateKey) (common.Hash, error) {

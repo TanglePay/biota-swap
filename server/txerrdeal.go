@@ -3,8 +3,10 @@ package server
 import (
 	"bwrap/config"
 	"bwrap/gl"
+	"bwrap/log"
 	"bwrap/tokens"
 	"encoding/hex"
+	"time"
 )
 
 func ListenTxErrorRecord() {
@@ -13,36 +15,33 @@ func ListenTxErrorRecord() {
 		panic(err)
 	}
 
+	log.Infof("Start to listen TxErrorRecord : %s", config.TxErrorRecord.Contract)
 	for {
 		orderC := make(chan *tokens.TxErrorRecord)
 		go contract.StartListen(orderC)
 		gl.OutLogger.Info("Begin to listen TxErrorRecord : %s", config.TxErrorRecord.Contract)
-	FOR:
-		for {
-			select {
-			case order := <-orderC:
-				if order.Error != nil {
-					gl.OutLogger.Error("Listen TxErrorRecord. %v", order.Error)
-					if order.Type == 0 {
-						break FOR
-					}
-				} else {
-					gl.OutLogger.Info("TxErrorRecord : %v", *order)
-					dealTxErrorRecord(order)
+		for order := range orderC {
+			if order.Error != nil {
+				gl.OutLogger.Error("Listen TxErrorRecord. %v", order.Error)
+				if order.Type == 0 {
+					break
 				}
+			} else {
+				gl.OutLogger.Info("Deal TxErrorRecord : (%s:%s), %s", order.FromCoin, order.ToCoin, hex.EncodeToString(order.Txid))
+				dealTxErrorRecord(order)
 			}
 		}
+		time.Sleep(time.Second * 3)
+		gl.OutLogger.Error("try to connect TxErrorRecord node again.")
 	}
 }
 
 func dealTxErrorRecord(o *tokens.TxErrorRecord) {
-	var t1, t2 tokens.Token
+	var t1 tokens.Token
 	if o.D == -1 {
 		t1 = destTokens[o.FromCoin]
-		t2 = srcTokens[o.ToCoin]
 	} else if o.D == 1 {
 		t1 = srcTokens[o.FromCoin]
-		t2 = destTokens[o.ToCoin]
 	}
 
 	//verify the txid
@@ -50,13 +49,6 @@ func dealTxErrorRecord(o *tokens.TxErrorRecord) {
 	if err != nil {
 		gl.OutLogger.Error("txid check error in dealTxErrorRecord. %s : %v", hex.EncodeToString(o.Txid), err)
 		return
-	}
-
-	for i := range o.FailedTxes {
-		if err := t2.CheckTxFailed(o.FailedTxes[i], o.Txid, to, amount, o.D); err != nil {
-			gl.OutLogger.Error("CheckTxFailed. %s : %v", hex.EncodeToString(o.FailedTxes[i]), err)
-			return
-		}
 	}
 
 	order := &tokens.SwapOrder{

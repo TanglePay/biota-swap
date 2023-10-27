@@ -39,7 +39,7 @@ func (ei *EvmToken) scanBlock(event common.Hash, ch chan *tokens.SwapOrder) {
 	if err != nil {
 		errOrder := &tokens.SwapOrder{
 			Type:  0,
-			Error: fmt.Errorf("Get the block number error. %s : %v", ei.symbol, err),
+			Error: fmt.Errorf("get the block number error. %s : %v", ei.symbol, err),
 		}
 		ch <- errOrder
 		return
@@ -102,21 +102,21 @@ func (ei *EvmToken) listenEvent(event common.Hash, ch chan *tokens.SwapOrder) {
 	//Create the ethclient
 	c, err := ethclient.Dial(ei.wss)
 	if err != nil {
-		errOrder.Error = fmt.Errorf("The EthWssClient redial error. %v\nThe EthWssClient will be redialed later...\n", err)
+		errOrder.Error = fmt.Errorf("the EthWssClient redial error. %v\nThe EthWssClient will be redialed later", err)
 		ch <- errOrder
 		return
 	}
 	eventLogChan := make(chan types.Log)
 	sub, err := c.SubscribeFilterLogs(context.Background(), query, eventLogChan)
 	if err != nil || sub == nil {
-		errOrder.Error = fmt.Errorf("Get event logs from eth wss client error. %v\n", err)
+		errOrder.Error = fmt.Errorf("get event logs from eth wss client error. %v", err)
 		ch <- errOrder
 		return
 	}
 	for {
 		select {
 		case err := <-sub.Err():
-			errOrder.Error = fmt.Errorf("Event wss sub error. %v\nThe EthWssClient will be redialed later...\n", err)
+			errOrder.Error = fmt.Errorf("event wss sub error. %v\nThe EthWssClient will be redialed later", err)
 			ch <- errOrder
 			return
 		case vLog := <-eventLogChan:
@@ -133,7 +133,7 @@ func (ei *EvmToken) dealWrapEvent(ch chan *tokens.SwapOrder, vLog *types.Log) {
 	errOrder := &tokens.SwapOrder{Type: 1}
 	tx := vLog.TxHash.Hex()
 	if len(vLog.Data) != 64 {
-		errOrder.Error = fmt.Errorf("Wrap event data is nil. %s, %s, %s\n", tx, vLog.Address.Hex(), vLog.Topics[1].Hex())
+		errOrder.Error = fmt.Errorf("wrap event data is nil. %s, %s, %s", tx, vLog.Address.Hex(), vLog.Topics[1].Hex())
 		ch <- errOrder
 		return
 	}
@@ -160,7 +160,7 @@ func (ei *EvmToken) dealUnWrapEvent(ch chan *tokens.SwapOrder, vLog *types.Log) 
 	errOrder := &tokens.SwapOrder{Type: 1}
 	tx := vLog.TxHash.Hex()
 	if len(vLog.Data) == 0 {
-		errOrder.Error = fmt.Errorf("UnWrap event data is nil. %s, %s, %s\n", tx, vLog.Address.Hex(), vLog.Topics[1].Hex())
+		errOrder.Error = fmt.Errorf("unWrap event data is nil. %s, %s, %s", tx, vLog.Address.Hex(), vLog.Topics[1].Hex())
 		ch <- errOrder
 		return
 	}

@@ -174,6 +174,9 @@ func (ist *IotaSmrToken) CreateUnWrapTxData(ed25519Id string, amount *big.Int, t
 	}
 	addr := &iotago.Ed25519Address{}
 	copy(addr[:], addrBytes)
+	if len(tag) > iotago.MaxTagLength {
+		return nil, nil, fmt.Errorf("tag too long. %s", hex.EncodeToString(tag))
+	}
 	if ist.tokenID.Empty() {
 		return ist.getUnSignedTxDataBasic(addr, amount, tag)
 	}
@@ -182,7 +185,7 @@ func (ist *IotaSmrToken) CreateUnWrapTxData(ed25519Id string, amount *big.Int, t
 
 func (ist *IotaSmrToken) SendSignedTxData(signedHash string, txData []byte) ([]byte, error) {
 	ed25519Sig := &iotago.Ed25519Signature{}
-	copy(ed25519Sig.Signature[:], signedHash)
+	copy(ed25519Sig.Signature[:], common.FromHex(signedHash))
 	copy(ed25519Sig.PublicKey[:], ist.publicKey)
 
 	blockBuilder, err := NewBlockBuilder(ist.protoParas, txData, ed25519Sig)
@@ -241,7 +244,6 @@ func (ist *IotaSmrToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseT
 
 func (ist *IotaSmrToken) getUnSignedTxDataBasic(toAddr iotago.Address, amount *big.Int, tag []byte) ([]byte, []byte, error) {
 	sendAmount := amount.Uint64()
-
 	info, err := ist.nodeAPI.Info(context.Background())
 	if err != nil {
 		return nil, nil, fmt.Errorf("get iotasmr node info error. %v", err)
@@ -255,11 +257,11 @@ func (ist *IotaSmrToken) getUnSignedTxDataBasic(toAddr iotago.Address, amount *b
 			Address: toAddr,
 		}},
 		Features: iotago.Features{
-			&iotago.TagFeature{
-				Tag: tag,
-			},
 			&iotago.MetadataFeature{
 				Data: []byte("Unwrap"),
+			},
+			&iotago.TagFeature{
+				Tag: tag,
 			},
 		},
 	}
@@ -298,11 +300,11 @@ func (ist *IotaSmrToken) getUnSignedTxDataNativeToken(toAddr iotago.Address, amo
 			Address: toAddr,
 		}},
 		Features: iotago.Features{
-			&iotago.TagFeature{
-				Tag: tag,
-			},
 			&iotago.MetadataFeature{
 				Data: []byte("Unwrap"),
+			},
+			&iotago.TagFeature{
+				Tag: tag,
 			},
 		},
 	}

@@ -1,12 +1,13 @@
 package tokens
 
 import (
+	"encoding/hex"
 	"fmt"
 	"testing"
 )
 
 func TestTxErr(t *testing.T) {
-	c, err := NewTxErrorRecordContract("https://json-rpc.evm.testnet.shimmer.network/", "wss://ws.json-rpc.evm.testnet.shimmer.network/", "0xfb55F7f7694F22658FfE6d0fDE37D39384996C4a", ScanBlock, 10)
+	c, err := NewTxErrorRecordContract("https://json-rpc.evm.shimmer.network/", "wss://ws.json-rpc.evm.shimmer.network/", "0xD9B13709Ce4Ef82402c091f3fc8A93a9360A5c1e", 0, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -14,17 +15,14 @@ func TestTxErr(t *testing.T) {
 	orderC := make(chan *TxErrorRecord)
 	go c.StartListen(orderC)
 
-	for {
-		select {
-		case order := <-orderC:
-			if order.Error != nil {
-				fmt.Println(err)
-				if order.Type == 0 {
-					t.Fatal(err)
-				}
-			} else {
-				fmt.Println(*order)
+	for order := range orderC {
+		if order.Error != nil {
+			fmt.Println(err)
+			if order.Type == 0 {
+				t.Fatal(err)
 			}
+		} else {
+			fmt.Println(hex.EncodeToString(order.Txid), order.FromCoin, order.ToCoin)
 		}
 	}
 }

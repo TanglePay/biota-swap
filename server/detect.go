@@ -24,7 +24,6 @@ func ListenTokens() {
 
 		log.Infof("src %s : %s, dest %s : %s", src, srcTokens[src].Address(), dest, destTokens[dest].Address())
 
-		// recheck the tx is pending or not
 		if srcTokens[src].MultiSignType() == tokens.EvmMultiSign {
 			key := srcTokens[src].Address() + srcTokens[src].ChainID()
 			if _, exist := sentEvmTxes[key]; !exist {
@@ -53,23 +52,19 @@ func listenWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 		orderC := make(chan *tokens.SwapOrder, 10)
 		go t1.StartWrapListen(orderC)
 		gl.OutLogger.Info("Begin to listen source token %s : %s.", t1.Symbol(), t1.Address())
-	FOR:
-		for {
-			select {
-			case order := <-orderC:
-				if order.Error != nil {
-					gl.OutLogger.Error(order.Error.Error())
-					if order.Type == 0 {
-						break FOR
-					}
-				} else {
-					gl.OutLogger.Info("Wrap Order : %v", *order)
-					if order.Amount.Cmp(config.Tokens[t1.Symbol()].MinAmount) < 0 {
-						gl.OutLogger.Error("The amount of %s is smaller than %s", t1.Symbol(), config.Tokens[t1.Symbol()].MinAmount.String())
-						continue
-					}
-					dealWrapOrder(t2, order)
+		for order := range orderC {
+			if order.Error != nil {
+				gl.OutLogger.Error(order.Error.Error())
+				if order.Type == 0 {
+					break
 				}
+			} else {
+				gl.OutLogger.Info("Wrap Order : %v", *order)
+				if order.Amount.Cmp(config.Tokens[t1.Symbol()].MinAmount) < 0 {
+					gl.OutLogger.Error("The amount of %s is smaller than %s", t1.Symbol(), config.Tokens[t1.Symbol()].MinAmount.String())
+					continue
+				}
+				dealWrapOrder(t2, order)
 			}
 		}
 		time.Sleep(time.Second * 3)
@@ -82,23 +77,19 @@ func listenUnWrap(t1 tokens.SourceToken, t2 tokens.DestinationToken) {
 		orderC := make(chan *tokens.SwapOrder, 10000)
 		go t2.StartUnWrapListen(orderC)
 		gl.OutLogger.Info("Begin to listen dest token %s : %s.", t2.Symbol(), t2.Address())
-	FOR:
-		for {
-			select {
-			case order := <-orderC:
-				if order.Error != nil {
-					gl.OutLogger.Error(order.Error.Error())
-					if order.Type == 0 {
-						break FOR
-					}
-				} else {
-					gl.OutLogger.Info("UnWrap Order : %v", *order)
-					if order.Amount.Cmp(config.Tokens[t2.Symbol()].MinAmount) < 0 {
-						gl.OutLogger.Error("The amount of %s is smaller than %s", t1.Symbol(), config.Tokens[t2.Symbol()].MinAmount.String())
-						continue
-					}
-					dealUnWrapOrder(t1, order)
+		for order := range orderC {
+			if order.Error != nil {
+				gl.OutLogger.Error(order.Error.Error())
+				if order.Type == 0 {
+					break
 				}
+			} else {
+				gl.OutLogger.Info("UnWrap Order : %v", *order)
+				if order.Amount.Cmp(config.Tokens[t2.Symbol()].MinAmount) < 0 {
+					gl.OutLogger.Error("The amount of %s is smaller than %s", t1.Symbol(), config.Tokens[t2.Symbol()].MinAmount.String())
+					continue
+				}
+				dealUnWrapOrder(t1, order)
 			}
 		}
 		time.Sleep(time.Second * 5)
@@ -217,13 +208,8 @@ func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {
 		return
 	}
 
-	data, _ := json.Marshal(map[string]string{
-		"txid":   wo.TxID,
-		"from":   wo.From,
-		"to":     wo.To,
-		"amount": wo.Amount,
-	})
-	hash, txData, err := t1.CreateUnWrapTxData(order.To, order.Amount, data)
+	tag := common.FromHex(wo.TxID)
+	hash, txData, err := t1.CreateUnWrapTxData(order.To, order.Amount, tag)
 	if err != nil {
 		gl.OutLogger.Error("CreateUnsignTxData error. %v : %v", err, order)
 		return
@@ -246,7 +232,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {
 		gl.OutLogger.Error("smpc.Sign error(%v). %v", err, order)
 		return
 	} else {
-		gl.OutLogger.Info("Require Sign to smpc for unwrap. %s", keyID)
+		gl.OutLogger.Info("Require Sign to smpc for unwrap. %s : %s", keyID, hexutil.Encode(hash))
 	}
 
 	if txid := detectSignStatus(keyID, txData, t1); txid != nil {
@@ -271,7 +257,7 @@ func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) []byte 
 				gl.OutLogger.Error("SendSignedTxData error. %v, %v", keyID, err)
 				return nil
 			} else {
-				gl.OutLogger.Info("SendSignedTxData OK. %s", hex.EncodeToString(txID))
+				gl.OutLogger.Info("SendSignedTxData OK. %s : %s", hex.EncodeToString(txID), rsvs[0])
 				return txID
 			}
 		}

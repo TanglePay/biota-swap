@@ -17,9 +17,9 @@ import (
 )
 
 func main() {
-	if os.Args[len(os.Args)-1] != "-d" {
+	if os.Args[len(os.Args)-1] != "daemon" {
 		input()
-		os.Args = append(os.Args, "-d")
+		os.Args = append(os.Args, "daemon")
 	}
 	daemon.Background("./out.log", true)
 
@@ -36,7 +36,7 @@ func main() {
 
 	fmt.Printf("Smpc Bridge Version %s is starting...\n", config.Version)
 
-	server.ListenTokens()
+	go server.Start()
 
 	if len(config.TxErrorRecord.Contract) > 0 {
 		go server.ListenTxErrorRecord()

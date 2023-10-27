@@ -64,7 +64,7 @@ func (c *TxErrorRecordContract) scanBlock(ch chan *TxErrorRecord) {
 	if err != nil {
 		errOrder := &TxErrorRecord{
 			Type:  0,
-			Error: fmt.Errorf("Get the block number error. %v", err),
+			Error: fmt.Errorf("get the block number error. %v", err),
 		}
 		ch <- errOrder
 		return
@@ -105,9 +105,9 @@ func (c *TxErrorRecordContract) scanBlock(ch chan *TxErrorRecord) {
 			if logs[i].Removed {
 				continue
 			}
-			if bytes.Compare(logs[i].Topics[0][:], EventUnWrapFailed[:]) == 0 {
+			if bytes.Equal(logs[i].Topics[0][:], EventUnWrapFailed[:]) {
 				c.dealFailedEvent(-1, &logs[i], ch)
-			} else if bytes.Compare(logs[i].Topics[0][:], EventWrapFailed[:]) == 0 {
+			} else if bytes.Equal(logs[i].Topics[0][:], EventWrapFailed[:]) {
 				c.dealFailedEvent(1, &logs[i], ch)
 			}
 		}
@@ -127,30 +127,30 @@ func (c *TxErrorRecordContract) listenEvent(ch chan *TxErrorRecord) {
 	//Create the ethclient
 	client, err := ethclient.Dial(c.wss)
 	if err != nil {
-		errOrder.Error = fmt.Errorf("The EthWssClient redial error. %v\nThe EthWssClient will be redialed later...\n", err)
+		errOrder.Error = fmt.Errorf("the EthWssClient redial error. %v. The EthWssClient will be redialed later", err)
 		ch <- errOrder
 		return
 	}
 	eventLogChan := make(chan types.Log)
 	sub, err := client.SubscribeFilterLogs(context.Background(), query, eventLogChan)
 	if err != nil || sub == nil {
-		errOrder.Error = fmt.Errorf("Get event logs from eth wss client error. %v\n", err)
+		errOrder.Error = fmt.Errorf("get event logs from eth wss client error. %v", err)
 		ch <- errOrder
 		return
 	}
 	for {
 		select {
 		case err := <-sub.Err():
-			errOrder.Error = fmt.Errorf("Event wss sub error. %v\nThe EthWssClient will be redialed later...\n", err)
+			errOrder.Error = fmt.Errorf("event wss sub error. %v. The EthWssClient will be redialed later", err)
 			ch <- errOrder
 			return
 		case vLog := <-eventLogChan:
 			if vLog.Removed {
 				continue
 			}
-			if bytes.Compare(vLog.Topics[0][:], EventUnWrapFailed[:]) == 0 {
+			if bytes.Equal(vLog.Topics[0][:], EventUnWrapFailed[:]) {
 				c.dealFailedEvent(-1, &vLog, ch)
-			} else if bytes.Compare(vLog.Topics[0][:], EventWrapFailed[:]) == 0 {
+			} else if bytes.Equal(vLog.Topics[0][:], EventWrapFailed[:]) {
 				c.dealFailedEvent(1, &vLog, ch)
 			}
 		}
@@ -159,10 +159,10 @@ func (c *TxErrorRecordContract) listenEvent(ch chan *TxErrorRecord) {
 
 func (c *TxErrorRecordContract) dealFailedEvent(d int, vLog *types.Log, ch chan *TxErrorRecord) {
 	tx := vLog.TxHash.Hex()
-	if len(vLog.Data) != 128 {
+	if len(vLog.Data) != 96 {
 		ch <- &TxErrorRecord{
 			Type:  0,
-			Error: fmt.Errorf("error order record event data is error. %s, %s, %s\n", tx, vLog.Address.Hex(), vLog.Topics[1].Hex()),
+			Error: fmt.Errorf("error order record event data is error. %s, %s", tx, vLog.Address.Hex()),
 		}
 		return
 	}
@@ -175,26 +175,6 @@ func (c *TxErrorRecordContract) dealFailedEvent(d int, vLog *types.Log, ch chan 
 		FromCoin: string(fromCoin),
 		ToCoin:   string(toCoin),
 	}
-	data := make([]byte, 0)
-	data = append(data, MethodGetFailTxes[:4]...)
-	data = append(data, ter.Txid...)
-	msg := ethereum.CallMsg{From: c.account, To: &c.contract, Data: data}
-	result, err := c.client.CallContract(context.Background(), msg, nil)
-	if err != nil {
-		ch <- &TxErrorRecord{
-			Type:  0,
-			Error: fmt.Errorf("CallContract error. %v", err),
-		}
-		return
-	}
-	count := new(big.Int).SetBytes(result[32:64]).Int64()
-	data = result[64:]
-	failedTxes := make([][]byte, 0)
-	for i := int64(0); i < count; i++ {
-		failedTxes = append(failedTxes, data[:32])
-		data = data[32:]
-	}
-	ter.FailedTxes = failedTxes
 
 	ch <- ter
 }

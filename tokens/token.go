@@ -93,11 +93,10 @@ type SwapOrder struct {
 }
 
 type TxErrorRecord struct {
-	D          int // 1 is wrap, -1 is unwrap
-	Txid       []byte
-	FromCoin   string
-	ToCoin     string
-	FailedTxes [][]byte
-	Error      error
-	Type       int // 0 need to reconnect and 1 only need to record
+	D        int // 1 is wrap, -1 is unwrap
+	Txid     []byte
+	FromCoin string
+	ToCoin   string
+	Error    error
+	Type     int // 0 need to reconnect and 1 only need to record
 }

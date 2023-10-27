@@ -85,7 +85,7 @@ func (t *IotaSmrToken) StartWrapListen(ch chan *tokens.SwapOrder) {
 		case recOutput := <-outputChan:
 			if output, err := recOutput.Output(); err != nil {
 				ch <- &tokens.SwapOrder{Type: 1, Error: fmt.Errorf("get output error. %s, %v", recOutput.Metadata.BlockID, err)}
-			} else if err = t.dealNewOutput(output, recOutput.Metadata.BlockID, ch); err != nil {
+			} else if err = t.dealNewOutput(output, recOutput.Metadata.BlockID, recOutput.Metadata.OutputIndex, ch); err != nil {
 				ch <- &tokens.SwapOrder{Type: 1, Error: err}
 			}
 		case err := <-eventAPI.Errors:
@@ -95,10 +95,13 @@ func (t *IotaSmrToken) StartWrapListen(ch chan *tokens.SwapOrder) {
 	}
 }
 
-func (t *IotaSmrToken) dealNewOutput(output iotago.Output, blockID string, ch chan *tokens.SwapOrder) error {
+func (t *IotaSmrToken) dealNewOutput(output iotago.Output, blockID string, index uint16, ch chan *tokens.SwapOrder) error {
 	order, err := t.getWrapOrderByOutput(output, blockID)
 	if order != nil {
 		ch <- order
+	}
+	if index > 0 {
+		return nil
 	}
 	return err
 }

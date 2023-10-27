@@ -9,7 +9,7 @@ import (
 )
 
 func RecheckIota() {
-	ticker := time.NewTicker(time.Minute * 1)
+	ticker := time.NewTicker(time.Minute * 3)
 	for range ticker.C {
 		order, t := sentIotaTxes.pop()
 		if order == nil {

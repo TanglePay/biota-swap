@@ -21,13 +21,13 @@ func Accept() {
 			//Get the sign data from smpc node
 			infoDatas, err := smpc.GetCurNodeSignInfo()
 			if err != nil {
-				gl.OutLogger.Error("GetCurNodeSignInfo error. %v", err)
+				gl.OutLogger.Error("getCurNodeSignInfo error. %v", err)
 				continue
 			}
 			for i := range infoDatas {
 				d := infoDatas[i]
 				if len(d.MsgContext) != 1 || len(d.MsgHash) != 1 {
-					gl.OutLogger.Error("MsgContext don't support multiple. %v", d.MsgContext)
+					gl.OutLogger.Error("msgContext don't support multiple. %v", d.MsgContext)
 					continue
 				}
 				msgContext := MsgContext{}
@@ -36,7 +36,7 @@ func Accept() {
 					continue
 				}
 				if (time.Now().Unix() - msgContext.Timestamp) > config.Server.AcceptOverTime {
-					gl.OutLogger.Error("Accept MsgContext over time. %v", msgContext)
+					gl.OutLogger.Error("accept MsgContext over time. %v", msgContext)
 					continue
 				}
 				t1 := srcTokens[msgContext.SrcToken]
@@ -51,10 +51,10 @@ func Accept() {
 				}
 				hash, _ := hex.DecodeString(strings.TrimPrefix(d.MsgHash[0], "0x"))
 				if baseTx, err := t1.ValiditeUnWrapTxData(hash, msgContext.TxData); err != nil {
-					gl.OutLogger.Error("ValiditeUnWrapTxData error. %s, %s, %v", d.MsgHash[0], string(msgContext.TxData), err)
+					gl.OutLogger.Error("validiteUnWrapTxData error. %s, %s, %v", d.MsgHash[0], string(msgContext.TxData), err)
 					continue
 				} else if err = t2.CheckUnWrapTx(baseTx.Txid, baseTx.To, t1.Symbol(), baseTx.Amount); err != nil {
-					gl.OutLogger.Error("CheckTxData error. %v : %v", baseTx, err)
+					gl.OutLogger.Error("checkTxData error. %v : %v", baseTx, err)
 					continue
 				} else {
 					txid := hex.EncodeToString(baseTx.Txid)
@@ -67,13 +67,13 @@ func Accept() {
 				// Get Private Key
 				_, prv, err := config.GetPrivateKey("smpc")
 				if err != nil {
-					gl.OutLogger.Error("GetPrivateKey error. smpc, %v", err)
+					gl.OutLogger.Error("getPrivateKey error. smpc, %v", err)
 					return
 				}
 				if err = smpc.AcceptSign(d, true, prv); err != nil {
 					gl.OutLogger.Error("smpc.AcceptSign error. %v : %v", d, err)
 				} else {
-					gl.OutLogger.Info("Accept the info. %s", d.Key)
+					gl.OutLogger.Info("accept the info. %s", d.Key)
 				}
 			}
 		}

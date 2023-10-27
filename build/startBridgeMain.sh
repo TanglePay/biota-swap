@@ -35,8 +35,8 @@ fi
 
 SmrRpcUrl="https://json-rpc.evm.shimmer.network"
 SmrWssUrl="wss://ws.json-rpc.evm.shimmer.network"
-IotaRpcUrl="https://chrysalis-nodes.iota.org"
-IotaWssUrl="wss://chrysalis-nodes.iota.org/mqtt"
+IotaRpcUrl="https://api.stardust-mainnet.iotaledger.net"
+IotaWssUrl="https://api.stardust-mainnet.iotaledger.net"
 
 tanglePay=$(echo "0xfb6e712F4f71D418A298EBe239889A2496f1359b" | tr '[:upper:]' '[:lower:]')
 soonavers=$(echo "0x3Fdd4B2d69848F74E44765e6AD423198bdBD94fa" | tr '[:upper:]' '[:lower:]')
@@ -115,7 +115,7 @@ Pwd= "$pwd"
 [TxErrorRecord]
 NodeRpc = "$SmrRpcUrl"
 NodeWss = "$SmrWssUrl"
-Contract = "0x3C71B92D6f54473a6c66010dF5Aa139cD42c34b0"
+Contract = "0xD9B13709Ce4Ef82402c091f3fc8A93a9360A5c1e"
 ScanEventType = 0
 TimePeriod = 3600
 

@@ -13,6 +13,7 @@ if [[ $result == "" ]] ; then
 fi
 
 pkill bwrap_main
+rm bwrap_main
 rm -rf ./biota-swap
 git clone https://github.com/TanglePay/biota-swap
 cd biota-swap
@@ -79,7 +80,7 @@ fi
 
 cat> config/conf.toml << :EOF
 # Version
-Version = "0.9.1"
+Version = "1.0.0"
 # PendingTime is time of seconds for a tx keep pending status
 PendingTime = 300
 
@@ -119,12 +120,22 @@ Contract = "0xD9B13709Ce4Ef82402c091f3fc8A93a9360A5c1e"
 ScanEventType = 0
 TimePeriod = 3600
 
-# Tokens contain "ATOI", "IOTA", SMIOTA", "MATIC"
+# Tokens contain "IOTA", "ETH", WBTC", "sIOTA", "sETH", "sBTC"
 # Symbol is the unique
 # ScanEventType, 0: listen event as websockt or mqtt; 1: scan block to get event logs.
 # MultiSignType, 0 is contract multiSign, 2 is smpc multiSign
 # MultiSignType = 0: PublicKey is null
 # MultiSignType = 2: Contract and KeyStore is null
+[[Tokens]]
+Symbol = "IOTA"
+NodeRpc = "$IotaRpcUrl"
+NodeWss = "$IotaWssUrl"
+ScanEventType = 0
+MultiSignType = 2
+# iota1qzx5ut3qj6q3rycpkn0e2glg4vr3cr8tq2dq63wyg36hpdsz2chnc30uza5
+PublicKey = "b477a4b11a54a6a1a3aa792878f50b49e21536bf0bfdd0876ec99fae4e4bdb08"
+MinAmount = 1
+
 [[Tokens]]
 Symbol = "ETH"
 NodeRpc = "$EthRpcUrl"
@@ -148,6 +159,18 @@ Contract = "0x6c2F73072bD9bc9052D99983e36411f48fa6cDf0"
 MinAmount = 1
 KeyStore = "./config/smpc_k"
 GasPriceUpper = 40
+
+[[Tokens]]
+Symbol = "sIOTA"
+NodeRpc = "$SmrRpcUrl"
+NodeWss = "$SmrWssUrl"
+ScanEventType = 0
+ScanMaxHeight = 1000
+MultiSignType = 0
+Contract = "0x5dA63f4456A56a0c5Cb0B2104a3610D5CA3d48E8"
+MinAmount = 1
+KeyStore = "./config/smpc_k"
+GasPriceUpper = 0
 
 [[Tokens]]
 Symbol = "sETH"
@@ -176,6 +199,10 @@ GasPriceUpper = 0
 # Pairs is the bridge pair. 
 # SrcToken to DestToken. They must be in the "Tokens".
 [[Pairs]]
+SrcToken = "IOTA"
+DestToken = "sIOTA"
+
+[[Pairs]]
 SrcToken = "ETH"
 DestToken = "sETH"
 
@@ -184,4 +211,4 @@ SrcToken = "WBTC"
 DestToken = "sBTC"
 :EOF
 
-./bwrap_main -d
+./bwrap_main

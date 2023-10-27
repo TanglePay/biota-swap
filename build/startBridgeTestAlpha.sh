@@ -44,7 +44,7 @@ Pwd="123456"
 [TxErrorRecord]
 NodeRpc = "$SmrRpcUrl"
 NodeWss = "$SmrWssUrl"
-Contract = "0xD9B13709Ce4Ef82402c091f3fc8A93a9360A5c1e"
+Contract = "0x3Ede34eF08d7822b28D31A8aa864F9ac7FD3566A"
 ScanEventType = 0
 TimePeriod = 3600
 

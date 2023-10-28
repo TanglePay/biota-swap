@@ -28,7 +28,7 @@ var MethodUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,bytes32,uint256)"
 // unWrap(bytes32 to, bytes32 symbol, uint256 amount)
 var MethodUserWrapEth = crypto.Keccak256Hash([]byte("wrap(address,bytes32)"))
 var MethodUserWrapErc20 = crypto.Keccak256Hash([]byte("wrap(address,bytes32,uint256)"))
-var MethodUserUnWrap = crypto.Keccak256Hash([]byte("wrap(bytes32,bytes32,uint256)"))
+var MethodUserUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,bytes32,uint256)"))
 
 type EvmToken struct {
 	client        *ethclient.Client
@@ -131,7 +131,7 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 		usrD = -1
 	}
 	if d != usrD {
-		return "", "", nil, fmt.Errorf("d error. %d", d)
+		return "", "", nil, fmt.Errorf("d error. %d,%d", usrD, d)
 	}
 	data = data[4:]
 

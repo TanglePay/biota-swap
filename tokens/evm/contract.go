@@ -30,6 +30,8 @@ var MethodUserWrapEth = crypto.Keccak256Hash([]byte("wrap(address,bytes32)"))
 var MethodUserWrapErc20 = crypto.Keccak256Hash([]byte("wrap(address,bytes32,uint256)"))
 var MethodUserUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,bytes32,uint256)"))
 
+var zeros [12]byte
+
 type EvmToken struct {
 	client        *ethclient.Client
 	rpc           string
@@ -136,7 +138,7 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 	data = data[4:]
 
 	to := ""
-	if d == 1 {
+	if d == 1 || bytes.Equal(data[:12], zeros[:]) {
 		to = common.BytesToAddress(data[:32]).Hex()
 	} else {
 		to = hex.EncodeToString(data[:32])

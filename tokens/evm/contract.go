@@ -123,11 +123,11 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 
 	data := tx.Data()
 	usrD := 0
-	if !bytes.Equal(data[:4], MethodUserWrapEth[:4]) {
+	if bytes.Equal(data[:4], MethodUserWrapEth[:4]) {
 		usrD = 1
-	} else if !bytes.Equal(data[:4], MethodUserWrapErc20[:4]) {
+	} else if bytes.Equal(data[:4], MethodUserWrapErc20[:4]) {
 		usrD = 1
-	} else if !bytes.Equal(data[:4], MethodUserUnWrap[:4]) {
+	} else if bytes.Equal(data[:4], MethodUserUnWrap[:4]) {
 		usrD = -1
 	}
 	if d != usrD {

@@ -11,12 +11,27 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"golang.org/x/term"
 )
 
 func main() {
+	args := make(map[string]bool)
+	for i := range os.Args {
+		args[os.Args[i]] = true
+	}
+	if args["key"] {
+		fmt.Printf("Input the keystore's password(It must contain number, char(Upper and Lower), and special) \n:")
+		pwd, err := term.ReadPassword(int(os.Stdin.Fd()))
+		if err != nil {
+			panic("read pwd error:" + err.Error())
+		}
+		CreateKeyStore(string(pwd), "key_"+time.Now().Format("20060102150405"))
+		return
+	}
+
 	if os.Args[len(os.Args)-1] != "daemon" {
 		input()
 		os.Args = append(os.Args, "daemon")

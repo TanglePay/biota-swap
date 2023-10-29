@@ -150,7 +150,7 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 	}
 
 	amount := tx.Value()
-	if amount.Uint64() == 0 {
+	if amount.Sign() == 0 {
 		amount = new(big.Int).SetBytes(data[64:])
 	}
 
@@ -307,10 +307,6 @@ func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa
 }
 
 func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
-	if len(common.FromHex(to)) != 20 {
-		return nil, fmt.Errorf("to address error. %s", to)
-	}
-
 	txHash := common.FromHex(txid)
 	if len(txHash) > 32 {
 		txHash = txHash[:32]

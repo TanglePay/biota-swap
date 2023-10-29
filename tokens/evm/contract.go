@@ -31,6 +31,8 @@ var MethodUserWrapEth = crypto.Keccak256Hash([]byte("wrap(address,bytes32)"))
 var MethodUserWrapErc20 = crypto.Keccak256Hash([]byte("wrap(address,bytes32,uint256)"))
 var MethodUserUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,bytes32,uint256)"))
 
+var zeroAddress common.Address
+
 type EvmToken struct {
 	client        *ethclient.Client
 	rpc           string
@@ -117,7 +119,7 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 	query := ethereum.FilterQuery{
 		BlockHash: &r.BlockHash,
 		Addresses: []common.Address{ei.contract},
-		Topics:    [][]common.Hash{{EventUnWrap}},
+		Topics:    [][]common.Hash{{EventWrap, EventUnWrap}},
 	}
 	logs, err := ei.client.FilterLogs(context.Background(), query)
 	if err != nil {
@@ -126,13 +128,26 @@ func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, stri
 
 	for _, log := range logs {
 		if bytes.Equal(txid, log.TxHash[:]) {
-			from := common.BytesToAddress(log.Topics[1][:]).Hex()
-			to := common.Bytes2Hex(log.Topics[2][:])
-			amount := new(big.Int).SetBytes(log.Data[32:])
-			return from, to, amount, nil
+			if bytes.Equal(log.Topics[0][:], EventWrap[:]) {
+				if d != 1 {
+					return "", "", nil, fmt.Errorf("d error. %d, %s", d, hash.Hex())
+				}
+				from := common.BytesToAddress(log.Topics[1][:]).Hex()
+				to := common.Bytes2Hex(log.Topics[2][:])
+				amount := new(big.Int).SetBytes(log.Data[32:])
+				return from, to, amount, nil
+			} else if bytes.Equal(log.Topics[0][:], EventUnWrap[:]) {
+				if d != -1 {
+					return "", "", nil, fmt.Errorf("d error. %d, %s", d, hash.Hex())
+				}
+				from := common.BytesToAddress(log.Topics[1][:]).Hex()
+				to := common.Bytes2Hex(log.Topics[2][:])
+				amount := new(big.Int).SetBytes(log.Data[32:])
+				return from, to, amount, nil
+			}
 		}
 	}
-	return "", "", nil, fmt.Errorf("don't find user's transaction. %s, %v", hash.Hex(), err)
+	return "", "", nil, fmt.Errorf("don't find user's transaction. %d, %s, %v", len(logs), hash.Hex(), err)
 }
 
 func (ei *EvmToken) CheckTxFailed(failedTx, txid []byte, to string, amount *big.Int, d int) error {
@@ -242,7 +257,8 @@ func (ei *EvmToken) SendSignedTxData(signedHash string, txData []byte) ([]byte, 
 }
 
 func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
-	if len(common.FromHex(to)) != 20 {
+	toAddr := common.HexToAddress(to)
+	if bytes.Equal(toAddr[:], zeroAddress[:]) {
 		return nil, fmt.Errorf("to address error. %s", to)
 	}
 
@@ -285,6 +301,11 @@ func (ei *EvmToken) SendWrap(txid string, amount *big.Int, to string, prv *ecdsa
 }
 
 func (ei *EvmToken) SendUnWrap(txid string, amount *big.Int, to string, prv *ecdsa.PrivateKey) ([]byte, error) {
+	toAddr := common.HexToAddress(to)
+	if bytes.Equal(toAddr[:], zeroAddress[:]) {
+		return nil, fmt.Errorf("to address error. %s", to)
+	}
+
 	txHash := common.FromHex(txid)
 	if len(txHash) > 32 {
 		txHash = txHash[:32]

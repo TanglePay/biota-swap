@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -29,8 +30,6 @@ var MethodUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,bytes32,uint256)"
 var MethodUserWrapEth = crypto.Keccak256Hash([]byte("wrap(address,bytes32)"))
 var MethodUserWrapErc20 = crypto.Keccak256Hash([]byte("wrap(address,bytes32,uint256)"))
 var MethodUserUnWrap = crypto.Keccak256Hash([]byte("unWrap(bytes32,bytes32,uint256)"))
-
-var zeros [12]byte
 
 type EvmToken struct {
 	client        *ethclient.Client
@@ -110,51 +109,30 @@ func (ei *EvmToken) CheckSentTx(txid []byte) (bool, error) {
 
 func (ei *EvmToken) CheckUserTx(txid []byte, toCoin string, d int) (string, string, *big.Int, error) {
 	hash := common.BytesToHash(txid)
-	tx, isPending, err := ei.client.TransactionByHash(context.Background(), hash)
+	r, err := ei.client.TransactionReceipt(context.Background(), hash)
 	if err != nil {
-		return "", "", nil, fmt.Errorf("client.TransactionByHash error. %s, %v", hash.Hex(), err)
+		return "", "", nil, fmt.Errorf("client.TransactionReceipt error. %s, %v", hash.Hex(), err)
 	}
-	if isPending {
-		return "", "", nil, fmt.Errorf("tx is pending status. %s", hash.Hex())
+
+	query := ethereum.FilterQuery{
+		BlockHash: &r.BlockHash,
+		Addresses: []common.Address{ei.contract},
+		Topics:    [][]common.Hash{{EventUnWrap}},
 	}
-	signer := types.NewEIP155Signer(tx.ChainId())
-	from, err := signer.Sender(tx)
+	logs, err := ei.client.FilterLogs(context.Background(), query)
 	if err != nil {
-		return "", "", nil, fmt.Errorf("get from address from tx error. %s : %v", hash.Hex(), err)
+		return "", "", nil, fmt.Errorf("client.FilterLogs error. %s, %v", hash.Hex(), err)
 	}
 
-	data := tx.Data()
-	usrD := 0
-	if bytes.Equal(data[:4], MethodUserWrapEth[:4]) {
-		usrD = 1
-	} else if bytes.Equal(data[:4], MethodUserWrapErc20[:4]) {
-		usrD = 1
-	} else if bytes.Equal(data[:4], MethodUserUnWrap[:4]) {
-		usrD = -1
+	for _, log := range logs {
+		if bytes.Equal(txid, log.TxHash[:]) {
+			from := common.BytesToAddress(log.Topics[1][:]).Hex()
+			to := common.Bytes2Hex(log.Topics[2][:])
+			amount := new(big.Int).SetBytes(log.Data[32:])
+			return from, to, amount, nil
+		}
 	}
-	if d != usrD {
-		return "", "", nil, fmt.Errorf("d error. %d,%d", usrD, d)
-	}
-	data = data[4:]
-
-	to := ""
-	if d == 1 || bytes.Equal(data[:12], zeros[:]) {
-		to = common.BytesToAddress(data[:32]).Hex()
-	} else {
-		to = hex.EncodeToString(data[:32])
-	}
-
-	sy, _, _ := bytes.Cut(data[32:64], []byte{0})
-	if string(sy) != toCoin {
-		return "", "", nil, fmt.Errorf("symbol is not equal. %s :%s", string(data), toCoin)
-	}
-
-	amount := tx.Value()
-	if amount.Sign() == 0 {
-		amount = new(big.Int).SetBytes(data[64:])
-	}
-
-	return from.Hex(), to, amount, nil
+	return "", "", nil, fmt.Errorf("don't find user's transaction. %s, %v", hash.Hex(), err)
 }
 
 func (ei *EvmToken) CheckTxFailed(failedTx, txid []byte, to string, amount *big.Int, d int) error {

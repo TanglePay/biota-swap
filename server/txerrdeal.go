@@ -51,6 +51,11 @@ func dealTxErrorRecord(o *tokens.TxErrorRecord) {
 		return
 	}
 
+	if sentEvmUserTxes.Exist(o.Txid) {
+		gl.OutLogger.Error("txid had dealt. %s", hex.EncodeToString(o.Txid))
+		return
+	}
+
 	order := &tokens.SwapOrder{
 		TxID:      hex.EncodeToString(o.Txid),
 		FromToken: o.FromCoin,

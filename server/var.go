@@ -7,6 +7,7 @@ import (
 	"bwrap/tokens/evm"
 	"bwrap/tokens/iotasmr"
 	"bwrap/tokens/smr"
+	"encoding/hex"
 	"sync"
 	"time"
 
@@ -125,12 +126,58 @@ func (q *SentEvmTxQueue) UpdateTop(txHash common.Hash, t tokens.EvmToken, ts int
 	q.times[0] = ts
 }
 
+type SentEvmTxMap struct {
+	txHashes map[string]int64 // txid -> timestamp, txid is with 0x prefix
+	sync.RWMutex
+}
+
+func NewSentEvmMap() *SentEvmTxMap {
+	m := &SentEvmTxMap{
+		txHashes: make(map[string]int64),
+	}
+
+	go func() {
+		ticker := time.NewTicker(time.Hour * 240)
+		for range ticker.C {
+			m.expired()
+		}
+	}()
+	return m
+}
+
+func (m *SentEvmTxMap) Push(tx []byte) {
+	m.Lock()
+	defer m.Unlock()
+	m.txHashes[hex.EncodeToString(tx)] = time.Now().Unix()
+}
+
+func (m *SentEvmTxMap) Exist(tx []byte) bool {
+	m.RLock()
+	defer m.RUnlock()
+	_, exist := m.txHashes[hex.EncodeToString(tx)]
+	return exist
+}
+
+func (m *SentEvmTxMap) expired() {
+	m.Lock()
+	defer m.Unlock()
+	now := time.Now().Unix() - 86400
+	txHashes := make(map[string]int64)
+	for tx, ts := range m.txHashes {
+		if now < ts {
+			txHashes[tx] = ts
+		}
+	}
+	m.txHashes = txHashes
+}
+
 var (
-	srcTokens    map[string]tokens.SourceToken
-	destTokens   map[string]tokens.DestinationToken
-	dealedOrders *DealedOrdersCheck
-	sentIotaTxes SentIotaTx
-	sentEvmTxes  map[string]*SentEvmTxQueue // key : address+chainid
+	srcTokens       map[string]tokens.SourceToken
+	destTokens      map[string]tokens.DestinationToken
+	dealedOrders    *DealedOrdersCheck
+	sentIotaTxes    SentIotaTx
+	sentEvmTxes     map[string]*SentEvmTxQueue // key : address+chainid
+	sentEvmUserTxes *SentEvmTxMap
 )
 
 const (
@@ -141,6 +188,7 @@ func init() {
 	srcTokens = make(map[string]tokens.SourceToken)
 	destTokens = make(map[string]tokens.DestinationToken)
 	dealedOrders = NewDealedOrdersCheck()
+	sentEvmUserTxes = NewSentEvmMap()
 }
 
 type MsgContext struct {

@@ -141,6 +141,7 @@ func dealWrapOrder(t2 tokens.DestinationToken, order *tokens.SwapOrder) {
 			if t, ok := t2.(tokens.EvmToken); ok {
 				key := t2.Address() + t2.ChainID()
 				sentEvmTxes[key].Push(common.BytesToHash(id), t, time.Now().Unix())
+				sentEvmUserTxes.Push(common.FromHex(order.TxID))
 			} else {
 				gl.OutLogger.Error("Don't support RecheckEvmTxes. %s", t2.Symbol())
 			}
@@ -198,6 +199,7 @@ func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {
 				if t, ok := t1.(tokens.EvmToken); ok {
 					key := t1.Address() + t1.ChainID()
 					sentEvmTxes[key].Push(common.BytesToHash(id), t, time.Now().Unix())
+					sentEvmUserTxes.Push(common.FromHex(order.TxID))
 				} else {
 					gl.OutLogger.Error("Don't support RecheckEvmTxes. %s", t1.Symbol())
 				}

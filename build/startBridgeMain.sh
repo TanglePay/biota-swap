@@ -50,19 +50,19 @@ account_fill=$(<config/smpc_k)
 addr=${account_fill: 12: 40}
 addr="0x"$addr
 if [ "$addr" == "$tanglePay" ]; then
-    SubGroup="20b5e962f662e74eca9e63596c57bfce2b160aded631b3b613148ebd47696cfe710a2128de153c48d17e29fdf11230ba40d04b626dd32b2af6fcf5e93a0cc52e"
+    SubGroup="dd235cc35050963bedc23d8a78c4fb8488822f870c914f0814549d4018e81aaab1c945376e71ab0bbdd822d456729141e31c3f232712b3df45b72e552c369eda"
     EthRpcUrl="https://mainnet.infura.io/v3/3f8b4373a4a943bf8b9c635fba90ee78"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/3f8b4373a4a943bf8b9c635fba90ee78"
 elif [ "$addr" == "$soonavers" ]; then
-    SubGroup="025c6714bad166f47a16a1da5e0b34d4cd4c3b0eddec31ca0bcaa9f89ac0d29e997026f5d66e17c01c035eabe8e04ac258a65363438904788a24a37ae3bcd97a"
+    SubGroup="01cb75848e61c9db2b07a1f33424dac05b29203799198edbb644ba90459ac8332d4277363ddb93b8c84baa2ca857f1753b00910b84f764da050a69a7ac4ca171"
     EthRpcUrl="https://mainnet.infura.io/v3/f3d3066e39d7480298e3b921927dd234"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/f3d3066e39d7480298e3b921927dd234"
 elif [ "$addr" == "$tangleswa" ]; then
-    SubGroup="9f3479126e84944121add787f8ad1e8145c53d74cbfee78ffeffd7e05cadab8c94d5cb21c6ffde7af9697e10c390f5c86ecfa69efae1dee85e829bda9428ee35"
+    SubGroup="ddd7cf8f59f097d2dc71e6cc654fa14e33b667548ec3bb9bd635c25008f5ab01b628a32ae063cb24dac680cf538935adf2f2dffaa117102c20c4a3726b3b62b1"
     EthRpcUrl="https://mainnet.infura.io/v3/3640e819dfa3470092c453ccdbf506a7"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/3640e819dfa3470092c453ccdbf506a7"
 elif [ "$addr" == "$dltgreenp" ]; then
-    SubGroup="c1b744444161eca1f1284d869f9b9b24a3597934f069863ac484ceb2ef271e4f1d8154628ac43be9754bb11e98f2bd851b6fdc55a3b05681d9c8ba901e4ea17b"
+    SubGroup="f83162f70c1803f4858bedb545508c68e1611cbbbf03bcfdf295d09c8ec981a98d689dc5551d01e539e290a58b50f9d4cd039243d581113530b78a3afedefb1f"
     EthRpcUrl="https://mainnet.infura.io/v3/796c3600d73a4a3c99be992f1f1035c7"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/796c3600d73a4a3c99be992f1f1035c7"
 elif [ "$addr" == "$spyce5xxx" ]; then
@@ -70,7 +70,7 @@ elif [ "$addr" == "$spyce5xxx" ]; then
     EthRpcUrl="https://mainnet.infura.io/v3/6ea7d0e6c4304751b2060044f2b213bd"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/6ea7d0e6c4304751b2060044f2b213bd"
 elif [ "$addr" == "$govtreasu" ]; then
-    SubGroup="81fc498fbc4d52b741cc55be8eb814ae0d0dc24bbcbf481e15dd9703c823208c382d655f93a53236f6ce24bfa7ed77d2411b4323229e846690181537a0ef24a6"
+    SubGroup="db9af9dd883adef5a348ac365dd9d4de53bcf417b09ed03934af8a9d2f189d74d71603e4eb6f21540b2dea016a0cd3451fb401aa656e6818a76536c904f639aa"
     EthRpcUrl="https://mainnet.infura.io/v3/0e0a929c16b947199c9290661c320ca6"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/0e0a929c16b947199c9290661c320ca6"
 else
@@ -132,8 +132,8 @@ NodeRpc = "$IotaRpcUrl"
 NodeWss = "$IotaWssUrl"
 ScanEventType = 0
 MultiSignType = 2
-# iota1qzx5ut3qj6q3rycpkn0e2glg4vr3cr8tq2dq63wyg36hpdsz2chnc30uza5
-PublicKey = "b477a4b11a54a6a1a3aa792878f50b49e21536bf0bfdd0876ec99fae4e4bdb08"
+# iota1qr3jf395mx0frslvndkzkhwe63gvwwqynh7997xm46h2lk6gv78dg5n27nc
+PublicKey = "1bcd460eb168c5de3183eca59c9b960f8083fdd703aec23df6a2815bffac0254 "
 MinAmount = 1
 
 [[Tokens]]

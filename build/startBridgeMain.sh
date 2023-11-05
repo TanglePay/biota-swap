@@ -80,7 +80,7 @@ fi
 
 cat> config/conf.toml << :EOF
 # Version
-Version = "1.0.0"
+Version = "1.0.1"
 # PendingTime is time of seconds for a tx keep pending status
 PendingTime = 300
 

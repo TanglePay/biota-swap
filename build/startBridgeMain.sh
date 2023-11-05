@@ -133,7 +133,7 @@ NodeWss = "$IotaWssUrl"
 ScanEventType = 0
 MultiSignType = 2
 # iota1qr3jf395mx0frslvndkzkhwe63gvwwqynh7997xm46h2lk6gv78dg5n27nc
-PublicKey = "1bcd460eb168c5de3183eca59c9b960f8083fdd703aec23df6a2815bffac0254 "
+PublicKey = "1bcd460eb168c5de3183eca59c9b960f8083fdd703aec23df6a2815bffac0254"
 MinAmount = 1
 
 [[Tokens]]

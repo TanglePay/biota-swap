@@ -36,7 +36,19 @@ func Accept() {
 					continue
 				}
 				if (time.Now().Unix() - msgContext.Timestamp) > config.Server.AcceptOverTime {
-					gl.OutLogger.Error("accept MsgContext over time. %v", msgContext)
+					gl.OutLogger.Error("accept MsgContext over time. %s,%s,%s,%d", msgContext.SrcToken, msgContext.DestToken, msgContext.Method, msgContext.Timestamp)
+
+					// Get Private Key
+					_, prv, err := config.GetPrivateKey("smpc")
+					if err != nil {
+						gl.OutLogger.Error("getPrivateKey error. smpc, %v", err)
+						return
+					}
+					if err = smpc.AcceptSign(d, false, prv); err != nil {
+						gl.OutLogger.Error("smpc.AcceptSign error. %v : %v", d, err)
+					} else {
+						gl.OutLogger.Info("accept the info not agree. %s", d.Key)
+					}
 					continue
 				}
 				t1 := srcTokens[msgContext.SrcToken]
@@ -64,6 +76,7 @@ func Accept() {
 					}
 					acceptedTxes[txid] = true
 				}
+
 				// Get Private Key
 				_, prv, err := config.GetPrivateKey("smpc")
 				if err != nil {

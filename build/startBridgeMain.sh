@@ -102,7 +102,7 @@ KeyStore = "./config/smpc_k"
 DetectCount = 60
 DetectTime = 10
 AcceptTime = 30
-AcceptOverTime = 7200
+AcceptOverTime = 72000
 
 # database driver is mysql 46768bacc61d97fe9d459fcb01181dcb6fae36f9
 # the dabasebase name is "smpc" and the table to see the "readme"

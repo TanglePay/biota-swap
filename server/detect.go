@@ -155,6 +155,14 @@ func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {
 		return
 	}
 
+	// check the SubGid->accounts online or not
+	if t1.MultiSignType() == tokens.SmpcSign {
+		if b, err := model.CheckAccountsState(config.Smpc.Accounts); !b {
+			gl.OutLogger.Error("The SubGid's accounts are not all online. %v", err)
+			return
+		}
+	}
+
 	wo := model.SwapOrder{
 		TxID:      order.TxID,
 		SrcToken:  order.ToToken,

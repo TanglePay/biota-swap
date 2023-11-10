@@ -3,6 +3,7 @@ package server
 import (
 	"bwrap/config"
 	"bwrap/gl"
+	"bwrap/model"
 	"bwrap/smpc"
 	"encoding/hex"
 	"encoding/json"
@@ -18,6 +19,10 @@ func Accept() {
 		ticker := time.NewTicker(config.Server.AcceptTime * time.Second)
 		defer ticker.Stop()
 		for range ticker.C {
+			if err := model.UpdateAccountState(config.Smpc.Account); err != nil {
+				gl.OutLogger.Error("UpdateAccountState error. %v", err)
+			}
+
 			//Get the sign data from smpc node
 			infoDatas, err := smpc.GetCurNodeSignInfo()
 			if err != nil {

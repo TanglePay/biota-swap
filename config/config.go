@@ -137,6 +137,7 @@ type Database struct {
 type SmpcConfig struct {
 	NodeUrl   string
 	Gid       string
+	Accounts  []string
 	ThresHold string
 	KeyStore  string
 	Account   string

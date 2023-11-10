@@ -53,26 +53,38 @@ if [ "$addr" == "$tanglePay" ]; then
     SubGroup="dd235cc35050963bedc23d8a78c4fb8488822f870c914f0814549d4018e81aaab1c945376e71ab0bbdd822d456729141e31c3f232712b3df45b72e552c369eda"
     EthRpcUrl="https://mainnet.infura.io/v3/3f8b4373a4a943bf8b9c635fba90ee78"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/3f8b4373a4a943bf8b9c635fba90ee78"
+    a3="0x3Fdd4B2d69848F74E44765e6AD423198bdBD94fa"
+    a4="0x5e80cf0C104D2D4f685A15deb65A319e95dd80dD"
 elif [ "$addr" == "$soonavers" ]; then
     SubGroup="01cb75848e61c9db2b07a1f33424dac05b29203799198edbb644ba90459ac8332d4277363ddb93b8c84baa2ca857f1753b00910b84f764da050a69a7ac4ca171"
     EthRpcUrl="https://mainnet.infura.io/v3/f3d3066e39d7480298e3b921927dd234"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/f3d3066e39d7480298e3b921927dd234"
+    a3="0x3Fdd4B2d69848F74E44765e6AD423198bdBD94fa"
+    a4="0x9dcb974Cf7522F91F2Add8303e7BCB2221063c48"
 elif [ "$addr" == "$tangleswa" ]; then
     SubGroup="ddd7cf8f59f097d2dc71e6cc654fa14e33b667548ec3bb9bd635c25008f5ab01b628a32ae063cb24dac680cf538935adf2f2dffaa117102c20c4a3726b3b62b1"
     EthRpcUrl="https://mainnet.infura.io/v3/3640e819dfa3470092c453ccdbf506a7"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/3640e819dfa3470092c453ccdbf506a7"
+    a3="0x3Fdd4B2d69848F74E44765e6AD423198bdBD94fa"
+    a4="0xeBbe638eF6dF4A3837435bB44527f8D9BA9CF981"
 elif [ "$addr" == "$dltgreenp" ]; then
     SubGroup="f83162f70c1803f4858bedb545508c68e1611cbbbf03bcfdf295d09c8ec981a98d689dc5551d01e539e290a58b50f9d4cd039243d581113530b78a3afedefb1f"
     EthRpcUrl="https://mainnet.infura.io/v3/796c3600d73a4a3c99be992f1f1035c7"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/796c3600d73a4a3c99be992f1f1035c7"
+    a3="0x5e80cf0C104D2D4f685A15deb65A319e95dd80dD"
+    a4="0xeBbe638eF6dF4A3837435bB44527f8D9BA9CF981"
 elif [ "$addr" == "$spyce5xxx" ]; then
     SubGroup="ed848bf18a6f2d968179b3f175bcd1fa87691b83cefb04722982e77c0d1292ae0fcfd3816c992b0ea53ea60e882e75a8ec60ee9c27b98622d25029acbdc44ecf"
     EthRpcUrl="https://mainnet.infura.io/v3/6ea7d0e6c4304751b2060044f2b213bd"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/6ea7d0e6c4304751b2060044f2b213bd"
+    a3="0x5e80cf0C104D2D4f685A15deb65A319e95dd80dD"
+    a4="0x9dcb974Cf7522F91F2Add8303e7BCB2221063c48"
 elif [ "$addr" == "$govtreasu" ]; then
     SubGroup="db9af9dd883adef5a348ac365dd9d4de53bcf417b09ed03934af8a9d2f189d74d71603e4eb6f21540b2dea016a0cd3451fb401aa656e6818a76536c904f639aa"
     EthRpcUrl="https://mainnet.infura.io/v3/0e0a929c16b947199c9290661c320ca6"
     EthWssUrl="wss://mainnet.infura.io/ws/v3/0e0a929c16b947199c9290661c320ca6"
+    a3="0x9dcb974Cf7522F91F2Add8303e7BCB2221063c48"
+    a4="0xeBbe638eF6dF4A3837435bB44527f8D9BA9CF981"
 else
     echo -e "\e[31m !!! panic : address error. $addr is not in the Group"
     exit
@@ -80,7 +92,7 @@ fi
 
 cat> config/conf.toml << :EOF
 # Version
-Version = "1.0.1"
+Version = "1.0.2"
 # PendingTime is time of seconds for a tx keep pending status
 PendingTime = 300
 
@@ -91,7 +103,8 @@ PendingTime = 300
 [Smpc]
 NodeUrl = "http://127.0.0.1:5871"
 Gid = "$SubGroup"
-ThresHold   ="4/6"
+Accounts = ["0xfb6e712F4f71D418A298EBe239889A2496f1359b","0x380dF538Ab2587B11466d07ca5c671d33497d5Ca","$a3","$a4"]
+ThresHold = "4/6"
 KeyStore = "./config/smpc_k"
 
 # The Server config
@@ -102,7 +115,7 @@ KeyStore = "./config/smpc_k"
 DetectCount = 60
 DetectTime = 10
 AcceptTime = 30
-AcceptOverTime = 144000
+AcceptOverTime = 7200
 
 # database driver is mysql 46768bacc61d97fe9d459fcb01181dcb6fae36f9
 # the dabasebase name is "smpc" and the table to see the "readme"

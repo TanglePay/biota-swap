@@ -10,6 +10,7 @@ PendingTime = 300
 [Smpc]
 NodeUrl = ""
 Gid = ""
+Accounts = ["0xfb6e712F4f71D418A298EBe239889A2496f1359b","0x380dF538Ab2587B11466d07ca5c671d33497d5Ca"]
 ThresHold   =""
 KeyStore = "./config/smpc_k"
 

@@ -41,7 +41,6 @@ func Accept() {
 					continue
 				}
 				if (time.Now().Unix() - msgContext.Timestamp) > config.Server.AcceptOverTime {
-					gl.OutLogger.Error("accept MsgContext over time. %s,%s,%s,%d", msgContext.SrcToken, msgContext.DestToken, msgContext.Method, msgContext.Timestamp)
 					continue
 				}
 				t1 := srcTokens[msgContext.SrcToken]
@@ -51,7 +50,6 @@ func Accept() {
 					continue
 				}
 				if msgContext.Method != UnwrapMethod {
-					gl.OutLogger.Error("msgContext.Method don't support. %s", msgContext.Method)
 					continue
 				}
 				hash, _ := hex.DecodeString(strings.TrimPrefix(d.MsgHash[0], "0x"))
@@ -62,12 +60,11 @@ func Accept() {
 					gl.OutLogger.Error("checkTxData error. %v : %v", baseTx, err)
 					continue
 				} else {
-					txid := hex.EncodeToString(baseTx.Txid)
-					if acceptedTxes[txid] {
+					if acceptedTxes[d.Key] {
 						//gl.OutLogger.Error("txid has been unwrapped. txid: %s, to: %s, amount: %s", txid, baseTx.To, baseTx.Amount.String())
 						continue
 					}
-					acceptedTxes[txid] = true
+					acceptedTxes[d.Key] = true
 				}
 
 				// Get Private Key

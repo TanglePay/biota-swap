@@ -393,7 +393,7 @@ func (ist *IotaSmrToken) getBasiceUnSpentOutputs(b *UnsignTransactionBuilder, am
 			b.AddInput(&builder.TxInput{UnlockTarget: ist.addr, Input: output, InputID: ids[i]})
 			sum += output.Deposit()
 			count++
-			if count >= gl.MAX_INPUT_COUNT {
+			if (count >= gl.MAX_INPUT_COUNT) && (sum >= amount) {
 				break
 			}
 		}

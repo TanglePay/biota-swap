@@ -7,6 +7,8 @@ import (
 	"bwrap/tokens"
 	"encoding/hex"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 func ListenTxErrorRecord() {
@@ -57,7 +59,7 @@ func dealTxErrorRecord(o *tokens.TxErrorRecord) {
 	}
 
 	order := &tokens.SwapOrder{
-		TxID:      hex.EncodeToString(o.Txid),
+		TxID:      hexutil.Encode(o.Txid),
 		FromToken: o.FromCoin,
 		ToToken:   o.ToCoin,
 		From:      from,

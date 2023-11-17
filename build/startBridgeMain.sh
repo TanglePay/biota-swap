@@ -112,7 +112,7 @@ KeyStore = "./config/smpc_k"
 # AcceptTime is the check time as seconds with one loop.
 # AcceptOverTime is the time as seconds. If smpc sign over this time, it should be not accepted.
 [Server]
-DetectCount = 60
+DetectCount = 120
 DetectTime = 10
 AcceptTime = 30
 AcceptOverTime = 1200

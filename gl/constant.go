@@ -8,4 +8,4 @@ const (
 
 const GasLimit = 300000
 const MIN_IOTA_AMOUNT = 1000000
-const MAX_INPUT_COUNT = 127
+const MAX_INPUT_COUNT = 10

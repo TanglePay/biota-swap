@@ -32,7 +32,7 @@ func Sign(pubkey, gid, context, hash, threshold, keyType string, pk *ecdsa.Priva
 		GroupID:       gid,
 		ThresHold:     threshold,
 		Mode:          "0",
-		AcceptTimeOut: "600",
+		AcceptTimeOut: "1200",
 		TimeStamp:     strconv.FormatInt(time.Now().UnixMilli(), 10),
 	}
 	playload, _ := json.Marshal(txdata)
@@ -70,7 +70,7 @@ func GetSignStatus(keyID string) ([]string, error) {
 		return nil, err
 	}
 	if err := json.Unmarshal([]byte(statusJSONStr), &statusJSON); err != nil {
-		return nil, fmt.Errorf("Unmarshal statusJSONStr fail. %s, %v", statusJSONStr, err)
+		return nil, fmt.Errorf("unmarshal statusJSONStr fail. %s, %v", statusJSONStr, err)
 	}
 	switch statusJSON.Status {
 	case "Timeout", "Failure":
@@ -95,7 +95,7 @@ func GetCurNodeSignInfo() ([]signCurNodeInfo, error) {
 
 	var keyList []signCurNodeInfo
 	if err := json.Unmarshal(reqListJSON, &keyList); err != nil {
-		return nil, fmt.Errorf("Unmarshal signCurNodeInfo fail. %s, %v", reqListJSON, err)
+		return nil, fmt.Errorf("unmarshal signCurNodeInfo fail. %s, %v", reqListJSON, err)
 	}
 	return keyList, nil
 }

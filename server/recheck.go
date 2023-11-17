@@ -45,6 +45,9 @@ func recheckEvmTx(q *SentEvmTxQueue) {
 			}
 			if time.Now().Unix()-ts < config.PendingTime {
 				break
+			} else if time.Now().Unix()-ts > 3*config.PendingTime {
+				q.Pop()
+				continue
 			}
 
 			// Get Private Key

@@ -39,11 +39,16 @@ func ListenTxErrorRecord() {
 }
 
 func dealTxErrorRecord(o *tokens.TxErrorRecord) {
+	var exist1, exist2 bool
 	var t1 tokens.Token
 	if o.D == -1 {
-		t1 = destTokens[o.FromCoin]
+		t1, exist1 = destTokens[o.FromCoin]
 	} else if o.D == 1 {
-		t1 = srcTokens[o.FromCoin]
+		t1, exist2 = srcTokens[o.FromCoin]
+	}
+	if !exist1 && !exist2 {
+		gl.OutLogger.Error("From coin is not exist : %s", o.FromCoin)
+		return
 	}
 
 	//verify the txid

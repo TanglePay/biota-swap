@@ -232,11 +232,20 @@ func (st *ShimmerToken) getBasiceUnSpentOutputs(b *builder.TransactionBuilder, p
 		return 0, err
 	}
 
-	hasNativeToken := false
+	notHas := false
 	query := nodeclient.BasicOutputsQuery{
 		AddressBech32: addr.Bech32(prefix),
 		IndexerNativeTokenParas: nodeclient.IndexerNativeTokenParas{
-			HasNativeTokens: &hasNativeToken,
+			HasNativeTokens: &notHas,
+		},
+		IndexerExpirationParas: nodeclient.IndexerExpirationParas{
+			HasExpiration: &notHas,
+		},
+		IndexerTimelockParas: nodeclient.IndexerTimelockParas{
+			HasTimelock: &notHas,
+		},
+		IndexerStorageDepositParas: nodeclient.IndexerStorageDepositParas{
+			HasStorageDepositReturn: &notHas,
 		},
 	}
 	res, err := indexer.Outputs(context.Background(), &query)

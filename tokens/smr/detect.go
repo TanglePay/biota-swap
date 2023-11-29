@@ -62,34 +62,34 @@ func (t *ShimmerToken) StartWrapListen(ch chan *tokens.SwapOrder) {
 	nodeAPI := nodeclient.New(t.rpc)
 	info, err := nodeAPI.Info(context.Background())
 	if err != nil {
-		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("Get Shimmer Node Info error. %s, %v", t.rpc, err)}
+		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("get Shimmer Node Info error. %s, %v", t.rpc, err)}
 		return
 	}
 	eventAPI, err := nodeAPI.EventAPI(context.Background())
 	if err != nil {
-		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("Get shimmer event client error. %v", err)}
+		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("get shimmer event client error. %v", err)}
 		return
 	}
 	if err := eventAPI.Connect(ctx); err != nil {
-		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("Connect to iota node error. %v", err)}
+		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("connect to iota node error. %v", err)}
 		return
 	}
 
 	outputChan, sub := eventAPI.OutputsByUnlockConditionAndAddress(t.address, t.hrp, nodeclient.UnlockConditionAddress)
 	if sub == nil || sub.Error() != nil {
-		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("Get sub from shimmer event client error. %v", sub.Error())}
+		ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("get sub from shimmer event client error. %v", sub.Error())}
 		return
 	}
 	for {
 		select {
 		case recOutput := <-outputChan:
 			if output, err := recOutput.Output(); err != nil {
-				ch <- &tokens.SwapOrder{Type: 1, Error: fmt.Errorf("Get output error. %s, %v", recOutput.Metadata.BlockID, err)}
+				ch <- &tokens.SwapOrder{Type: 1, Error: fmt.Errorf("get output error. %s, %v", recOutput.Metadata.BlockID, err)}
 			} else if err = t.dealNewOutput(&info.Protocol, output, recOutput.Metadata.BlockID, ch); err != nil {
 				ch <- &tokens.SwapOrder{Type: 1, Error: err}
 			}
 		case err := <-eventAPI.Errors:
-			ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("Shimmer node event connect error. %v.", err)}
+			ch <- &tokens.SwapOrder{Type: 0, Error: fmt.Errorf("shimmer node event connect error. %v", err)}
 			return
 		}
 	}
@@ -137,7 +137,7 @@ func (t *ShimmerToken) dealNewOutput(protoParas *iotago.ProtocolParameters, outp
 	// Get from address and wrapOrder through block
 	wrapOrder, err1 := t.getBlock(protoParas, blockID)
 	if err1 != nil {
-		return fmt.Errorf("Unknow wrap order. %s : %v : %v", blockID, err, err1)
+		return fmt.Errorf("unknow wrap order. %s : %v : %v", blockID, err, err1)
 	}
 	if wrapOrder == nil { // userAddr == walletAddr
 		return nil
@@ -153,7 +153,7 @@ func (t *ShimmerToken) dealNewOutput(protoParas *iotago.ProtocolParameters, outp
 		Org:       wrapOrder.Tag,
 	}
 	ch <- order
-	return fmt.Errorf("Use Payload Data to Wrap")
+	return fmt.Errorf("use Payload Data to Wrap")
 }
 
 func (t *ShimmerToken) getBlock(protoParas *iotago.ProtocolParameters, id string) (*WrapOrder, error) {

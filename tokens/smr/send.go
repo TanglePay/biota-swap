@@ -144,18 +144,18 @@ func (st *ShimmerToken) SendUnWrap(txid string, amount *big.Int, to string, prv 
 	}
 	id, err := st.nodeAPI.SubmitBlock(context.Background(), block, &info.Protocol)
 	if err != nil {
-		return nil, fmt.Errorf("Send block to node error. %v", err)
+		return nil, fmt.Errorf("send block to node error. %v", err)
 	}
 
 	return id[:], nil
 }
 
 func (st *ShimmerToken) CreateUnWrapTxData(addr string, amount *big.Int, extra []byte) ([]byte, []byte, error) {
-	return nil, nil, fmt.Errorf("Don't support this method")
+	return nil, nil, fmt.Errorf("don't support this method")
 }
 
 func (st *ShimmerToken) ValiditeUnWrapTxData(hash, txData []byte) (tokens.BaseTransaction, error) {
-	return tokens.BaseTransaction{}, fmt.Errorf("Don't support this method")
+	return tokens.BaseTransaction{}, fmt.Errorf("don't support this method")
 }
 
 func (st *ShimmerToken) getWalletAddress(prv *ecdsa.PrivateKey) (iotago.Address, iotago.AddressSigner, error) {
@@ -173,19 +173,21 @@ func (st *ShimmerToken) getNativeTokenOutputs(b *builder.TransactionBuilder, amo
 		return nil, 0, err
 	}
 
-	hasNativeToken := true
-	hasExpiration := false
-	hasTimelock := false
+	has := true
+	notHas := false
 	query := nodeclient.BasicOutputsQuery{
 		AddressBech32: addr.Bech32(prefix),
 		IndexerNativeTokenParas: nodeclient.IndexerNativeTokenParas{
-			HasNativeTokens: &hasNativeToken,
+			HasNativeTokens: &has,
 		},
 		IndexerExpirationParas: nodeclient.IndexerExpirationParas{
-			HasExpiration: &hasExpiration,
+			HasExpiration: &notHas,
 		},
 		IndexerTimelockParas: nodeclient.IndexerTimelockParas{
-			HasTimelock: &hasTimelock,
+			HasTimelock: &notHas,
+		},
+		IndexerStorageDepositParas: nodeclient.IndexerStorageDepositParas{
+			HasStorageDepositReturn: &notHas,
 		},
 	}
 	res, err := indexer.Outputs(context.Background(), &query)

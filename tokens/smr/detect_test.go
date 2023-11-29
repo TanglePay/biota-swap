@@ -11,17 +11,14 @@ func TestListShimmer(t *testing.T) {
 	orderC := make(chan *tokens.SwapOrder, 10000)
 	go token.StartWrapListen(orderC)
 	fmt.Println("Start to listen wrap order")
-	for {
-		select {
-		case order := <-orderC:
-			if order.Error != nil {
-				fmt.Println(order.Error.Error())
-				if order.Type == 0 {
-					return
-				}
-			} else {
-				fmt.Printf("Wrap Order : %v\n", *order)
+	for order := range orderC {
+		if order.Error != nil {
+			fmt.Println(order.Error.Error())
+			if order.Type == 0 {
+				return
 			}
+		} else {
+			fmt.Printf("Wrap Order : %v\n", *order)
 		}
 	}
 }

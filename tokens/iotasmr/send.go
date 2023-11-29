@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	iotago "github.com/iotaledger/iota.go/v3"
@@ -374,6 +375,8 @@ func (ist *IotaSmrToken) getBasiceUnSpentOutputs(b *UnsignTransactionBuilder, am
 			HasStorageDepositReturn: &notHas,
 		},
 	}
+GetUtxos:
+	getUtxosCount := 0
 	res, err := indexer.Outputs(context.Background(), &query)
 	if err != nil {
 		return 0, err
@@ -389,6 +392,15 @@ func (ist *IotaSmrToken) getBasiceUnSpentOutputs(b *UnsignTransactionBuilder, am
 		for i, output := range outputs {
 			if len(output.NativeTokenList()) > 0 {
 				continue
+			}
+			outputMetaRes, err := ist.nodeAPI.OutputMetadataByID(context.Background(), ids[i])
+			if err != nil || outputMetaRes.Spent {
+				getUtxosCount++
+				time.Sleep(time.Second * 10)
+				if getUtxosCount > 6 {
+					return 0, fmt.Errorf("get outputmetadata error or the output was spent. %v", err)
+				}
+				goto GetUtxos
 			}
 			b.AddInput(&builder.TxInput{UnlockTarget: ist.addr, Input: output, InputID: ids[i]})
 			sum += output.Deposit()

@@ -127,3 +127,7 @@ to more complex formula, as follows. The more complex of the formula, the safer 
 	d := seed*math.Sin(i)
 	d = seed * math.Cos(i) + i * seed
 ```
+
+
+0x0884298fe9b82504d26ddb873dbd234a344c120da3a4317d8063dbcf96d356aa9d0100000000
+0x0884298fe9b82504d26ddb873dbd234a344c120da3a4317d8063dbcf96d356aa9d0100000000

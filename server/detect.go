@@ -246,9 +246,9 @@ func dealUnWrapOrder(t1 tokens.SourceToken, order *tokens.SwapOrder) {
 	}
 
 	if txid := detectSignStatus(keyID, txData, t1); txid != nil {
-		time.Sleep(60 * time.Second)
 		wo.Hash = hex.EncodeToString(txid)
 		sentIotaTxes.push(&wo, t1)
+		time.Sleep(120 * time.Second)
 	}
 }
 
@@ -264,10 +264,10 @@ func detectSignStatus(keyID string, txData []byte, t tokens.SourceToken) []byte 
 		}
 		if len(rsvs) > 0 {
 			if txID, err := t.SendSignedTxData(rsvs[0], txData); err != nil {
-				gl.OutLogger.Error("SendSignedTxData error. %v, %v", keyID, err)
+				gl.OutLogger.Error("SendSignedTxData error. keyid:%s txid:0x%s, %v", keyID, hex.EncodeToString(txID), err)
 				return nil
 			} else {
-				gl.OutLogger.Info("SendSignedTxData OK. %s : %s", hex.EncodeToString(txID), rsvs[0])
+				gl.OutLogger.Info("SendSignedTxData OK. keyid:%s txid:0x%s : signed hash :%s", keyID, hex.EncodeToString(txID), rsvs[0])
 				return txID
 			}
 		}

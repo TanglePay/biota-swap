@@ -213,7 +213,7 @@ func (st *ShimmerToken) getNativeTokenOutputs(b *builder.TransactionBuilder, amo
 			sumSmr += output.Deposit()
 			b.AddInput(&builder.TxInput{UnlockTarget: addr, Input: output, InputID: ids[i]})
 			count++
-			if count >= gl.MAX_INPUT_COUNT/2 {
+			if (count >= gl.MAX_INPUT_COUNT) && (sum.Cmp(amount) >= 0) {
 				break
 			}
 		}

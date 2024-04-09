@@ -107,3 +107,7 @@ func CreateKeyStore(pwd, filename string) {
 		log.Fatal(err)
 	}
 }
+
+func TestSign() {
+
+}

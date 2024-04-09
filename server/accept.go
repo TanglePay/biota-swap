@@ -5,10 +5,10 @@ import (
 	"bwrap/gl"
 	"bwrap/model"
 	"bwrap/smpc"
-	"encoding/hex"
 	"encoding/json"
-	"strings"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var acceptedTxes map[string]bool
@@ -37,7 +37,7 @@ func Accept() {
 				}
 				msgContext := MsgContext{}
 				if err := json.Unmarshal([]byte(d.MsgContext[0]), &msgContext); err != nil {
-					gl.OutLogger.Error("json.Unmarshal to MsgContext error. %v", err)
+					//					gl.OutLogger.Error("json.Unmarshal to MsgContext error. %v", err)
 					continue
 				}
 				if (time.Now().Unix() - msgContext.Timestamp) > config.Server.AcceptOverTime {
@@ -52,7 +52,7 @@ func Accept() {
 				if msgContext.Method != UnwrapMethod {
 					continue
 				}
-				hash, _ := hex.DecodeString(strings.TrimPrefix(d.MsgHash[0], "0x"))
+				hash := common.FromHex(d.MsgHash[0])
 				if baseTx, err := t1.ValiditeUnWrapTxData(hash, msgContext.TxData); err != nil {
 					gl.OutLogger.Error("validiteUnWrapTxData error. %s, %s, %v", d.MsgHash[0], string(msgContext.TxData), err)
 					continue
